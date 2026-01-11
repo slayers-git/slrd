@@ -1,0 +1,18 @@
+/* SPDX-License-Identifer: LGPL-3.0-or-later */
+
+#ifndef __SLRD_FENCE_HPP__
+#define __SLRD_FENCE_HPP__
+
+#include <cstdint>
+
+namespace slrd {
+    class IFence { 
+    public:
+        virtual ~IFence () = default;
+
+        virtual int wait (uint64_t timeout = UINT64_MAX) = 0;
+        virtual void reset () = 0;
+    };
+};
+
+#endif /* #define __SLRD_FENCE_HPP__ */

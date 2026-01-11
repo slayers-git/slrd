@@ -1,0 +1,126 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+
+cmake_minimum_required (VERSION 3.20)
+project (slrd VERSION 1.0.0)
+
+option (SLRD_DEBUG "Enable debug assertions" FALSE)
+option (SLRD_VULKAN_ENABLED "Enable vulkan backend" TRUE)
+option (SLRD_VULKAN_DEBUG "Enable vulkan debug layers" TRUE)
+option (SLRD_TESTS "Compile tests" FALSE)
+
+# Bundled libraries
+option (SLRD_USE_VENDOR_VMA "Use bundled VMA" ON)
+option (SLRD_USE_VENDOR_SPIRV_REFLECT "Use bundled SPIRV-Reflect" ON)
+
+set (SLRD_VMA_PATH "" CACHE PATH "Path to VulkanMemoryAllocator")
+set (SLRD_SPIRV_REFLECT_PATH "" CACHE PATH "Path to SPIRV-Reflect")
+
+set (SLRD_VERSION VERSION ${CMAKE_PROJECT_VERSION})
+
+set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+set (SRC src/api.cpp
+         src/device.cpp
+         src/error.cpp
+         src/surface.cpp
+         src/uniformset.cpp)
+
+set (VULKAN_SRC
+         src/vulkan/api.cpp
+         src/vulkan/device.cpp
+         src/vulkan/surface.cpp
+         src/vulkan/swapchain.cpp
+         src/vulkan/shader.cpp
+         src/vulkan/pipelinelayout.cpp
+         src/vulkan/pipeline.cpp
+         src/vulkan/buffer.cpp
+         src/vulkan/texture.cpp
+         src/vulkan/commandqueue.cpp
+         src/vulkan/commandbuffer.cpp
+         src/vulkan/renderpass.cpp
+         src/vulkan/fence.cpp
+         src/vulkan/sampler.cpp
+         src/vulkan/uniformset.cpp
+         src/vulkan/descpoolmanager.cpp
+         src/vulkan/pipelinemanager.cpp)
+
+if (SLRD_VULKAN_ENABLED)
+    message ("Compiling with Vulkan support")
+
+    if (SLRD_VULKAN_DEBUG)
+        set (SLRD_VULKAN_DEBUG_MESSENGER_ENABLED TRUE)
+    endif ()
+endif ()
+
+if (SLRD_DEBUG)
+    message ("SLRD debug is enabled!")
+endif ()
+
+configure_file (src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/slrd/config.hpp @ONLY)
+
+set (PCH
+    "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/include/slrd/util/proxyarray.hpp>")
+
+include_directories (include)
+include_directories (src)
+
+add_library (slrd ${SRC})
+add_library (SLRD::SLRD ALIAS slrd)
+
+target_precompile_headers (slrd PRIVATE ${PCH})
+
+if (SLRD_VULKAN_ENABLED)
+    if (SLRD_USE_VENDOR_VMA)
+        message ("Using vendor-provided VMA")
+        set (SLRD_VMA_PATH "${CMAKE_SOURCE_DIR}/vendor/VulkanMemoryAllocator/include")
+    else ()
+        if (NOT SLRD_VMA_PATH)
+            message (FATAL_ERROR
+                "Build is set to not use the vendor-provided VMA, but no user-defined path was provided")
+        endif ()
+    endif ()
+
+    if (NOT IS_DIRECTORY ${SLRD_VMA_PATH})
+        message (FATAL_ERROR "SLRD_VMA_PATH (${SLRD_VMA_PATH}) doesn't exist!")
+    endif ()
+
+    if (SLRD_USE_VENDOR_SPIRV_REFLECT)
+        message ("Using vendor-provided SPIRV-Reflect")
+        set (SLRD_SPIRV_REFLECT_PATH "${CMAKE_SOURCE_DIR}/vendor/SPIRV-Reflect")
+    else ()
+        if (NOT SLRD_SPIRV_REFLECT_PATH)
+            message (FATAL_ERROR
+                "Build is set to not use the vendor-provided SPIRV-Reflect, but no user-defined path was provided")
+        endif ()
+    endif ()
+
+    if (NOT IS_DIRECTORY ${SLRD_SPIRV_REFLECT_PATH})
+        message (FATAL_ERROR "SLRD_SPIRV_REFLECT_PATH (${SLRD_SPIRV_REFLECT_PATH}) doesn't exist!")
+    endif ()
+
+    find_package (Vulkan REQUIRED)
+
+    include_directories (${SLRD_SPIRV_REFLECT_PATH})
+    include_directories (${SLRD_VMA_PATH})
+
+    include_directories (vendor/rocket)
+
+    add_library (vulkan_memory_allocator STATIC src/vulkan/vma.cpp)
+    target_compile_options (vulkan_memory_allocator PRIVATE -Wno-nullability-completeness)
+
+    add_library (xxhash STATIC vendor/xxHash/xxhash.c)
+    target_include_directories (xxhash PUBLIC vendor/xxHash)
+
+    add_library (spirv_reflect STATIC ${SLRD_SPIRV_REFLECT_PATH}/spirv_reflect.c)
+
+    add_library (slrd_vulkan OBJECT ${VULKAN_SRC})
+
+    target_sources (slrd PUBLIC $<TARGET_OBJECTS:slrd_vulkan>)
+    target_link_libraries (slrd PRIVATE 
+        Vulkan::Vulkan spirv_reflect xxhash vulkan_memory_allocator)
+endif ()
+
+if (SLRD_TESTS)
+    add_subdirectory (test)
+endif ()
