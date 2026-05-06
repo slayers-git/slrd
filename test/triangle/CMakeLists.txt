@@ -15,7 +15,7 @@ add_executable (slrdtriangle ${SRC})
 find_package (SDL2 REQUIRED)
 target_link_libraries (slrdtriangle
     ${SDL2_LIBRARIES}
-    SLRD::SLRD)
+    slrd::slrd)
 
 add_shaders (triangleshaders ${GLSL_SRC})
 add_dependencies (slrdtriangle triangleshaders)

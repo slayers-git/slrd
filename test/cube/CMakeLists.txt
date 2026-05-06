@@ -15,7 +15,7 @@ add_executable (slrdcube ${SRC})
 find_package (SDL2 REQUIRED)
 target_link_libraries (slrdcube
     ${SDL2_LIBRARIES}
-    SLRD::SLRD)
+    slrd::slrd)
 
 add_shaders (cubeshaders ${GLSL_SRC})
 add_dependencies (slrdcube cubeshaders)

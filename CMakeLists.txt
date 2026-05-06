@@ -7,6 +7,7 @@ option (SLRD_DEBUG "Enable debug assertions" FALSE)
 option (SLRD_VULKAN_ENABLED "Enable vulkan backend" TRUE)
 option (SLRD_VULKAN_DEBUG "Enable vulkan debug layers" TRUE)
 option (SLRD_TESTS "Compile tests" FALSE)
+option (SLRD_INSTALL "Install slrd" FALSE)
 
 # Bundled libraries
 option (SLRD_USE_VENDOR_VMA "Use bundled VMA" ON)
@@ -57,16 +58,17 @@ if (SLRD_DEBUG)
     message ("SLRD debug is enabled!")
 endif ()
 
-configure_file (src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/slrd/config.hpp @ONLY)
-
-set (PCH
-    "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/include/slrd/util/proxyarray.hpp>")
-
-include_directories (include)
-include_directories (src)
+configure_file (src/config.h.in
+    ${PROJECT_SOURCE_DIR}/include/slrd/config.hpp @ONLY)
 
 add_library (slrd ${SRC})
-add_library (SLRD::SLRD ALIAS slrd)
+add_library (slrd::slrd ALIAS slrd)
+
+target_include_directories (slrd PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src> 
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> 
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 target_precompile_headers (slrd PRIVATE ${PCH})
 
@@ -101,26 +103,79 @@ if (SLRD_VULKAN_ENABLED)
 
     find_package (Vulkan REQUIRED)
 
-    include_directories (${SLRD_SPIRV_REFLECT_PATH})
-    include_directories (${SLRD_VMA_PATH})
+    target_include_directories (slrd PRIVATE
+        $<BUILD_INTERFACE:${SLRD_SPIRV_REFLECT_PATH}>
+        $<BUILD_INTERFACE:${SLRD_VMA_PATH}>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/vendor/rocket>
+    )
+    # include_directories (vendor/rocket)
 
-    include_directories (vendor/rocket)
+    add_library (vulkan_memory_allocator OBJECT src/vulkan/vma.cpp)
+    target_include_directories (vulkan_memory_allocator PRIVATE ${SLRD_VMA_PATH})
+    target_compile_options (vulkan_memory_allocator
+        PRIVATE -Wno-nullability-completeness)
 
-    add_library (vulkan_memory_allocator STATIC src/vulkan/vma.cpp)
-    target_compile_options (vulkan_memory_allocator PRIVATE -Wno-nullability-completeness)
+    add_library (xxhash OBJECT vendor/xxHash/xxhash.c)
+    target_include_directories (xxhash PRIVATE vendor/xxHash)
 
-    add_library (xxhash STATIC vendor/xxHash/xxhash.c)
-    target_include_directories (xxhash PUBLIC vendor/xxHash)
+    add_library (spirv_reflect OBJECT ${SLRD_SPIRV_REFLECT_PATH}/spirv_reflect.c)
+    target_include_directories (spirv_reflect PRIVATE ${SLRD_VMA_PATH})
 
-    add_library (spirv_reflect STATIC ${SLRD_SPIRV_REFLECT_PATH}/spirv_reflect.c)
-
-    add_library (slrd_vulkan OBJECT ${VULKAN_SRC})
-
-    target_sources (slrd PUBLIC $<TARGET_OBJECTS:slrd_vulkan>)
-    target_link_libraries (slrd PRIVATE 
-        Vulkan::Vulkan spirv_reflect xxhash vulkan_memory_allocator)
+    target_sources (slrd PRIVATE
+        ${VULKAN_SRC}
+        $<TARGET_OBJECTS:xxhash>
+        $<TARGET_OBJECTS:spirv_reflect>
+        $<TARGET_OBJECTS:vulkan_memory_allocator>
+    )
+    target_link_libraries (slrd
+        PUBLIC Vulkan::Vulkan
+    )
 endif ()
 
 if (SLRD_TESTS)
     add_subdirectory (test)
+endif ()
+
+if (SLRD_INSTALL)
+    include (GNUInstallDirs)
+    include (CMakePackageConfigHelpers)
+
+    configure_package_config_file (
+        "cmake/slrd-config.cmake.in"
+        "slrd-config.cmake"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/slrd"
+    )
+
+    write_basic_package_version_file (
+        "slrd-config-version.cmake"
+        VERSION "${PROJECT_VERSION}"
+        COMPATIBILITY SameMajorVersion
+    )
+
+    install (
+        TARGETS slrd
+        EXPORT slrdTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+
+    install (
+        DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.hpp"
+    )
+
+    install (
+        EXPORT slrdTargets
+        FILE slrd-targets.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/slrd
+        NAMESPACE slrd::
+    )
+
+    install (FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/slrd-config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/slrd-config-version.cmake"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/slrd"
+    )
 endif ()
