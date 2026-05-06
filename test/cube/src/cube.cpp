@@ -305,7 +305,7 @@ struct App {
 
         bufTexCopyInfo.buffer = stagingBuffer.get ();
         bufTexCopyInfo.texture = texture.get ();
-        bufTexCopyInfo.regions = &region;
+        bufTexCopyInfo.regions = { &region, 1 };
 
         slrd::TextureBarrierInfo tbInfo;
         tbInfo.texture = texture.get ();
@@ -327,7 +327,7 @@ struct App {
         oneTime->end ();
 
         slrd::SubmitInfo info;
-        info.commandBuffers = &oneTime;
+        info.commandBuffers = { &oneTime, 1 };
         int res = m_commandQueue->submit (info);
         if (res) {
             std::cout << "Failed to submit one time command buffer\n";
@@ -522,7 +522,7 @@ struct App {
         oneTimeBuffer->end ();
 
         slrd::SubmitInfo submitInfo;
-        submitInfo.commandBuffers = &oneTimeBuffer;
+        submitInfo.commandBuffers = { &oneTimeBuffer, 1 };
         if (m_commandQueue->submit (submitInfo)) {
             return nullptr;
         }
@@ -580,16 +580,11 @@ struct App {
         {
             /* Load shaders */
             slrd::ShaderInfo shaderInfo;
-            auto vshCode = loadFileContents ("shaders/cube.vert.spv");
-            auto fshCode = loadFileContents ("shaders/cube.frag.spv");
-            if (vshCode.empty () || fshCode.empty ()) {
-                std::cerr << "Failed to load shaders";
-                exit (1);
-            }
+            auto vshCode = loadSPIRVFromFile ("shaders/cube.vert.spv");
+            auto fshCode = loadSPIRVFromFile ("shaders/cube.frag.spv");
             
             slrd::ShaderBytecode bytecodes[] = {
-                slrd::ProxyArray<char> (vshCode),
-                slrd::ProxyArray<char> (fshCode)
+                vshCode, fshCode
             };
             shaderInfo.bytecodes = bytecodes;
 
@@ -614,7 +609,7 @@ struct App {
             depth.loadOp = slrd::LOAD_OPERATION_CLEAR;
             depth.storeOp = slrd::STORE_OPERATION_DONT_CARE;
             depth.presentable = false;
-            rpInfo.colorAttachments = &attachment;
+            rpInfo.colorAttachments = { &attachment, 1 };
             rpInfo.depthAttachment = depth;
 
             m_renderPass = m_device->createRenderPass (rpInfo);
@@ -640,7 +635,7 @@ struct App {
             colorBlend.colorWriteMask = slrd::COLOR_MASK_RGBA;
             colorBlend.blendEnabled = false;
 
-            plInfo.colorBlendConfig.attachments = &colorBlend;
+            plInfo.colorBlendConfig.attachments = { &colorBlend, 1 };
 
             m_pipeline = m_device->createGraphicsPipeline (plInfo);
             if (!m_pipeline) {
@@ -826,7 +821,7 @@ struct App {
         
         slrd::RenderPassColorClearValue cv = { 0.f, 0.f, 0.f, 0.f };
         slrd::RenderPassBeginInfo begInfo;
-        begInfo.colorClearValues = &cv;
+        begInfo.colorClearValues = { &cv, 1 };
 
         profiler.startScope ("CommandBufferRecording");
         m_commandBuffer->begin (); 
@@ -901,6 +896,24 @@ struct App {
         return bytes;
     }
 
+    static slrd::ShaderBytecode loadSPIRVFromFile (const std::filesystem::path& path) {
+        std::ifstream ifs (path.string (), std::ios::in | std::ios::binary | std::ios::ate);
+        if (!ifs.is_open ())
+            return {};
+
+        std::ifstream::pos_type fileSize = ifs.tellg();
+        ifs.seekg(0, std::ios::beg);
+
+        if (fileSize & 3)
+            throw std::runtime_error ("Size of the SPIRV is not aligned");
+
+        std::vector<uint32_t> code(fileSize / 4);
+        ifs.read(reinterpret_cast<char *>(code.data()), fileSize);
+
+        ifs.close ();
+
+        return slrd::ShaderBytecode (code.data (), code.size ());
+    }
 };
 
 int main (void) {

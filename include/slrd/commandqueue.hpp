@@ -3,8 +3,8 @@
 #ifndef __SLRD_COMMAND_QUEUE_HPP__
 #define __SLRD_COMMAND_QUEUE_HPP__
 
-#include "slrd/util/proxyarray.hpp"
 #include <memory>
+#include <span>
 
 namespace slrd {
     class ICommandBuffer;
@@ -14,7 +14,7 @@ namespace slrd {
         /* Fence to singal when the execution is complete. */
         std::shared_ptr<IFence> fence;
         /* Which command buffers need to be executed */
-        ProxyArray<std::shared_ptr<ICommandBuffer>> commandBuffers;
+        std::span<std::shared_ptr<ICommandBuffer>> commandBuffers;
     };
 
     class ICommandQueue {

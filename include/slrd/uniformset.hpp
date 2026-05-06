@@ -3,7 +3,7 @@
 #ifndef __SLRD_UNIFORM_SET_HPP__
 #define __SLRD_UNIFORM_SET_HPP__
 
-#include "slrd/pipeline.hpp"
+#include "pipeline.hpp"
 #include <cstdint>
 #include <vector>
 
@@ -44,7 +44,7 @@ namespace slrd {
             std::vector<UniformUpdateDataBuffer>  buffers;
         };
 
-        slrd::ProxyArray<UniformUpdate> data;
+        std::span<const UniformUpdate> data;
     };
 
     class IUniformSet {

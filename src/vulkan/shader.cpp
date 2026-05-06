@@ -109,7 +109,7 @@ namespace slrd {
     /* FIXME: Maybe store the duplicates in a separate heap to cut down on
      * memory usage at the cost of not being able to use the date when the
      * shader is destroyed (small price to pay, I think) */
-    VkResult VKShader::reflectShader (const slrd::ProxyArray<ShaderBytecode>& bytecode) {
+    VkResult VKShader::reflectShader (std::span<const ShaderBytecode> bytecode) {
         std::vector<DescriptorSet> descriptor_sets;
         VkPushConstantRange push_constants {};
         std::vector<SpecializationInfo> spec_infos;
@@ -119,7 +119,7 @@ namespace slrd {
         std::vector<std::vector<UniformDescription>> uniform_sets;
 
         for (uint32_t i = 0; i < bytecode.size (); ++i) {
-            spv_reflect::ShaderModule module (bytecode[i].bytecode);
+            spv_reflect::ShaderModule module (bytecode[i].size (), bytecode[i].data ());
 
             SpvReflectResult result = module.GetResult ();
             RETURN_LOG_ERROR_IF (result != SPV_REFLECT_RESULT_SUCCESS, VK_ERROR_UNKNOWN,
@@ -353,8 +353,8 @@ namespace slrd {
         std::vector<VkPipelineShaderStageCreateInfo> stages (config.bytecodes.size ());
         for (uint32_t i = 0; i < stages.size (); ++i) {
             VkResult result = createShaderStage (device->getVkDevice (), m_stageFlags[i],
-                    (uint32_t *)config.bytecodes[i].bytecode.data (),
-                    config.bytecodes[i].bytecode.size (), &stages[i]);
+                    (uint32_t *)config.bytecodes[i].data (),
+                    config.bytecodes[i].size (), &stages[i]);
 
             WRAP_COND_RETURN (result != VK_SUCCESS, -1);
         }

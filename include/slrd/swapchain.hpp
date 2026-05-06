@@ -3,8 +3,8 @@
 #ifndef __SLRD_SWAPCHAIN_HPP__
 #define __SLRD_SWAPCHAIN_HPP__
 
-#include "slrd/surface.hpp"
-#include "slrd/texture.hpp"
+#include "surface.hpp"
+#include "texture.hpp"
 #include <cstdint>
 #include <memory>
 

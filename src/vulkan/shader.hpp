@@ -36,7 +36,7 @@ namespace slrd {
             VkShaderStageFlags stages;
         };
 
-        VkResult reflectShader (const slrd::ProxyArray<ShaderBytecode>& bytecode);
+        VkResult reflectShader (std::span<const ShaderBytecode> bytecode);
 
         PipelineLayoutInfoHash m_layoutHash {};
 

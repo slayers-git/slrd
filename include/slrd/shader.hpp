@@ -3,8 +3,8 @@
 #ifndef __SLRD_SHADER_HPP__
 #define __SLRD_SHADER_HPP__
 
-#include "slrd/format.hpp"
-#include "slrd/pipeline.hpp"
+#include "format.hpp"
+#include "pipeline.hpp"
 #include <memory>
 #include <optional>
 #include <vector>
@@ -123,47 +123,44 @@ namespace slrd {
                 std::vector<UniformDescription>&& desc) : m_uniforms (desc) {}
         constexpr ~ShaderReflection () = default;
 
-        constexpr ProxyArray<UniformDescription> getShaderUniforms () const {
+        constexpr std::span<const UniformDescription> getShaderUniforms () const {
             return m_uniforms;
         }
     };
 
+    /**
+     * Wrapper to actual SPIR-V bytecode */
     struct ShaderBytecode {
-        std::vector<uint8_t> bytecode;
+    private:
+        std::vector<uint32_t> m_data;
 
-        ShaderBytecode () : bytecode () {}
+    public:
+        ShaderBytecode () noexcept :
+            m_data () { }
 
-        ShaderBytecode (ShaderBytecode&& other) = default;
-        ShaderBytecode& operator= (ShaderBytecode&& other) = default;
+        ShaderBytecode (const ShaderBytecode& other) noexcept = default;
+        ShaderBytecode (ShaderBytecode&& other) noexcept = default;
 
-        template<size_t Size>
-        ShaderBytecode (uint32_t (&code)[Size]) :
-            bytecode ((uint8_t *)code, (uint8_t *)code + Size * 4) {
+        ShaderBytecode& operator= (const ShaderBytecode& other) noexcept = default;
+        ShaderBytecode& operator= (ShaderBytecode&& other) noexcept = default;
 
+        ShaderBytecode (const uint32_t *data, size_t size) noexcept :
+            m_data (data, data + size) { }
+
+        [[nodiscard]]
+        size_t size () const noexcept {
+            return m_data.size () * 4;
         }
 
-        ShaderBytecode (uint8_t *code, uint32_t size) :
-            bytecode (code, code + size) { }
-
-        ShaderBytecode (uint32_t *code, uint32_t size) :
-            bytecode ((uint8_t *)code, (uint8_t *)code + size * 4) { }
-
-        template<typename T>
-        ShaderBytecode (const slrd::ProxyArray<T>& data) :
-            bytecode ((uint8_t *)data.begin (), (uint8_t *)data.end()) { }
-
-        uint32_t size () const {
-            return bytecode.size ();
-        }
-
-        const uint8_t *data () const {
-            return bytecode.data ();
+        [[nodiscard]]
+        const uint32_t *data () const noexcept {
+            return m_data.data ();
         }
     };
 
     struct ShaderInfo {
         bool reflect = true;
-        slrd::ProxyArray<ShaderBytecode> bytecodes;
+        std::span<const ShaderBytecode> bytecodes;
     };
 
     class IShader {

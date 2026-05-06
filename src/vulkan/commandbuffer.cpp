@@ -271,7 +271,7 @@ namespace slrd {
         vkCmdSetScissor (m_buffer, 0, 1, &vkscissor);
     }
 
-    void VKCommandBuffer::pushConstant (const ProxyArray<uint8_t>& data, slrd::StageFlags stage,
+    void VKCommandBuffer::pushConstant (std::span<const uint8_t> data, slrd::StageFlags stage,
             uint32_t offset) {
         SLRD_ASSERT (m_pipeline != VK_NULL_HANDLE);
         vkCmdPushConstants (m_buffer, m_pipeline->getPipelineLayout ()->getLayout (), 
@@ -362,7 +362,7 @@ namespace slrd {
         vkCmdCopyBuffer (m_buffer, src, dst, 1, &region);
     }
 
-    void VKCommandBuffer::bindSets (const slrd::ProxyArray<IUniformSet *>& uniformSets,
+    void VKCommandBuffer::bindSets (std::span<IUniformSet *> uniformSets,
             uint32_t firstSet) {
         SLRD_ASSERT (m_pipeline != nullptr);
 

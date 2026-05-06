@@ -3,11 +3,11 @@
 #ifndef __SLRD_PIPELINE_HPP__
 #define __SLRD_PIPELINE_HPP__
 
-#include "util/proxyarray.hpp"
-#include "slrd/buffer.hpp"
-#include "slrd/format.hpp"
+#include "buffer.hpp"
+#include "format.hpp"
 #include <cstdint>
 #include <memory>
+#include <span>
 
 namespace slrd {
     class IUniformSet;
@@ -154,8 +154,8 @@ namespace slrd {
 		std::shared_ptr<IShader> shader = nullptr;
 
 		struct VertexConfig {
-            slrd::ProxyArray<VertexBindingDescription> vertexBindings;
-            slrd::ProxyArray<VertexAttributeDescription> attributeDescs;
+            std::span<const VertexBindingDescription> vertexBindings;
+            std::span<const VertexAttributeDescription> attributeDescs;
 		} vertexConfig;
 
 		struct InputAssemblyDesc {
@@ -192,7 +192,7 @@ namespace slrd {
 		} multisampleConfig;
 
 		struct ColorBlendConfig {
-            slrd::ProxyArray<ColorBlendAttachment> attachments;
+            std::span<const ColorBlendAttachment> attachments;
 			float blendconstants[4] = { 0, 0, 0, 0 };
 		} colorBlendConfig;
 

@@ -3,7 +3,7 @@
 #ifndef __SLRD_TEXTURE_HPP__
 #define __SLRD_TEXTURE_HPP__
 
-#include "slrd/format.hpp"
+#include "format.hpp"
 #include <cstdint>
 #include <memory>
 

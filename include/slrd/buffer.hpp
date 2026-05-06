@@ -3,9 +3,8 @@
 #ifndef __SLRD_BUFFER_HPP__
 #define __SLRD_BUFFER_HPP__
 
-#include "slrd/types.hpp"
+#include "types.hpp"
 #include <cstdint>
-#include <cstddef>
 
 namespace slrd {
     enum BufferUsage {

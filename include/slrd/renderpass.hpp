@@ -3,10 +3,10 @@
 #ifndef __SLRD_RENDERPASS_HPP__
 #define __SLRD_RENDERPASS_HPP__
 
-#include "slrd/format.hpp"
-#include "slrd/util/proxyarray.hpp"
+#include "format.hpp"
 #include <optional>
 #include <memory>
+#include <span>
 
 namespace slrd {
     class ITextureView;
@@ -49,7 +49,7 @@ namespace slrd {
     };
 
     struct RenderPassInfo {
-        slrd::ProxyArray<RenderPassAttachment> colorAttachments;
+        std::span<const RenderPassAttachment> colorAttachments;
 
         RenderPassFlags flags = RENDERPASS_FLAG_NONE;
 
@@ -67,7 +67,7 @@ namespace slrd {
          * you should set the textureView for these attachments to nullptr, then
          * in the rendering code, update them so that framebuffers can be created
          * for them */
-        virtual int setTextureViews (ProxyArray<std::shared_ptr<ITextureView>> textureViews) = 0;
+        virtual int setTextureViews (std::span<std::shared_ptr<ITextureView>> textureViews) = 0;
 
         virtual int setDepthView   (const std::shared_ptr<ITextureView>& textureView) = 0;
         virtual int setStencilView (const std::shared_ptr<ITextureView>& textureView) = 0;

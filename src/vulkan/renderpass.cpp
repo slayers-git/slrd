@@ -165,7 +165,7 @@ namespace slrd {
         return 0;
     }
     
-    int VKRenderPass::setTextureViews (ProxyArray<std::shared_ptr<ITextureView>> textureViews) {
+    int VKRenderPass::setTextureViews (std::span<std::shared_ptr<ITextureView>> textureViews) {
         SLRD_ASSERT (m_textureViews.size () != m_colorAttachments);
         SLRD_ASSERT (m_renderpass != nullptr);
 

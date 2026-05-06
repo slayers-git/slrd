@@ -4,9 +4,8 @@
 #define __SLRD_API_HPP__
 
 #include <cstdint>
+#include <span>
 #include <string>
-
-#include "util/proxyarray.hpp"
 
 namespace slrd {
     struct APIVersion {
@@ -29,8 +28,8 @@ namespace slrd {
 
         bool debug = false;
 
-        ProxyArray<const char *> instance_extensions;
-        ProxyArray<const char *> instance_layers;
+        std::span<const char *> instance_extensions;
+        std::span<const char *> instance_layers;
     };
 
     enum API : uint8_t {

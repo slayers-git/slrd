@@ -3,11 +3,11 @@
 #ifndef __SLRD_COMMAND_BUFFER_HPP__
 #define __SLRD_COMMAND_BUFFER_HPP__
 
-#include "slrd/format.hpp"
-#include "slrd/texture.hpp"
-#include "slrd/types.hpp"
-#include "slrd/util/proxyarray.hpp"
+#include "format.hpp"
+#include "texture.hpp"
+#include "types.hpp"
 #include <memory>
+#include <span>
 
 namespace slrd {
     class IPipeline;
@@ -44,7 +44,7 @@ namespace slrd {
         /* The destination texture */
         ITexture *texture     = nullptr;
 
-        slrd::ProxyArray<BufferTextureRegion> regions;
+        std::span<const BufferTextureRegion> regions;
     };
 
     struct BufferCopyInfo {
@@ -100,7 +100,7 @@ namespace slrd {
     };
 
     struct RenderPassBeginInfo {
-        ProxyArray<const RenderPassColorClearValue> colorClearValues;
+        std::span<const RenderPassColorClearValue> colorClearValues;
         RenderPassDepthStencilClearValue depthStencilClearValue {};
     };
 
@@ -116,7 +116,7 @@ namespace slrd {
         virtual void beginRenderPass (std::shared_ptr<IRenderPass>& renderPass, const RenderPassBeginInfo&) = 0;
         virtual void endRenderPass () = 0;
 
-        virtual void pushConstant (const ProxyArray<uint8_t>& data, slrd::StageFlags stage,
+        virtual void pushConstant (std::span<const uint8_t> data, slrd::StageFlags stage,
                 uint32_t offset = 0) = 0;
 
         virtual void bindGraphicsPipeline (std::shared_ptr<IPipeline>& pipeline) = 0;
@@ -131,7 +131,7 @@ namespace slrd {
         virtual void setScissor (const Scissor& scissor)    = 0;
 
         virtual void bindSets (
-                const slrd::ProxyArray<IUniformSet *>& uniformSet, uint32_t firstSet = 0) = 0;
+                std::span<IUniformSet *> uniformSet, uint32_t firstSet = 0) = 0;
 
         virtual void draw (uint32_t vertexCount, uint32_t instanceCount,
                 uint32_t firstVertex = 0, uint32_t firstInstance = 0) = 0;

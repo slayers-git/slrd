@@ -128,7 +128,7 @@ namespace slrd {
                 const RenderPassInfo& info);
 
         /* Set texture views */
-        int setTextureViews (ProxyArray<std::shared_ptr<ITextureView>> textureViews) final;
+        int setTextureViews (std::span<std::shared_ptr<ITextureView>> textureViews) final;
 
         /* Set texture view for one element
          *

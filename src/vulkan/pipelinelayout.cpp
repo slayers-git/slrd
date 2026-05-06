@@ -13,7 +13,7 @@ namespace slrd {
     /* FIXME: Not the best way to deal with this, since we can have multiple 
      * layouts using the same shaders. */
     std::vector<VkDescriptorSetLayout> VKPipelineLayout::getVkSetLayouts (
-            const ProxyArray<DescriptorSet>& sets) {
+            std::span<const DescriptorSet> sets) {
         PoolKey poolKey {};
 
         std::vector<VkDescriptorSetLayout> layouts;

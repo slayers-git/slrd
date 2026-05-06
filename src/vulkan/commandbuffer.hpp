@@ -71,13 +71,13 @@ namespace slrd {
         void bindIndexBuffer (std::shared_ptr<IBuffer>& buffer,
             IndexType type, DeviceSize offset) final override;
 
-        void pushConstant (const ProxyArray<uint8_t>& data, slrd::StageFlags stage,
+        void pushConstant (std::span<const uint8_t> data, slrd::StageFlags stage,
                 uint32_t offset = 0) final override;
 
         void setViewport (const Viewport& viewport) final override;
         void setScissor (const Scissor& scissor)    final override;
 
-        void bindSets (const slrd::ProxyArray<IUniformSet *>& uniformSet,
+        void bindSets (std::span<IUniformSet *> uniformSet,
                 uint32_t firstSet) final;
 
         void draw (uint32_t vertexCount, uint32_t instanceCount,

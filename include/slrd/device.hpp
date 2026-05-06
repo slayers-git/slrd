@@ -4,11 +4,11 @@
 #define __SLRD_DEVICE_HPP__
 
 #include <memory>
-#include "util/proxyarray.hpp"
+#include <span>
 
 namespace slrd {
     struct DeviceConfig {
-        slrd::ProxyArray<const char *> device_extensions;
+        std::span<const char *> device_extensions;
         bool debug = false;
 
         DeviceConfig () = default;

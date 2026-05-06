@@ -117,7 +117,7 @@ namespace slrd {
         std::shared_ptr<VKUniformSet> allocateUniformSet (uint32_t set);
 
         std::vector<VkDescriptorSetLayout> getVkSetLayouts (
-            const ProxyArray<DescriptorSet>& sets);
+            std::span<const DescriptorSet> sets);
 
         void clearSetLayouts ();
 

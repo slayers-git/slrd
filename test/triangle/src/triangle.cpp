@@ -260,16 +260,11 @@ struct App {
         {
             /* Load shaders */
             slrd::ShaderInfo shaderInfo;
-            auto vshCode = loadFileContents ("shaders/basic.vert.spv");
-            auto fshCode = loadFileContents ("shaders/basic.frag.spv");
-            if (vshCode.empty () || fshCode.empty ()) {
-                std::cerr << "Failed to load shaders";
-                exit (1);
-            }
+            auto vshCode = loadSPIRVFromFile ("shaders/basic.vert.spv");
+            auto fshCode = loadSPIRVFromFile ("shaders/basic.frag.spv");
             
             slrd::ShaderBytecode bytecodes[] = {
-                slrd::ProxyArray<char> (vshCode),
-                slrd::ProxyArray<char> (fshCode)
+                vshCode, fshCode
             };
             shaderInfo.bytecodes = bytecodes;
 
@@ -289,7 +284,7 @@ struct App {
             attachment.loadOp = slrd::LOAD_OPERATION_CLEAR;
             attachment.storeOp = slrd::STORE_OPERATION_STORE;
             attachment.presentable = true;
-            rpInfo.colorAttachments = &attachment;
+            rpInfo.colorAttachments = { &attachment, 1 };
 
             m_renderPass = m_device->createRenderPass (rpInfo);
             if (!m_renderPass) {
@@ -309,7 +304,7 @@ struct App {
             colorBlend.colorWriteMask = slrd::COLOR_MASK_RGBA;
             colorBlend.blendEnabled = false;
 
-            plInfo.colorBlendConfig.attachments = &colorBlend;
+            plInfo.colorBlendConfig.attachments = { &colorBlend, 1 };
 
             m_pipeline = m_device->createGraphicsPipeline (plInfo);
             if (!m_pipeline) {
@@ -419,7 +414,7 @@ struct App {
         m_commandBuffer->begin (); 
             slrd::RenderPassColorClearValue cv = { 0, 0, 0, 0 };
             slrd::RenderPassBeginInfo begInfo;
-            begInfo.colorClearValues = &cv;
+            begInfo.colorClearValues = { &cv, 1 };
             m_commandBuffer->beginRenderPass (m_renderPass, begInfo);
 
             m_commandBuffer->bindGraphicsPipeline (m_pipeline);
@@ -467,6 +462,24 @@ struct App {
         return bytes;
     }
 
+    static slrd::ShaderBytecode loadSPIRVFromFile (const std::filesystem::path& path) {
+        std::ifstream ifs (path.string (), std::ios::in | std::ios::binary | std::ios::ate);
+        if (!ifs.is_open ())
+            return {};
+
+        std::ifstream::pos_type fileSize = ifs.tellg();
+        ifs.seekg(0, std::ios::beg);
+
+        if (fileSize & 3)
+            throw std::runtime_error ("Size of the SPIRV is not aligned");
+
+        std::vector<uint32_t> code(fileSize / 4);
+        ifs.read(reinterpret_cast<char *>(code.data()), fileSize);
+
+        ifs.close ();
+
+        return slrd::ShaderBytecode (code.data (), code.size ());
+    }
 };
 
 int main (void) {
