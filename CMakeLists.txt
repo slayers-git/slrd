@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 cmake_minimum_required (VERSION 3.20)
-project (slrd VERSION 1.0.0)
+project (slrd VERSION 0.0.1)
 
 option (SLRD_DEBUG "Enable debug assertions" FALSE)
 option (SLRD_VULKAN_ENABLED "Enable vulkan backend" TRUE)
