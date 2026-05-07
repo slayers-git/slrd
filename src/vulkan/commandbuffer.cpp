@@ -133,20 +133,37 @@ namespace slrd {
     void VKCommandBuffer::reset () {
         vkResetCommandBuffer (m_buffer, 0);
         m_swapchainsToSignal.clear ();
+
+#if SLRD_DEBUG
+        m_state = STATE_INITIAL;
+#endif
     }
 
     void VKCommandBuffer::begin () {
+        SLRD_ASSERT (m_state == STATE_INITIAL);
+
         VkCommandBufferBeginInfo begInfo {};
         begInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         begInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
         vkBeginCommandBuffer (m_buffer, &begInfo);
+
+#if SLRD_DEBUG
+        m_state = STATE_RECORDING;
+#endif
     }
 
     void VKCommandBuffer::end () {
+        SLRD_ASSERT (m_state == STATE_RECORDING);
+
         m_renderpass = nullptr;
         m_pipeline = nullptr;
+
         vkEndCommandBuffer (m_buffer);
+
+#if SLRD_DEBUG
+        m_state = STATE_EXECUTABLE;
+#endif
     }
 
     void VKCommandBuffer::beginRenderPass (IRenderPass *renderPass,

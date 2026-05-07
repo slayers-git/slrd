@@ -37,6 +37,16 @@ namespace slrd {
         VKRenderPass *m_renderpass = nullptr;
         /* Current Pipeline */
         VKPipeline *m_pipeline = nullptr;
+
+#if SLRD_DEBUG
+        enum State {
+            STATE_INITIAL,
+            STATE_RECORDING,
+            STATE_EXECUTABLE
+        };
+
+        State m_state = STATE_INITIAL;
+#endif
         
     public:
         VKCommandBuffer () = default;
