@@ -163,54 +163,52 @@ namespace slrd::platform::vulkan {
         return vkapi.get ();
     }
 
-    VkDevice getLogicalDevice (const std::shared_ptr<IDevice>& device) {
-        auto vkdevice = static_cast<VKDevice *> (device.get ());
+    VkDevice getLogicalDevice (IDevice *device) {
+        auto vkdevice = static_cast<VKDevice *> (device);
         return vkdevice->getVkDevice ();
     }
 
-    VkPhysicalDevice getPhysicalDevice (const std::shared_ptr<IDevice>& device) {
-        auto vkdevice = static_cast<VKDevice *> (device.get ());
+    VkPhysicalDevice getPhysicalDevice (IDevice *device) {
+        auto vkdevice = static_cast<VKDevice *> (device);
         return vkdevice->getPhysicalDevice ();
     }
 
-    VkQueue getQueue (const std::shared_ptr<ICommandQueue>& queue) {
-        auto vkqueue = static_cast<VKCommandQueue *> (queue.get ());
+    VkQueue getQueue (ICommandQueue *queue) {
+        auto vkqueue = static_cast<VKCommandQueue *> (queue);
         return vkqueue->getCommandQueue ();
     }
 
-    uint32_t getQueueFamily (const std::shared_ptr<ICommandQueue>& queue) {
-        auto vkqueue = static_cast<VKCommandQueue *> (queue.get ());
+    uint32_t getQueueFamily (ICommandQueue *queue) {
+        auto vkqueue = static_cast<VKCommandQueue *> (queue);
         return vkqueue->getCommandQueueFamily ();
     }
 
-    VkCommandBuffer getCommandBuffer (
-            const std::shared_ptr<ICommandBuffer>& commandBuffer) {
-        auto vkbuffer = static_cast<VKCommandBuffer *> (commandBuffer.get ());
+    VkCommandBuffer getCommandBuffer (ICommandBuffer *commandBuffer) {
+        auto vkbuffer = static_cast<VKCommandBuffer *> (commandBuffer);
         return vkbuffer->getCommandBuffer ();
     }
 
-    VkRenderPass getRenderPass (
-            const std::shared_ptr<IRenderPass>& renderPass) {
-        auto vkbuffer = static_cast<VKRenderPass *> (renderPass.get ());
+    VkRenderPass getRenderPass (IRenderPass *renderPass) {
+        auto vkbuffer = static_cast<VKRenderPass *> (renderPass);
         return vkbuffer->getRenderPass ();
     }
 
-    VkImage getTexture (const std::shared_ptr<ITexture>& texture) {
-        auto vktexture = static_cast<VKTexture *> (texture.get ());
+    VkImage getTexture (ITexture *texture) {
+        auto vktexture = static_cast<VKTexture *> (texture);
         return vktexture->getImage ();
     }
 
-    VkImageView getTextureView (const std::shared_ptr<ITextureView>& textureView) {
-        auto vkview = static_cast<VKTextureView *> (textureView.get ());
+    VkImageView getTextureView (ITextureView *textureView) {
+        auto vkview = static_cast<VKTextureView *> (textureView);
         return vkview->getView ();
     }
-    VkSampler getSampler (const std::shared_ptr<ISampler>& sampler) {
-        auto vksampler = static_cast<VKSampler *> (sampler.get ());
+    VkSampler getSampler (ISampler *sampler) {
+        auto vksampler = static_cast<VKSampler *> (sampler);
         return vksampler->getSampler ();
     }
 
-    VkSwapchainKHR getSwapchain (const std::shared_ptr<ISwapchain>& swapchain) {
-        auto vkswapchain = static_cast<VKSwapchain *> (swapchain.get ());
+    VkSwapchainKHR getSwapchain (ISwapchain *swapchain) {
+        auto vkswapchain = static_cast<VKSwapchain *> (swapchain);
         return vkswapchain->getSwapchain ();
     }
 }

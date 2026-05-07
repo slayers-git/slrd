@@ -17,11 +17,10 @@ namespace slrd {
     class ISampler;
     class ISwapchain;
 
+    /**
+     * Global state that is used by the Vulkan backend */
     struct VulkanData {
         VkInstance instance;
-
-        /* All devices in use */
-        std::vector<std::weak_ptr<IDevice>> devices;
 
 #define __DECLARE_PFN_NAME(__Name) \
         PFN_ ## __Name __Name
@@ -34,25 +33,25 @@ namespace slrd {
     };
 
     namespace platform::vulkan {
-        /* Get the data for initialized vulkan api */
+        /**
+         * Get pointer to the global state that is used by Vulkan */
         const VulkanData *getVulkanAPIData ();
 
-        VkDevice getLogicalDevice (const std::shared_ptr<IDevice>& device);
-        VkPhysicalDevice getPhysicalDevice (const std::shared_ptr<IDevice>& device);
+        VkDevice getLogicalDevice (IDevice *device);
+        VkPhysicalDevice getPhysicalDevice (IDevice *device);
 
-        VkQueue getQueue (const std::shared_ptr<ICommandQueue>& queue);
-        uint32_t getQueueFamily (const std::shared_ptr<ICommandQueue>& queue);
+        VkQueue getQueue (ICommandQueue *queue);
+        uint32_t getQueueFamily (ICommandQueue *queue);
 
-        VkCommandBuffer getCommandBuffer (
-                const std::shared_ptr<ICommandBuffer>& commandBuffer);
+        VkCommandBuffer getCommandBuffer (ICommandBuffer *commandBuffer);
 
-        VkRenderPass getRenderPass (const std::shared_ptr<IRenderPass>& renderPass);
+        VkRenderPass getRenderPass (IRenderPass *renderPass);
 
-        VkImage getTexture (const std::shared_ptr<ITexture>& texture);
-        VkImageView getTextureView (const std::shared_ptr<ITextureView>& texture);
-        VkSampler getSampler (const std::shared_ptr<ISampler>& sampler);
+        VkImage getTexture (ITexture *texture);
+        VkImageView getTextureView (ITextureView *texture);
+        VkSampler getSampler (const ISampler *sampler);
 
-        VkSwapchainKHR getSwapchain (const std::shared_ptr<ISwapchain>& swapchain);
+        VkSwapchainKHR getSwapchain (ISwapchain *swapchain);
     }
 }
 
