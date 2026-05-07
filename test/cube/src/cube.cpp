@@ -196,38 +196,38 @@ public:
 Profiler profiler;
 
 struct App {
-    slrd::DevicePtr m_device;
-    slrd::SwapchainPtr m_swapchain;
+    slrd::Ref<slrd::IDevice> m_device;
+    slrd::Ref<slrd::ISwapchain> m_swapchain;
 
     /* Pointer to the memory for the vp UB */
     void *m_vpBufferMap;
     
     ViewProjectionUB m_currentVP;
 
-    slrd::RenderPassPtr m_renderPass;
-    slrd::PipelinePtr m_pipeline;
+    slrd::Ref<slrd::IRenderPass> m_renderPass;
+    slrd::Ref<slrd::IPipeline> m_pipeline;
 
     /* This program uses one inflight frame */
 
-    slrd::FencePtr m_fence;
+    slrd::Ref<slrd::IFence> m_fence;
 
-    slrd::BufferPtr m_vpBuffer;
+    slrd::Ref<slrd::IBuffer> m_vpBuffer;
 
-    slrd::BufferPtr m_vertexBuffer;
-    slrd::BufferPtr m_indexBuffer;
+    slrd::Ref<slrd::IBuffer> m_vertexBuffer;
+    slrd::Ref<slrd::IBuffer> m_indexBuffer;
 
-    slrd::CommandQueuePtr m_commandQueue;
+    slrd::Ref<slrd::ICommandQueue> m_commandQueue;
     slrd::ICommandBuffer *m_commandBuffer;
 
-    slrd::UniformSetPtr m_uniformSet;
+    slrd::Ref<slrd::IUniformSet> m_uniformSet;
 
     /* depth attachment */
-    slrd::TexturePtr m_depthTexture;
-    slrd::TextureViewPtr m_depthTextureView;
+    slrd::Ref<slrd::ITexture> m_depthTexture;
+    slrd::Ref<slrd::ITextureView> m_depthTextureView;
 
-    slrd::TexturePtr m_texture;
-    slrd::TextureViewPtr m_textureView;
-    slrd::SamplerPtr m_sampler;
+    slrd::Ref<slrd::ITexture> m_texture;
+    slrd::Ref<slrd::ITextureView> m_textureView;
+    slrd::Ref<slrd::ISampler> m_sampler;
 
     bool m_shouldRecreateSwapchain = false;
 
@@ -237,7 +237,7 @@ struct App {
     float m_delta = 0.f;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_prevTime {};
 
-    slrd::TexturePtr createTextureFromImage (const std::filesystem::path& path, slrd::TextureViewPtr *texView) {
+    slrd::Ref<slrd::ITexture> createTextureFromImage (const std::filesystem::path& path, slrd::Ref<slrd::ITextureView> *texView) {
         if (!std::filesystem::exists (path)) {
             return nullptr;
         }
@@ -257,7 +257,7 @@ struct App {
         bufInfo.coherent = true;
         bufInfo.properties = slrd::BUFFER_PROPERTY_TRANSFER_SRC;
         bufInfo.size = w * h * 4;
-        slrd::BufferPtr stagingBuffer = m_device->createBuffer (bufInfo);
+        slrd::Ref<slrd::IBuffer> stagingBuffer = m_device->createBuffer (bufInfo);
         if (!stagingBuffer) {
             std::cout << "Failed to create one time staging buffer\n";
             return nullptr;
@@ -280,7 +280,7 @@ struct App {
         texInfo.format = slrd::FORMAT_RGBA8_UNORM;
         texInfo.tiling = slrd::TEXTURE_TILING_OPTIMAL;
 
-        slrd::TexturePtr texture = m_device->createTexture (texInfo);
+        slrd::Ref<slrd::ITexture> texture = m_device->createTexture (texInfo);
         if (!texture) {
             return nullptr;
         }
@@ -341,7 +341,7 @@ struct App {
         viewInfo.mipLevels = 1;
         viewInfo.arrayLayers = 1;
 
-        slrd::TextureViewPtr view = texture->createTextureView (viewInfo);
+        slrd::Ref<slrd::ITextureView> view = texture->createTextureView (viewInfo);
         if (!view) {
             return nullptr;
         }
@@ -472,8 +472,8 @@ struct App {
         init ();
     }
 
-    slrd::BufferPtr createBufferWithData (slrd::BufferUsageFlags usage, void *data, size_t size) {
-        slrd::BufferPtr result, stagingBuffer;
+    slrd::Ref<slrd::IBuffer> createBufferWithData (slrd::BufferUsageFlags usage, void *data, size_t size) {
+        slrd::Ref<slrd::IBuffer> result, stagingBuffer;
         auto oneTimeBuffer = m_commandQueue->getCommandBuffer (true);
         if (!oneTimeBuffer) {
             std::cout << "Failed to create a one time buffer\n";

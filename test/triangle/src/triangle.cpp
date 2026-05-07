@@ -74,20 +74,20 @@ static const Vertex s_vertices[] = {
 };
 
 struct App {
-    slrd::DevicePtr m_device;
-    slrd::SwapchainPtr m_swapchain;
+    slrd::Ref<slrd::IDevice> m_device;
+    slrd::Ref<slrd::ISwapchain> m_swapchain;
 
-    slrd::RenderPassPtr m_renderPass;
-    slrd::PipelinePtr m_pipeline;
+    slrd::Ref<slrd::IRenderPass> m_renderPass;
+    slrd::Ref<slrd::IPipeline> m_pipeline;
 
     /* This program uses one inflight frame */
 
-    slrd::FencePtr m_fence;
+    slrd::Ref<slrd::IFence> m_fence;
 
-    slrd::BufferPtr m_uniformBuffer;
-    slrd::BufferPtr m_triangleBuffer;
+    slrd::Ref<slrd::IBuffer> m_uniformBuffer;
+    slrd::Ref<slrd::IBuffer> m_triangleBuffer;
 
-    slrd::CommandQueuePtr m_commandQueue;
+    slrd::Ref<slrd::ICommandQueue> m_commandQueue;
     slrd::ICommandBuffer *m_commandBuffer;
 
     bool m_shouldRecreateSwapchain = false;
