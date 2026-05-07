@@ -61,6 +61,12 @@ namespace slrd {
         SLRD_ASSERT (m_pool != VK_NULL_HANDLE);
         vkResetCommandPool (m_device->getVkDevice (), m_pool, 0);
 
+#if SLRD_DEBUG
+        /* In case we track it (which only happens when we track the state),
+         * notify all of the connected queues about the reset */
+        commandQueueReset ();
+#endif
+
         return -1;
     }
     int VKCommandQueue::wait () {

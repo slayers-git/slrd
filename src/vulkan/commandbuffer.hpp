@@ -3,6 +3,7 @@
 #ifndef __SLRD_VULKAN_COMMAND_BUFFER_HPP__
 #define __SLRD_VULKAN_COMMAND_BUFFER_HPP__
 
+#include <rocket/rocket.hpp>
 #include "vulkan/deviceobject.hpp"
 #include "vulkan/resource.hpp"
 #include <slrd/commandbuffer.hpp>
@@ -22,6 +23,9 @@ namespace slrd {
     class VKCommandBuffer :
             public VKDeviceObject<ICommandBuffer>,
             public VKResource<VKCommandBuffer> {
+    public:
+        rocket::scoped_connection_container m_queueConnections;
+
     private:
         /* Queue to which this command buffer belongs */
         VKCommandQueue *m_queue;
@@ -37,6 +41,8 @@ namespace slrd {
         VKRenderPass *m_renderpass = nullptr;
         /* Current Pipeline */
         VKPipeline *m_pipeline = nullptr;
+
+        void signalReset ();
 
 #if SLRD_DEBUG
         enum State {

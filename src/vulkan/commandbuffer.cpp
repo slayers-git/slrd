@@ -127,7 +127,22 @@ namespace slrd {
         m_owningPool = queue->getCommandPool ();
         m_buffer = vkbuffer;
 
+#if SLRD_DEBUG
+        /* In case we need to track the state, connect with the queue, so it
+         * notifies us of reset() */
+        m_queueConnections += {
+            queue->commandQueueReset.connect (this, 
+                    &VKCommandBuffer::signalReset)
+        };
+#endif
+
         return 0;
+    }
+
+    void VKCommandBuffer::signalReset () {
+#if SLRD_DEBUG
+        m_state = STATE_INITIAL;
+#endif
     }
 
     void VKCommandBuffer::reset () {

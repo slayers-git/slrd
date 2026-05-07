@@ -3,6 +3,7 @@
 #ifndef __SLRD_VULKAN_COMMAND_QUEUE_HPP__
 #define __SLRD_VULKAN_COMMAND_QUEUE_HPP__
 
+#include <rocket/rocket.hpp>
 #include "vulkan/deviceobject.hpp"
 #include "vulkan/factory.hpp"
 #include "vulkan/resource.hpp"
@@ -18,6 +19,9 @@ namespace slrd {
     class VKCommandQueue : 
             public VKDeviceObject<ICommandQueue>,
             public VKResource<VKCommandQueue> {
+    public:
+        rocket::thread_safe_signal<void()> commandQueueReset;
+
     private:
         VkQueue m_queue = VK_NULL_HANDLE;
         VkCommandPool m_pool = VK_NULL_HANDLE;
