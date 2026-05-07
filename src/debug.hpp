@@ -79,6 +79,8 @@ namespace slrd {
                     loc.line (),
                     loc.function_name (),
                     condition);
+
+            std::terminate ();
         }
 
         template<typename... Args>

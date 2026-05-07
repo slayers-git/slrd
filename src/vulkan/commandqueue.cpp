@@ -81,7 +81,7 @@ namespace slrd {
             auto *cmdbuffer = static_cast<VKCommandBuffer *>(info.commandBuffers[i]);
 
             /* Check that this command buffer was created by the same queue */
-            SLRD_ASSERT (cmdbuffer->getCommandQueue ().get () == this);
+            SLRD_ASSERT (cmdbuffer->getCommandQueue () == this);
             SLRD_ASSERT (cmdbuffer != nullptr);
             
             vkbuffers[i] = cmdbuffer->getCommandBuffer ();
