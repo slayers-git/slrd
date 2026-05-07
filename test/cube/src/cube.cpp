@@ -217,7 +217,7 @@ struct App {
     slrd::BufferPtr m_indexBuffer;
 
     slrd::CommandQueuePtr m_commandQueue;
-    slrd::CommandBufferPtr m_commandBuffer;
+    slrd::ICommandBuffer *m_commandBuffer;
 
     slrd::UniformSetPtr m_uniformSet;
 
@@ -245,7 +245,7 @@ struct App {
         int w, h, c;
         uint8_t *const udata = stbi_load (path.c_str (), &w, &h, &c, 4);
 
-        slrd::CommandBufferPtr oneTime = m_commandQueue->getCommandBuffer ();
+        auto oneTime = m_commandQueue->getCommandBuffer ();
         if (!oneTime) {
             std::cout << "Failed to create one time command buffer\n";
             return nullptr;
@@ -426,7 +426,7 @@ struct App {
 
             /* Create the swapchain with the surface */
             slrd::SwapchainInfo swpInfo;
-            swpInfo.surface = surface;
+            swpInfo.surface = surface.get ();
             swpInfo.requireVSync = true;
             swpInfo.width = 800;
             swpInfo.height = 600;
@@ -474,7 +474,7 @@ struct App {
 
     slrd::BufferPtr createBufferWithData (slrd::BufferUsageFlags usage, void *data, size_t size) {
         slrd::BufferPtr result, stagingBuffer;
-        slrd::CommandBufferPtr oneTimeBuffer = m_commandQueue->getCommandBuffer (true);
+        auto oneTimeBuffer = m_commandQueue->getCommandBuffer (true);
         if (!oneTimeBuffer) {
             std::cout << "Failed to create a one time buffer\n";
             return nullptr;
@@ -521,7 +521,7 @@ struct App {
 
         oneTimeBuffer->end ();
 
-        slrd::SubmitInfo submitInfo;
+        slrd::SubmitInfo submitInfo {};
         submitInfo.commandBuffers = { &oneTimeBuffer, 1 };
         if (m_commandQueue->submit (submitInfo)) {
             return nullptr;
@@ -617,11 +617,11 @@ struct App {
                 std::cerr << "Failed to create renderpass: " << slrd::getErrorString ();
                 exit (1);
             }
-            m_renderPass->setDepthView (m_depthTextureView);
+            m_renderPass->setDepthView (m_depthTextureView.get ());
 
             /* Create pipeline */
             slrd::GraphicsPipelineInfo plInfo;
-            plInfo.shader = shader;
+            plInfo.shader = shader.get ();
 
             plInfo.vertexConfig.vertexBindings = Vertex::getBindingDescriptions ();
             plInfo.vertexConfig.attributeDescs = Vertex::getAttributeDescription ();
@@ -766,7 +766,7 @@ struct App {
         memcpy (m_vpBufferMap, &m_currentVP, sizeof (m_currentVP));
 
         createDepth (w, h);
-        m_renderPass->setDepthView (m_depthTextureView);
+        m_renderPass->setDepthView (m_depthTextureView.get ());
     }
 
     void draw () {
@@ -825,9 +825,9 @@ struct App {
 
         profiler.startScope ("CommandBufferRecording");
         m_commandBuffer->begin (); 
-            m_commandBuffer->beginRenderPass (m_renderPass, begInfo);
+            m_commandBuffer->beginRenderPass (m_renderPass.get (), begInfo);
 
-            m_commandBuffer->bindGraphicsPipeline (m_pipeline);
+            m_commandBuffer->bindGraphicsPipeline (m_pipeline.get ());
 
             m_commandBuffer->setViewport ({ 0, 0, (float)w, (float)h});
             m_commandBuffer->setScissor ({ 0, 0, (uint32_t)w, (uint32_t)h });
@@ -836,15 +836,13 @@ struct App {
                     { (uint8_t *)glm::value_ptr (transform), 64 }, slrd::STAGE_VERTEX);
 
             /* Bind the sets before we draw */
-            slrd::IUniformSet* sets[] = {
-                m_uniformSet.get ()
-            };
+            slrd::IUniformSet* sets[] = { m_uniformSet.get () };
             profiler.startScope ("BindSets");
             m_commandBuffer->bindSets (sets);
             profiler.endScope ("BindSets");
 
-            m_commandBuffer->bindVertexBuffer (m_vertexBuffer, 0, 0);
-            m_commandBuffer->bindIndexBuffer (m_indexBuffer, slrd::INDEX_TYPE_UINT16);
+            m_commandBuffer->bindVertexBuffer (m_vertexBuffer.get (), 0, 0);
+            m_commandBuffer->bindIndexBuffer (m_indexBuffer.get (), slrd::INDEX_TYPE_UINT16);
             m_commandBuffer->drawIndexed (36, 1);
 
             m_commandBuffer->endRenderPass ();
@@ -854,9 +852,9 @@ struct App {
         static int frame = 0;
 
         slrd::SubmitInfo submitInfo;
-        submitInfo.fence = m_fence;
+        submitInfo.fence = m_fence.get ();
 
-        slrd::CommandBufferPtr cmdBuffers[] = { m_commandBuffer };
+        slrd::ICommandBuffer *cmdBuffers[] = { m_commandBuffer };
         submitInfo.commandBuffers = cmdBuffers;
 
         profiler.startScope ("Submit");

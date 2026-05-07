@@ -6,7 +6,7 @@
 #include <cstring>
 
 namespace slrd {
-    int VKBuffer::init (std::shared_ptr<VKDevice> device, const BufferInfo& info) {
+    int VKBuffer::init (VKDevice *device, const BufferInfo& info) {
         VkBufferCreateInfo bufInfo {};
 
         bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -60,7 +60,7 @@ namespace slrd {
 
         m_allocation = allocation;
         m_buffer = buffer;
-        m_device = device;
+        setParentDevice (device);
         m_coherent = info.coherent;
 
         return 0;

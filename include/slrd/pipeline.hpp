@@ -3,6 +3,8 @@
 #ifndef __SLRD_PIPELINE_HPP__
 #define __SLRD_PIPELINE_HPP__
 
+#include "object.hpp"
+
 #include "buffer.hpp"
 #include "format.hpp"
 #include <cstdint>
@@ -151,7 +153,7 @@ namespace slrd {
 
     class IRenderPass;
 	struct GraphicsPipelineInfo {
-		std::shared_ptr<IShader> shader = nullptr;
+		IShader *shader = nullptr;
 
 		struct VertexConfig {
             std::span<const VertexBindingDescription> vertexBindings;
@@ -210,25 +212,25 @@ namespace slrd {
 	};
 
     struct ComputePipelineInfo {
-        //std::shared_ptr<IPipelineLayout> layout;
-        std::shared_ptr<IShader> shader;
+        IShader *shader;
     };
 
     struct BindBufferInfo {
         uint32_t location;
         uint32_t set;
 
-        std::shared_ptr<IBuffer> buffer;
+        IBuffer *buffer;
         uint64_t offset;
         uint64_t range;
     };
 
-    class IPipeline {
+    class IPipeline : public IObject {
     public:
         virtual ~IPipeline () = default;
 
-        /* Allocate a uniform set by its id */
-        virtual std::shared_ptr<IUniformSet> allocateUniformSet (uint32_t set) = 0;
+        /**
+         * Allocate a UniformSet that is compatible with this pipeline */
+        virtual Ref<IUniformSet> allocateUniformSet (uint32_t set) = 0;
     };
 };
 

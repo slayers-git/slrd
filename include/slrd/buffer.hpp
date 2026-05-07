@@ -37,7 +37,7 @@ namespace slrd {
         DeviceSize size = 0;
     };
 
-    class IBuffer {
+    class IBuffer : public IObject {
     public:
         virtual ~IBuffer () = default;
 

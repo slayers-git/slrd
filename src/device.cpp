@@ -6,7 +6,7 @@
 #include <slrd/device.hpp>
 
 namespace slrd {
-    std::shared_ptr<IDevice> createDevice (const DeviceConfig& config) {
+    Ref<IDevice> createDevice (const DeviceConfig& config) {
         API api;
         
         if ((api = slrd::getCurrentAPI ()) == slrd::API_NONE) {
@@ -16,7 +16,7 @@ namespace slrd {
 
         switch (api) {
             case API_VULKAN:
-                return createVKDevice (config);
+                return Ref<IDevice>::adopt (createVKDevice (config));
             default:
                 setError ("API NOT IMPLEMENTED");
                 return nullptr;

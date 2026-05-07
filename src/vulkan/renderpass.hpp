@@ -5,7 +5,6 @@
 
 #include "slrd/renderpass.hpp"
 #include "vulkan/factory.hpp"
-#include <memory>
 #include <array>
 #include "vulkan/swapchain.hpp"
 
@@ -22,9 +21,8 @@ namespace slrd {
 
     using RenderPassHash = uint64_t;
 
-    /* Because of the utter retardedness of the Vulkan 1.0 standard, to implement
-     * SLRD library without the need for a separate Framebuffer object we do the
-     * following:
+    /* Because of how the Vulkan 1.0 standard works, to implement this library
+     * without the need for a separate Framebuffer object, we do the following:
      *
      * - For Vulkan 1.0 in the renderpass we keep all textures used for drawing,
      *   and a framebuffer that is used for this particular object.
@@ -38,9 +36,10 @@ namespace slrd {
      * This will remain a thing, until this library supports Vulkan 1.3. */
 
     SLRD_RESOURCE_DEFINE_TYPE(VKRenderPass);
-    class VKRenderPass : public IRenderPass, public VKResource<VKRenderPass> {
+    class VKRenderPass :
+        public VKDeviceObject<IRenderPass>,
+        public VKResource<VKRenderPass> {
     private:
-        std::shared_ptr<VKDevice> m_device;
         VkRenderPass m_renderpass = VK_NULL_HANDLE;
 
         RenderPassHash m_hash;
@@ -124,22 +123,20 @@ namespace slrd {
             return m_stencilIndex != UINT32_MAX;
         }
 
-        int init (std::shared_ptr<VKDevice> device,
-                const RenderPassInfo& info);
+        int init (VKDevice *device, const RenderPassInfo& info);
 
         /* Set texture views */
-        int setTextureViews (std::span<std::shared_ptr<ITextureView>> textureViews) final;
+        int setTextureViews (std::span<ITextureView *> textureViews) final;
 
         /* Set texture view for one element
          *
          * Note: this will result in framebuffer recreation, which is highly inefficient.
          * However, if the TextureView being replaced is from a swapchain, then the replaced 
          * framebuffer will be stored. */
-        int setTextureView (uint32_t index, const std::shared_ptr<ITextureView>& textureView) final;
-        int setTextureView (uint32_t index, const ITextureView *textureView) final;
+        int setTextureView (uint32_t index, ITextureView *textureView) final;
 
-        virtual int setDepthView   (const std::shared_ptr<ITextureView>& textureView) final;
-        virtual int setStencilView (const std::shared_ptr<ITextureView>& textureView) final;
+        virtual int setDepthView   (ITextureView *textureView) final;
+        virtual int setStencilView (ITextureView *textureView) final;
 
         /* Internal use to create framebuffers based on current set of views */
         VkFramebuffer createFramebuffer ();
@@ -157,8 +154,7 @@ namespace slrd {
         void signalSwapchainRecreation ();
     };
 
-    inline std::shared_ptr<VKRenderPass> createVKRenderPass (
-            std::shared_ptr<VKDevice> device, const RenderPassInfo& info) {
+    inline VKRenderPass *createVKRenderPass (VKDevice *device, const RenderPassInfo& info) {
         return makeResource<VKRenderPass> (device, info);
     }
 };

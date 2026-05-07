@@ -156,17 +156,17 @@ namespace slrd {
         return result == VK_SUCCESS ? SWAPCHAIN_RESULT_SUCCESS : SWAPCHAIN_RESULT_OTHER;
     }
 
-    std::shared_ptr<ITextureView>& VKSwapchain::getTextureView (uint32_t id) {
+    ITextureView *VKSwapchain::getTextureView (uint32_t id) {
         SLRD_ASSERT (id < m_textures.size ());
-        return m_textureViews[id];
+        return m_textureViews[id].get ();
     }
-    std::shared_ptr<ITexture>& VKSwapchain::getTexture (uint32_t id) {
+    ITexture *VKSwapchain::getTexture (uint32_t id) {
         SLRD_ASSERT (id < m_textures.size ());
-        return m_textures[id];
+        return m_textures[id].get ();
     }
 
     VkSwapchainKHR VKSwapchain::create (VkSwapchainKHR old, uint32_t width, uint32_t height) {
-        auto caps = m_surface->queryCapabilities (m_device);
+        auto caps = m_surface->queryCapabilities (m_device.get ());
         const auto& vkcap = caps->capabilities;
 
         m_currentFrame = nullptr;
@@ -220,8 +220,9 @@ namespace slrd {
 
         m_textures.resize (m_imageCount);
         for (uint32_t i = 0; i < m_imageCount; ++i) {
-            auto texture = std::make_shared<VKTexture> ();
-            if (texture->createFromExisting (m_device, images[i],
+            auto texture = Ref<VKTexture>::adopt (new VKTexture);
+
+            if (texture->createFromExisting (m_device.get (), images[i],
                         TEXTURE_TYPE_2D, scInfo.imageExtent.width,
                         scInfo.imageExtent.height, 1,
                         scInfo.imageFormat, this)) {
@@ -256,9 +257,8 @@ namespace slrd {
     }
 
     /* Create the swapchain */
-    int VKSwapchain::init (std::shared_ptr<VKDevice> device, const SwapchainInfo& info) {
-        std::shared_ptr<VKSurface> surface = static_pointer_cast<VKSurface>(
-                info.surface);
+    int VKSwapchain::init (VKDevice *device, const SwapchainInfo& info) {
+        VKSurface *surface = static_cast<VKSurface *> (info.surface);
 
         auto caps = surface->queryCapabilities (device);
         if (!caps) {
@@ -277,15 +277,14 @@ namespace slrd {
         auto surfaceFormat = caps->selectBestFormatAvailable ();
         auto presentMode = caps->selectBestModeAvailable (info.requireVSync);
 
-        m_device = device;
         m_presentMode = presentMode;
         m_format = surfaceFormat.format;
         m_colorSpace = surfaceFormat.colorSpace;
         m_imageCount = imageCount;
         m_preTransform = vkcap.currentTransform;
 
-        m_device = device;
-        m_surface = surface;
+        setParentDevice (device);
+        m_surface = Ref<VKSurface>::share (surface);
         m_swapchain = create (VK_NULL_HANDLE, info.width, info.height);
 
         return !m_swapchain;

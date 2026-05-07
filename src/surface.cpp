@@ -6,14 +6,14 @@
 #include <slrd/surface.hpp>
 
 namespace slrd {
-    std::shared_ptr<ISurface> createSurface (const SurfaceInfo& info) {
+    Ref<ISurface> createSurface (const SurfaceInfo& info) {
         RETURN_LOG_ERROR_IF (getCurrentAPI () == API_NONE,
                 nullptr,
                 "No API is initialized");
 
         switch (getCurrentAPI ()) {
             case API_VULKAN:
-                return slrd::createVKSurface (info);
+                return Ref<ISurface>::adopt (slrd::createVKSurface (info));
             default:
                 setError ("NO IMPLEMENT");
                 return nullptr;

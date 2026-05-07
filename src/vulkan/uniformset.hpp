@@ -3,6 +3,7 @@
 #ifndef __SLRD_VULKAN_UNIFORM_SET_HPP__
 #define __SLRD_VULKAN_UNIFORM_SET_HPP__
 
+#include "vulkan/deviceobject.hpp"
 #include <slrd/uniformset.hpp>
 
 #include <vulkan/vulkan.h>
@@ -11,7 +12,8 @@ namespace slrd {
     class VKPipelineLayout;
     class DescriptorPoolManager;
 
-    class VKUniformSet : public IUniformSet {
+    class VKUniformSet :
+            public VKDeviceObject<IUniformSet> {
     private:
         VkDevice m_device = VK_NULL_HANDLE;
         VkDescriptorSet m_set = nullptr;

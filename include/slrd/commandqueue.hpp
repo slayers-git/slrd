@@ -3,6 +3,8 @@
 #ifndef __SLRD_COMMAND_QUEUE_HPP__
 #define __SLRD_COMMAND_QUEUE_HPP__
 
+#include "object.hpp"
+
 #include <memory>
 #include <span>
 
@@ -12,17 +14,17 @@ namespace slrd {
 
     struct SubmitInfo {
         /* Fence to singal when the execution is complete. */
-        std::shared_ptr<IFence> fence;
+        IFence *fence;
         /* Which command buffers need to be executed */
-        std::span<std::shared_ptr<ICommandBuffer>> commandBuffers;
+        std::span<ICommandBuffer *> commandBuffers;
     };
 
-    class ICommandQueue {
+    class ICommandQueue : public IObject {
     public:
         virtual ~ICommandQueue () = default;
 
         /* Get command buffer from this queue */
-        virtual std::shared_ptr<ICommandBuffer> getCommandBuffer (bool primary = true) = 0;
+        virtual ICommandBuffer *getCommandBuffer (bool primary = true) = 0;
 
         /* Reset buffers inherited from here (Only works in specific cases) */
         virtual int reset () = 0;

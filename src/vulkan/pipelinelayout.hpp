@@ -114,7 +114,7 @@ namespace slrd {
 
         int init (VKDevice *device, const PipelineLayoutInfo& info);
         /* Allocate a uniform set using this pipeline */
-        std::shared_ptr<VKUniformSet> allocateUniformSet (uint32_t set);
+        VKUniformSet *allocateUniformSet (uint32_t set);
 
         std::vector<VkDescriptorSetLayout> getVkSetLayouts (
             std::span<const DescriptorSet> sets);

@@ -3,6 +3,8 @@
 #ifndef __SLRD_SURFACE_HPP__
 #define __SLRD_SURFACE_HPP__
 
+#include "object.hpp"
+#include "slrd/ref.hpp"
 #include <memory>
 
 namespace slrd {
@@ -13,12 +15,12 @@ namespace slrd {
     };
 
     /* Window surface to which swapchain binds */
-    class ISurface {
+    class ISurface : public IObject {
     public:
         virtual ~ISurface () = default;
     };
 
-    std::shared_ptr<ISurface> createSurface (const SurfaceInfo&);
+    Ref<ISurface> createSurface (const SurfaceInfo&);
 };
 
 #endif /* #define __SLRD_SURFACE_HPP__ */

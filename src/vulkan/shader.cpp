@@ -345,8 +345,8 @@ namespace slrd {
     }
 
 
-    int VKShader::init (std::shared_ptr<VKDevice> device, const ShaderInfo& config) {
-        m_device = device;
+    int VKShader::init (VKDevice *device, const ShaderInfo& config) {
+        setParentDevice (device);
 
         WRAP_COND_RETURN (reflectShader (config.bytecodes) != VK_SUCCESS, -1);
 
@@ -372,8 +372,10 @@ namespace slrd {
         return m_device->getPipelineManager ()->grabOrCreatePipelineLayout (m_layoutHash);
     }
 
-    std::shared_ptr<IUniformSet> VKShader::allocateUniformSet (uint32_t set) {
-        return getOrCreatePipelineLayout ()->allocateUniformSet (set);
+    Ref<IUniformSet> VKShader::allocateUniformSet (uint32_t set) {
+        return Ref<IUniformSet>::adopt (
+            getOrCreatePipelineLayout ()->allocateUniformSet (set)
+        );
     }
 
     const ShaderReflection& VKShader::getShaderReflection () const {

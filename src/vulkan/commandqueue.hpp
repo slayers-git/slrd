@@ -3,6 +3,7 @@
 #ifndef __SLRD_VULKAN_COMMAND_QUEUE_HPP__
 #define __SLRD_VULKAN_COMMAND_QUEUE_HPP__
 
+#include "vulkan/deviceobject.hpp"
 #include "vulkan/factory.hpp"
 #include "vulkan/resource.hpp"
 #include <slrd/commandqueue.hpp>
@@ -11,10 +12,11 @@
 
 namespace slrd {
     class VKDevice;
+    class VKCommandBuffer;
 
     SLRD_RESOURCE_DEFINE_TYPE(VKCommandQueue);
-    class VKCommandQueue : public ICommandQueue,
-            public std::enable_shared_from_this<VKCommandQueue>,
+    class VKCommandQueue : 
+            public VKDeviceObject<ICommandQueue>,
             public VKResource<VKCommandQueue> {
     private:
         VkQueue m_queue = VK_NULL_HANDLE;
@@ -22,9 +24,8 @@ namespace slrd {
 
         uint32_t m_queueFamily;
 
-        std::vector<std::weak_ptr<ICommandBuffer>> m_buffers;
-
-        std::shared_ptr<VKDevice> m_device;
+        /* The buffers allocated from this queue */
+        std::vector<Ref<VKCommandBuffer>> m_buffers;
 
     public:
         VKCommandQueue () = default;
@@ -38,7 +39,7 @@ namespace slrd {
             return m_queueFamily;
         }
 
-        [[nodiscard]] auto& getDevice () const {
+        [[nodiscard]] auto& getDevice () {
             return m_device;
         }
 
@@ -46,8 +47,8 @@ namespace slrd {
             return m_pool;
         }
 
-        int init (std::shared_ptr<VKDevice> device, const CommandQueueInfo& info);
-        std::shared_ptr<ICommandBuffer> getCommandBuffer (bool primary) final override;
+        int init (VKDevice *device, const CommandQueueInfo& info);
+        ICommandBuffer *getCommandBuffer (bool primary) final override;
 
         int reset () final override;
         int wait () final override;
@@ -55,8 +56,8 @@ namespace slrd {
         int submit (const SubmitInfo& info) final override;
     };
 
-    inline std::shared_ptr<VKCommandQueue> createVKCommandQueue (
-            std::shared_ptr<VKDevice> device,
+    inline VKCommandQueue *createVKCommandQueue (
+            VKDevice *device,
             const CommandQueueInfo& info) {
         return makeResource<VKCommandQueue> (device, info);
     }

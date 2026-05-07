@@ -97,7 +97,7 @@ namespace slrd {
             iaInfo.primitiveRestartEnable = info.inputAssembly.restart;
         }
 
-        shader = std::static_pointer_cast<VKShader> (info.shader);
+        shader = Ref<IShader>::share (info.shader);
 
         XXH64_state_t *state = XXH64_createState ();
         SLRD_DEBUG_CRIT_IF (!state,
@@ -119,12 +119,17 @@ namespace slrd {
                 blendAttachments.size () *
                 sizeof (decltype (blendAttachments)::value_type));
 
+        auto *vkshader = getShader ();
         /* FIXME */
-        XXH64_update (state, shader->getStages ().data (), shader->getStages ().size () *
+        XXH64_update (state, vkshader->getStages ().data (), vkshader->getStages ().size () *
                 sizeof (VkPipelineShaderStageCreateInfo));
 
         hash = XXH64_digest (state);
         XXH64_freeState (state);
+    }
+
+    VKShader *VKPipelineState::getShader () const noexcept {
+        return static_cast<VKShader *> (shader.get ());
     }
 
     void PipelineLayoutInfo::calculateHash () {
@@ -182,12 +187,13 @@ namespace slrd {
             vpInfo.scissorCount = 1;
         }
 
-        auto& stages = state.shader->getStages ();
+        auto *shader = state.getShader ();
+        auto& stages = shader->getStages ();
 
         VkGraphicsPipelineCreateInfo plInfo {};
         plInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         plInfo.flags = 0;
-        plInfo.layout = state.shader->grabOrCreatePipelineLayout ()->getLayout ();
+        plInfo.layout = shader->grabOrCreatePipelineLayout ()->getLayout ();
         plInfo.subpass = 0;
         plInfo.pStages = stages.data ();
         plInfo.stageCount = stages.size ();

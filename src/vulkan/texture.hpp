@@ -3,9 +3,11 @@
 #ifndef __SLRD_VULKAN_TEXTURE_HPP__
 #define __SLRD_VULKAN_TEXTURE_HPP__
 
+#include "slrd/ref.hpp"
 #include "slrd/texture.hpp"
+#include "vulkan/deviceobject.hpp"
+#include "vulkan/factory.hpp"
 #include "vulkan/resource.hpp"
-#include <memory>
 #include <utility>
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
@@ -17,15 +19,17 @@ namespace slrd {
     class VKTextureView;
 
     SLRD_RESOURCE_DEFINE_TYPE(VKTextureView);
-    class VKTextureView : public ITextureView,
-            VKResource<VKTextureView> {
+    class VKTextureView :
+        public VKDeviceObject<ITextureView>,
+        VKResource<VKTextureView> {
     private:
-        std::shared_ptr<VKTexture> m_texture;
-        std::shared_ptr<VKDevice> m_device;
+        /* Strong reference, because we need the texture for as long as the
+         * view lives */
+        Ref<VKTexture> m_texture;
         VkImageView m_view = VK_NULL_HANDLE;
 
     public:
-        inline VKTextureView (const std::shared_ptr<VKTexture>& texture, VkImageView view);
+        inline VKTextureView (VKTexture *texture, VkImageView view);
 
         VKTextureView () = default;
         ~VKTextureView ();
@@ -44,14 +48,12 @@ namespace slrd {
 
         VKTextureView (VKTextureView&& other) noexcept :
             m_texture (std::move (other.m_texture)),
-            m_device (std::move (other.m_device)),
             m_view (std::exchange (other.m_view, VK_NULL_HANDLE)) { }
 
         VKTextureView operator= (const VKTextureView&) = delete;
         VKTextureView& operator= (VKTextureView&& other) noexcept {
             if (&other != this) {
                 m_texture = std::exchange (other.m_texture, nullptr);
-                m_device = std::exchange (other.m_device, nullptr);
                 m_view = std::exchange (other.m_view, VK_NULL_HANDLE);
             }
 
@@ -62,14 +64,14 @@ namespace slrd {
             return m_view;
         }
 
-        int init (std::shared_ptr<VKTexture> texture, const TextureViewInfo& viewData);
+        int init (VKTexture *texture, const TextureViewInfo& viewData);
     };
 
     SLRD_RESOURCE_DEFINE_TYPE(VKTexture);
-    class VKTexture : public ITexture, public std::enable_shared_from_this<VKTexture>,
+    class VKTexture :
+            public VKDeviceObject<ITexture>,
             VKResource<VKTexture> {
     private:
-        std::shared_ptr<VKDevice> m_device;
         VkImage m_image = VK_NULL_HANDLE;
 
         /* The swapchain that this texture was created from
@@ -127,9 +129,9 @@ namespace slrd {
         }
 
         /* Initialize the texture */
-        int init (std::shared_ptr<VKDevice> device, const TextureInfo& info);
+        int init (VKDevice *device, const TextureInfo& info);
 
-        int createFromExisting (std::shared_ptr<VKDevice> device,
+        int createFromExisting (VKDevice *device,
                 VkImage image, TextureType type,
                 uint32_t width, uint32_t height, uint32_t depth,
                 VkFormat format, VKSwapchain *swapchain = nullptr);
@@ -141,21 +143,24 @@ namespace slrd {
         void invalidate ();
 
         /* Create a custom texture view */
-        std::shared_ptr<ITextureView> createTextureView (const TextureViewInfo& view) final;
+        Ref<ITextureView> createTextureView (const TextureViewInfo& view) final;
 
         ~VKTexture ();
 
         friend class VKTextureView;
     };
 
-    VKTextureView::VKTextureView (const std::shared_ptr<VKTexture>& texture, VkImageView view) :
-            m_texture (texture),
-            m_device (texture->m_device),
-            m_view (view) {}
+    VKTextureView::VKTextureView (VKTexture *texture, VkImageView view) {
+        m_device = texture->getDevice ();
+        m_texture = Ref<VKTexture>::share(texture);
+        m_view = view;
+    }
 
-    /* Create the texture */
-    std::shared_ptr<VKTexture> createVKTexture (std::shared_ptr<VKDevice> device,
-            const TextureInfo& info);
+    /* Create a texture */
+    inline VKTexture *createVKTexture (VKDevice *device, const TextureInfo& info) {
+        return makeResource<VKTexture> (device, info);
+    }
+
 
 
     /* Helpers */

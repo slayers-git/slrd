@@ -14,27 +14,27 @@ namespace slrd {
             vkDestroyPipeline (m_device->getVkDevice (), m_pipeline, nullptr);
     }
 
-    int VKPipeline::init (std::shared_ptr<VKDevice> device, const GraphicsPipelineInfo& info) {
+    int VKPipeline::init (VKDevice *device, const GraphicsPipelineInfo& info) {
         RETURN_LOG_ERROR_IF (!info.shader,
                 -1,
                 "Shader were not specified in the pipeline creation info");
 
         m_state = VKPipelineState (info);
 
-        m_device = device;
+        setParentDevice (device);
         m_bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
         return 0;
     }
 
-    int VKPipeline::init (std::shared_ptr<VKDevice> device, const ComputePipelineInfo& info) {
+    int VKPipeline::init (VKDevice *device, const ComputePipelineInfo& info) {
         VkPipeline vkpipeline;
 
         RETURN_LOG_ERROR_IF (!info.shader,
                 -1,
                 "Shader were not specified in the pipeline creation info");
 
-        auto iShader = static_cast<VKShader *> (info.shader.get ());
+        auto iShader = static_cast<VKShader *> (info.shader);
         const std::vector<VkPipelineShaderStageCreateInfo>& stages = iShader->getStages ();
 
         SLRD_COMPLAIN_RETURN (stages.size () != 1 ||
@@ -52,21 +52,21 @@ namespace slrd {
                 "Failed to create VkPipeline (compute)"
                 );
 
-        m_device = device;
+        setParentDevice (device);
         m_pipeline = vkpipeline;
         m_bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
-        m_state.shader = std::static_pointer_cast<VKShader> (info.shader);
+        m_state.shader = Ref<IShader>::share (info.shader);
 
         return 0;
     }
 
     VKPipelineLayout *VKPipeline::getPipelineLayout () {
         SLRD_ASSERT (m_state.shader != nullptr);
-        return m_state.shader->getOrCreatePipelineLayout ();
+        return m_state.getShader ()->getOrCreatePipelineLayout ();
     }
 
-    std::shared_ptr<IUniformSet> VKPipeline::allocateUniformSet (uint32_t set) {
+    Ref<IUniformSet> VKPipeline::allocateUniformSet (uint32_t set) {
         SLRD_ASSERT (m_state.shader);
-        return m_state.shader->allocateUniformSet (set);
+        return m_state.getShader ()->allocateUniformSet (set);
     }
 };

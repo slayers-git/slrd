@@ -24,7 +24,7 @@ namespace slrd {
         vkDestroySurfaceKHR (vkapi->instance, m_surface, nullptr);
     }
 
-    slrd::Result<VKSurface::SurfaceCapabilities, VkResult> VKSurface::queryCapabilities (std::shared_ptr<VKDevice> device) const {
+    slrd::Result<VKSurface::SurfaceCapabilities, VkResult> VKSurface::queryCapabilities (VKDevice *device) const {
         SurfaceCapabilities info;
         VkPhysicalDevice physicalDevice = device->getPhysicalDevice ();
 

@@ -3,10 +3,11 @@
 #ifndef __SLRD_FENCE_HPP__
 #define __SLRD_FENCE_HPP__
 
+#include "object.hpp"
 #include <cstdint>
 
 namespace slrd {
-    class IFence { 
+    class IFence : public IObject {
     public:
         virtual ~IFence () = default;
 

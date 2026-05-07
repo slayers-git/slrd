@@ -8,14 +8,7 @@
 #include "device.hpp"
 
 namespace slrd {
-    std::shared_ptr<VKTexture> createVKTexture (std::shared_ptr<VKDevice> device,
-            const TextureInfo& info) {
-        std::shared_ptr<VKTexture> texture = std::make_shared<VKTexture> ();
-        int res = texture->init (device, info);
-        return !res ? texture : nullptr;
-    }
-
-    int VKTexture::init (std::shared_ptr<VKDevice> device, const TextureInfo& info) {
+    int VKTexture::init (VKDevice *device, const TextureInfo& info) {
         VkImage image;
 
         m_format = ::slrd::getVkFormat (info.format);
@@ -62,17 +55,17 @@ namespace slrd {
 
         m_image = image;
         m_allocation = allocation;
-        m_device = device;
+        setParentDevice (device);
         m_valid = true;
 
         return 0;
     }
 
-    int VKTexture::createFromExisting (std::shared_ptr<VKDevice> device,
+    int VKTexture::createFromExisting (VKDevice *device,
             VkImage image, TextureType type,
             uint32_t width, uint32_t height, uint32_t depth,
             VkFormat format, VKSwapchain *swapchain) {
-        m_device = device;
+        setParentDevice (device);
         m_image = image;
 
         m_type = type;
@@ -112,27 +105,9 @@ namespace slrd {
     }
 
     /* Create a custom texture view */
-    std::shared_ptr<ITextureView> VKTexture::createTextureView (const TextureViewInfo& view) {
+    Ref<ITextureView> VKTexture::createTextureView (const TextureViewInfo& viewData) {
         SLRD_ASSERT (m_image);
-
-        VkImageView iv;
-
-        VkImageViewCreateInfo ivInfo {};
-        ivInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        ivInfo.format = m_format;
-        ivInfo.image = m_image;
-        ivInfo.viewType = getVkImageViewType (m_type);
-        ivInfo.subresourceRange.aspectMask = view.aspect;
-        ivInfo.subresourceRange.baseMipLevel = view.mipLevel;
-        ivInfo.subresourceRange.baseArrayLayer = view.arrayLayer;
-        ivInfo.subresourceRange.layerCount = view.arrayLayers;
-        ivInfo.subresourceRange.levelCount = view.mipLevels;
-
-        VK_WRAP_RETURN (
-                vkCreateImageView (m_device->getVkDevice (), &ivInfo, nullptr, &iv),
-                nullptr);
-
-        return std::make_shared<VKTextureView> (shared_from_this (), iv);
+        return Ref<ITextureView>::adopt (makeResource<VKTextureView> (this, viewData));
     }
 
     bool VKTexture::isValid () const {
@@ -145,7 +120,7 @@ namespace slrd {
 
 
 
-    int VKTextureView::init (std::shared_ptr<VKTexture> texture, const TextureViewInfo& viewData) {
+    int VKTextureView::init (VKTexture *texture, const TextureViewInfo& viewData) {
         SLRD_ASSERT (texture != nullptr);
 
         VkImageView imageView;
@@ -172,7 +147,8 @@ namespace slrd {
                 vkCreateImageView (texture->m_device->getVkDevice (), &ivInfo, nullptr, &imageView)
                 );
 
-        m_texture = texture;
+        m_texture = Ref<VKTexture>::share (texture);
+        m_device  = texture->m_device;
         m_view    = imageView;
 
         return 0;

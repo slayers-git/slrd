@@ -12,7 +12,7 @@
 #include <set>
 
 namespace slrd {
-    int VKCommandQueue::init (std::shared_ptr<VKDevice> device, const CommandQueueInfo& info) {
+    int VKCommandQueue::init (VKDevice *device, const CommandQueueInfo& info) {
         SLRD_ASSERT (device != nullptr);
 
         VkCommandPool vkpool;
@@ -33,19 +33,25 @@ namespace slrd {
 
         m_queue = device->getGraphicsQueue ();
         m_pool  = vkpool;
-        m_device = device;
+        setParentDevice (device);
 
         return 0;
     }
 
-    std::shared_ptr<ICommandBuffer> VKCommandQueue::getCommandBuffer (bool primary) {
+    ICommandBuffer *VKCommandQueue::getCommandBuffer (bool primary) {
         SLRD_ASSERT (m_pool != VK_NULL_HANDLE);
-        auto buffer = makeResource<VKCommandBuffer> (shared_from_this (), primary);
+        auto buffer = makeResource<VKCommandBuffer> (this, primary);
+        if (buffer) {
+            m_buffers.push_back (Ref<VKCommandBuffer>::adopt (buffer));
+        }
 
         return buffer;
     }
 
     VKCommandQueue::~VKCommandQueue () {
+        wait ();
+        m_buffers.clear ();
+
         if (m_pool) {
             vkDestroyCommandPool (m_device->getVkDevice (), m_pool, nullptr);
         }
@@ -72,8 +78,7 @@ namespace slrd {
 
         std::vector<VkCommandBuffer> vkbuffers (info.commandBuffers.size ());
         for (unsigned i = 0; i < info.commandBuffers.size (); ++i) {
-            auto cmdbuffer = std::static_pointer_cast<VKCommandBuffer>(
-                    info.commandBuffers[i]);
+            auto *cmdbuffer = static_cast<VKCommandBuffer *>(info.commandBuffers[i]);
 
             /* Check that this command buffer was created by the same queue */
             SLRD_ASSERT (cmdbuffer->getCommandQueue ().get () == this);
@@ -113,7 +118,7 @@ namespace slrd {
 
         VkFence fence = VK_NULL_HANDLE;
         if (info.fence) {
-            fence = std::static_pointer_cast<VKFence> (info.fence)->getFence ();
+            fence = static_cast<VKFence *> (info.fence)->getFence ();
         }
 
         /* FIXME: Queue is always graphics. */

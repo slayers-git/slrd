@@ -3,6 +3,7 @@
 #ifndef __SLRD_VULKAN_PIPELINE_MANAGER_HPP__
 #define __SLRD_VULKAN_PIPELINE_MANAGER_HPP__
 
+#include <slrd/shader.hpp>
 #include "slrd/pipeline.hpp"
 #include "vulkan/renderpass.hpp"
 #include <cstdint>
@@ -54,7 +55,7 @@ namespace slrd {
     struct VKPipelineState {
         PipelineStateHash hash {};
 
-        std::shared_ptr<VKShader> shader {};
+        Ref<IShader> shader {};
 
         VkPipelineMultisampleStateCreateInfo msInfo {};
         VkPipelineDepthStencilStateCreateInfo dpsInfo {};
@@ -77,6 +78,8 @@ namespace slrd {
 
         /* Calculate combined hash for the RenderPass */
         PipelineStateHash hashForRenderPass (const VKRenderPass *rp) const;
+
+        VKShader *getShader () const noexcept;
     };
 
     /* This class is responsible for managing the actual pipelines created
@@ -88,8 +91,8 @@ namespace slrd {
         std::mutex m_pipelineMtx;
         std::mutex m_pipelineLayoutMtx;
 
-        std::unordered_map<PipelineStateHash,
-            VkPipeline> m_stateRpToPipeline;
+        std::unordered_map<PipelineStateHash, VkPipeline>
+            m_stateRpToPipeline;
 
         /* Stores the PipelineLayout itself along with the reference counting */
         std::unordered_map<PipelineLayoutInfoHash,

@@ -47,7 +47,7 @@ namespace slrd {
         std::span<const UniformUpdate> data;
     };
 
-    class IUniformSet {
+    class IUniformSet : public IObject {
     public:
         virtual ~IUniformSet () = default;
 

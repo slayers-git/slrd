@@ -8,6 +8,7 @@
 #include "swapchain.hpp"
 #include "error.hpp"
 #include "vulkan/buffer.hpp"
+#include "vulkan/commandbuffer.hpp"
 #include "vulkan/commandqueue.hpp"
 #include "vulkan/fence.hpp"
 #include "vulkan/pipeline.hpp"
@@ -236,43 +237,43 @@ namespace slrd {
         return 0;
     }
 
-    std::shared_ptr<ITexture> VKDevice::createTexture (const TextureInfo& info) {
-        return createVKTexture (shared_from_this (), info);
+    Ref<ITexture> VKDevice::createTexture (const TextureInfo& info) {
+        return Ref<ITexture>::adopt (createVKTexture (this, info));
     }
 
-    std::shared_ptr<ISwapchain> VKDevice::createSwapchain (const SwapchainInfo& info) {
-        return createVKSwapchain (shared_from_this (), info);
+    Ref<ISwapchain> VKDevice::createSwapchain (const SwapchainInfo& info) {
+        return Ref<ISwapchain>::adopt (createVKSwapchain (this, info));
     }
 
-    std::shared_ptr<IShader> VKDevice::createShader (const ShaderInfo& info) {
-        return createVKShader (shared_from_this (), info);
+    Ref<IShader> VKDevice::createShader (const ShaderInfo& info) {
+        return Ref<IShader>::adopt (createVKShader (this, info));
     }
 
-    std::shared_ptr<IPipeline> VKDevice::createGraphicsPipeline (const GraphicsPipelineInfo& info) {
-        return createVKGraphicsPipeline (shared_from_this (), info);
+    Ref<IPipeline> VKDevice::createGraphicsPipeline (const GraphicsPipelineInfo& info) {
+        return Ref<IPipeline>::adopt (createVKGraphicsPipeline (this, info));
     }
-    std::shared_ptr<IPipeline> VKDevice::createComputePipeline (const ComputePipelineInfo& info) {
-        return createVKComputePipeline (shared_from_this (), info);
-    }
-
-    std::shared_ptr<IBuffer> VKDevice::createBuffer (const BufferInfo& info) {
-        return createVKBuffer (shared_from_this (), info);
+    Ref<IPipeline> VKDevice::createComputePipeline (const ComputePipelineInfo& info) {
+        return Ref<IPipeline>::adopt (createVKComputePipeline (this, info));
     }
 
-    std::shared_ptr<IFence> VKDevice::createFence (bool signalled) {
-        return createVKFence (shared_from_this (), signalled);
+    Ref<IBuffer> VKDevice::createBuffer (const BufferInfo& info) {
+        return Ref<IBuffer>::adopt (createVKBuffer (this, info));
     }
 
-    std::shared_ptr<ICommandQueue> VKDevice::createCommandQueue (const CommandQueueInfo& info) {
-        return createVKCommandQueue (shared_from_this (), info);
+    Ref<IFence> VKDevice::createFence (bool signalled) {
+        return Ref<IFence>::adopt (createVKFence (this, signalled));
     }
 
-    std::shared_ptr<IRenderPass> VKDevice::createRenderPass (const RenderPassInfo& info) {
-        return createVKRenderPass (shared_from_this (), info);
+    Ref<ICommandQueue> VKDevice::createCommandQueue (const CommandQueueInfo& info) {
+        return Ref<ICommandQueue>::adopt (createVKCommandQueue (this, info));
     }
 
-    std::shared_ptr<ISampler> VKDevice::createSampler (const SamplerInfo& info) {
-        return createVKSampler (shared_from_this (), info);
+    Ref<IRenderPass> VKDevice::createRenderPass (const RenderPassInfo& info) {
+        return Ref<IRenderPass>::adopt (createVKRenderPass (this, info));
+    }
+
+    Ref<ISampler> VKDevice::createSampler (const SamplerInfo& info) {
+        return Ref<ISampler>::adopt (createVKSampler (this, info));
     }
 
     void VKDevice::waitIdle () {

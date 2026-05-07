@@ -3,6 +3,8 @@
 #ifndef __SLRD_SHADER_HPP__
 #define __SLRD_SHADER_HPP__
 
+#include "object.hpp"
+
 #include "format.hpp"
 #include "pipeline.hpp"
 #include <memory>
@@ -163,7 +165,7 @@ namespace slrd {
         std::span<const ShaderBytecode> bytecodes;
     };
 
-    class IShader {
+    class IShader : public IObject {
     protected:
         ShaderType m_shaderType;
 
@@ -177,7 +179,9 @@ namespace slrd {
         /* Get shader reflection data */
         virtual const ShaderReflection& getShaderReflection () const = 0;
 
-        virtual std::shared_ptr<IUniformSet> allocateUniformSet (uint32_t set) = 0;
+        /**
+         * Allocate a UniformSet that is compatible with this shader */
+        virtual Ref<IUniformSet> allocateUniformSet (uint32_t set) = 0;
     };
 };
 

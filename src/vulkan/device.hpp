@@ -15,6 +15,8 @@
 
 #include <slrd/config.hpp>
 
+#include "../refcnt.hpp"
+
 namespace slrd {
     struct QueueIndices {
         /* We hope that present and graphics queue are the same, which is
@@ -28,8 +30,17 @@ namespace slrd {
     };
 
     class VKShader;
+    class VKCommandQueue;
+    class VKCommandBuffer;
+    class VKUniformSet;
+    class VKFramebuffer;
+    class VKPipeline;
+    class VKBuffer;
+    class VKSampler;
 
-    class VKDevice : public IDevice, public std::enable_shared_from_this<VKDevice> {
+    /**
+     * Implementation for a reference-counted Vulkan device */
+    class VKDevice : public SimpleRefCounted<IDevice> {
     private:
         VkDevice m_device;
         /* A reference, not created, therefore doesn't need to be deallocated */
@@ -100,26 +111,26 @@ namespace slrd {
 
         int init (const DeviceConfig&);
 
-        std::shared_ptr<ITexture> createTexture (const TextureInfo& info) final override;
-        std::shared_ptr<ISwapchain> createSwapchain (const SwapchainInfo& info) final override;
-        std::shared_ptr<IShader> createShader (const ShaderInfo& info) final override;
+        Ref<ITexture> createTexture (const TextureInfo& info) final override;
+        Ref<ISwapchain> createSwapchain (const SwapchainInfo& info) final override;
+        Ref<IShader> createShader (const ShaderInfo& info) final override;
 
-        std::shared_ptr<IRenderPass> createRenderPass (const RenderPassInfo&) final override;
+        Ref<IRenderPass> createRenderPass (const RenderPassInfo&) final override;
 
-        std::shared_ptr<IPipeline> createGraphicsPipeline (const GraphicsPipelineInfo& info) final override;
-        std::shared_ptr<IPipeline> createComputePipeline (const ComputePipelineInfo& info) final override;
+        Ref<IPipeline> createGraphicsPipeline (const GraphicsPipelineInfo& info) final override;
+        Ref<IPipeline> createComputePipeline (const ComputePipelineInfo& info) final override;
 
-        std::shared_ptr<IBuffer> createBuffer (const BufferInfo& info) final override;
-        std::shared_ptr<IFence> createFence (bool signalled = false) final override;
+        Ref<IBuffer> createBuffer (const BufferInfo& info) final override;
+        Ref<IFence> createFence (bool signalled = false) final override;
 
-        std::shared_ptr<ICommandQueue> createCommandQueue (const CommandQueueInfo& info) final override;
+        Ref<ICommandQueue> createCommandQueue (const CommandQueueInfo& info) final override;
 
-        std::shared_ptr<ISampler> createSampler (const SamplerInfo& info) final override;
+        Ref<ISampler> createSampler (const SamplerInfo& info) final override;
 
         void waitIdle () final override;
     };
 
-    inline std::shared_ptr<VKDevice> createVKDevice (const DeviceConfig& config) {
+    inline IDevice *createVKDevice (const DeviceConfig& config) {
         return makeResource<VKDevice> (config);
     }
 };

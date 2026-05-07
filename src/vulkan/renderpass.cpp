@@ -11,8 +11,7 @@
 #include "debug.hpp"
 
 namespace slrd {
-    int VKRenderPass::init (std::shared_ptr<VKDevice> device,
-            const RenderPassInfo& info) {
+    int VKRenderPass::init (VKDevice *device, const RenderPassInfo& info) {
         SLRD_ASSERT (device != nullptr);
 
         VkRenderPass renderpass;
@@ -156,7 +155,7 @@ namespace slrd {
         /* TODO: FIXME calculate the hash based on the rules of RP compatibility */
         m_hash = reinterpret_cast<RenderPassHash> (m_renderpass);
 
-        m_device = device;
+        setParentDevice (device);
         m_renderpass = renderpass;
 
         m_textureViews.resize (attachments.size ());
@@ -165,7 +164,7 @@ namespace slrd {
         return 0;
     }
     
-    int VKRenderPass::setTextureViews (std::span<std::shared_ptr<ITextureView>> textureViews) {
+    int VKRenderPass::setTextureViews (std::span<ITextureView *> textureViews) {
         SLRD_ASSERT (m_textureViews.size () != m_colorAttachments);
         SLRD_ASSERT (m_renderpass != nullptr);
 
@@ -177,7 +176,7 @@ namespace slrd {
                 continue;
             }
 
-            auto iTextureView = static_cast<VKTextureView *>(textureViews[i].get ());
+            auto iTextureView = static_cast<VKTextureView *>(textureViews[i]);
             if (m_textureViews[i] != iTextureView) {
                 m_textureViews[i] = iTextureView;
                 m_requiresFBRecreation = true;
@@ -234,10 +233,6 @@ namespace slrd {
         return vkframebuffer;
     }
 
-    int VKRenderPass::setTextureView (uint32_t index, const std::shared_ptr<ITextureView>& textureView) {
-        return setTextureView (index, textureView.get ());
-    }
-
     void VKRenderPass::connectToSwapchain () {
         m_swapchainConnections += {
             m_swapchain->swapchainInvalidated.connect (this, 
@@ -245,10 +240,10 @@ namespace slrd {
         };
     }
 
-    int VKRenderPass::setTextureView (uint32_t index, const ITextureView *textureView) {
+    int VKRenderPass::setTextureView (uint32_t index, ITextureView *textureView) {
         SLRD_ASSERT (index < m_textureViews.size ());
 
-        auto *vkView = static_cast<const VKTextureView *>(textureView);
+        auto *vkView = static_cast<VKTextureView *>(textureView);
         SLRD_ASSERT (vkView->getTexture () &&
                 vkView->getTexture ()->isValid ());
 
@@ -289,12 +284,12 @@ namespace slrd {
         return 0;
     }
 
-    int VKRenderPass::setDepthView   (const std::shared_ptr<ITextureView>& textureView) {
+    int VKRenderPass::setDepthView (ITextureView *textureView) {
         SLRD_ASSERT (textureView != nullptr);
         SLRD_COMPLAIN_RETURN (m_depthIndex == UINT32_MAX, -1,
                 "The RenderPass has no depth attachment");
 
-        auto vkTextureView = static_cast<VKTextureView *> (textureView.get ());
+        auto vkTextureView = static_cast<VKTextureView *> (textureView);
         m_textureViews[m_depthIndex] = vkTextureView;
 
         if (m_textureViews[m_depthIndex] != vkTextureView) {
@@ -303,12 +298,12 @@ namespace slrd {
 
         return 0;
     }
-    int VKRenderPass::setStencilView (const std::shared_ptr<ITextureView>& textureView) {
+    int VKRenderPass::setStencilView (ITextureView *textureView) {
         SLRD_ASSERT (m_stencilIndex != UINT32_MAX);
         SLRD_COMPLAIN_RETURN (m_stencilIndex == UINT32_MAX, -1,
                 "The RenderPass has no stencil attachment");
 
-        auto vkTextureView = static_cast<VKTextureView *> (textureView.get ());
+        auto vkTextureView = static_cast<VKTextureView *> (textureView);
         m_textureViews[m_stencilIndex] = vkTextureView;
 
         if (m_textureViews[m_stencilIndex] != vkTextureView) {

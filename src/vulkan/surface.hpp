@@ -3,6 +3,7 @@
 #ifndef __SLRD_VULKAN_SURFACE_HPP__
 #define __SLRD_VULKAN_SURFACE_HPP__
 
+#include "refcnt.hpp"
 #include "slrd/surface.hpp"
 #include "slrd/util/result.hpp"
 #include "vulkan/factory.hpp"
@@ -14,7 +15,9 @@ namespace slrd {
     class VKDevice;
 
     SLRD_RESOURCE_DEFINE_TYPE(VKSurface);
-    class VKSurface : public ISurface, VKResource<VKSurface> {
+    class VKSurface :
+        public SimpleRefCounted<ISurface>,
+        VKResource<VKSurface> {
     private:
         VkSurfaceKHR m_surface;    
         VkSurfaceFormatKHR m_format;
@@ -45,10 +48,10 @@ namespace slrd {
         }
 
         int init (const SurfaceInfo& info);
-        slrd::Result<SurfaceCapabilities, VkResult> queryCapabilities (std::shared_ptr<VKDevice> device) const;
+        slrd::Result<SurfaceCapabilities, VkResult> queryCapabilities (VKDevice *device) const;
     };
 
-    inline std::shared_ptr<VKSurface> createVKSurface (const SurfaceInfo& info) {
+    inline VKSurface *createVKSurface (const SurfaceInfo& info) {
         return makeResource<VKSurface> (info);
     }
 };

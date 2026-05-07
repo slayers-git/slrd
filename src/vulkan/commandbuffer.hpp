@@ -3,6 +3,7 @@
 #ifndef __SLRD_VULKAN_COMMAND_BUFFER_HPP__
 #define __SLRD_VULKAN_COMMAND_BUFFER_HPP__
 
+#include "vulkan/deviceobject.hpp"
 #include "vulkan/resource.hpp"
 #include <slrd/commandbuffer.hpp>
 #include <vector>
@@ -18,11 +19,12 @@ namespace slrd {
     class ITexture;
 
     SLRD_RESOURCE_DEFINE_TYPE(VKCommandBuffer);
-    class VKCommandBuffer : public ICommandBuffer,
+    class VKCommandBuffer :
+            public VKDeviceObject<ICommandBuffer>,
             public VKResource<VKCommandBuffer> {
     private:
         /* Queue to which this command buffer belongs */
-        std::shared_ptr<VKCommandQueue> m_queue;
+        VKCommandQueue *m_queue;
 
         /* The list of swapchains we should signal to that the rendering
          * is finished */
@@ -52,23 +54,22 @@ namespace slrd {
             return m_swapchainsToSignal;
         }
 
-        int init (std::shared_ptr<VKCommandQueue> queue,
-                bool primary);
+        int init (VKCommandQueue *queue, bool primary);
 
         void reset () final override;
 
         void begin () final override;
         void end () final override;
 
-        void beginRenderPass (std::shared_ptr<IRenderPass>&, const RenderPassBeginInfo& info) final override;
+        void beginRenderPass (IRenderPass *, const RenderPassBeginInfo& info) final override;
         void endRenderPass () final override;
 
-        void bindGraphicsPipeline (std::shared_ptr<IPipeline>& pipeline) final override;
-        void bindComputePipeline (std::shared_ptr<IPipeline>& pipeline) final override;
+        void bindGraphicsPipeline (IPipeline *pipeline) final override;
+        void bindComputePipeline (IPipeline *pipeline) final override;
 
-        void bindVertexBuffer (std::shared_ptr<IBuffer>& buffer, uint32_t binding,
+        void bindVertexBuffer (IBuffer *buffer, uint32_t binding,
             DeviceSize offset) final override;
-        void bindIndexBuffer (std::shared_ptr<IBuffer>& buffer,
+        void bindIndexBuffer (IBuffer *buffer,
             IndexType type, DeviceSize offset) final override;
 
         void pushConstant (std::span<const uint8_t> data, slrd::StageFlags stage,

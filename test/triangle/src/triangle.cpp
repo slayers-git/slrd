@@ -88,7 +88,7 @@ struct App {
     slrd::BufferPtr m_triangleBuffer;
 
     slrd::CommandQueuePtr m_commandQueue;
-    slrd::CommandBufferPtr m_commandBuffer;
+    slrd::ICommandBuffer *m_commandBuffer;
 
     bool m_shouldRecreateSwapchain = false;
 
@@ -177,7 +177,7 @@ struct App {
 
             /* Create the swapchain with the surface */
             slrd::SwapchainInfo swpInfo;
-            swpInfo.surface = surface;
+            swpInfo.surface = surface.get ();
             swpInfo.width = 800;
             swpInfo.height = 600;
             swpInfo.requestedImages = 2;
@@ -294,7 +294,7 @@ struct App {
 
             /* Create pipeline */
             slrd::GraphicsPipelineInfo plInfo;
-            plInfo.shader = shader;
+            plInfo.shader = shader.get ();
 
             plInfo.vertexConfig.vertexBindings = Vertex::getBindingDescriptions ();
             plInfo.vertexConfig.attributeDescs = Vertex::getAttributeDescription ();
@@ -415,23 +415,23 @@ struct App {
             slrd::RenderPassColorClearValue cv = { 0, 0, 0, 0 };
             slrd::RenderPassBeginInfo begInfo;
             begInfo.colorClearValues = { &cv, 1 };
-            m_commandBuffer->beginRenderPass (m_renderPass, begInfo);
+            m_commandBuffer->beginRenderPass (m_renderPass.get (), begInfo);
 
-            m_commandBuffer->bindGraphicsPipeline (m_pipeline);
+            m_commandBuffer->bindGraphicsPipeline (m_pipeline.get ());
 
             m_commandBuffer->setViewport ({ 0, 0, (float)w, (float)h});
             m_commandBuffer->setScissor ({ 0, 0, (uint32_t)w, (uint32_t)h });
 
-            m_commandBuffer->bindVertexBuffer (m_triangleBuffer, 0, 0);
+            m_commandBuffer->bindVertexBuffer (m_triangleBuffer.get (), 0, 0);
             m_commandBuffer->draw (3, 1);
 
             m_commandBuffer->endRenderPass ();
         m_commandBuffer->end ();
 
         slrd::SubmitInfo submitInfo;
-        submitInfo.fence = m_fence;
+        submitInfo.fence = m_fence.get ();
 
-        slrd::CommandBufferPtr cmdBuffers[] = { m_commandBuffer };
+        slrd::ICommandBuffer *cmdBuffers[] = { m_commandBuffer };
         submitInfo.commandBuffers = cmdBuffers;
 
         m_commandQueue->submit (submitInfo);

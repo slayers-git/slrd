@@ -7,6 +7,9 @@
 #include <cstdint>
 #include <limits>
 
+#include "object.hpp"
+#include "ref.hpp"
+
 namespace slrd {
     class IDevice;
     class ISwapchain;
@@ -23,21 +26,21 @@ namespace slrd {
     class ISampler;
     class ITextureView;
 
-    using DevicePtr = std::shared_ptr<IDevice>;
+    using DevicePtr = Ref<IDevice>;
 
-    using SwapchainPtr      = std::shared_ptr<ISwapchain>;
-    using RenderPassPtr     = std::shared_ptr<IRenderPass>;
-    using PipelinePtr       = std::shared_ptr<IPipeline>;
-    using ShaderPtr         = std::shared_ptr<IShader>;
-    using TexturePtr        = std::shared_ptr<ITexture>;
-    using TextureViewPtr    = std::shared_ptr<ITextureView>;
-    using BufferPtr         = std::shared_ptr<IBuffer>;
-    using SurfacePtr        = std::shared_ptr<ISurface>;
-    using FencePtr          = std::shared_ptr<IFence>;
-    using CommandQueuePtr   = std::shared_ptr<ICommandQueue>;
-    using CommandBufferPtr  = std::shared_ptr<ICommandBuffer>;
-    using UniformSetPtr     = std::shared_ptr<IUniformSet>;
-    using SamplerPtr        = std::shared_ptr<ISampler>;
+    using SwapchainPtr      = Ref<ISwapchain>;
+    using RenderPassPtr     = Ref<IRenderPass>;
+    using PipelinePtr       = Ref<IPipeline>;
+    using ShaderPtr         = Ref<IShader>;
+    using TexturePtr        = Ref<ITexture>;
+    using TextureViewPtr    = Ref<ITextureView>;
+    using BufferPtr         = Ref<IBuffer>;
+    using SurfacePtr        = Ref<ISurface>;
+    using FencePtr          = Ref<IFence>;
+    using CommandQueuePtr   = Ref<ICommandQueue>;
+    using CommandBufferPtr  = Ref<ICommandBuffer>;
+    using UniformSetPtr     = Ref<IUniformSet>;
+    using SamplerPtr        = Ref<ISampler>;
 
     using DeviceSize = uint64_t;
     constexpr DeviceSize WHOLE_DEVICE_SIZE = std::numeric_limits<uint64_t>::max ();

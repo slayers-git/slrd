@@ -20,10 +20,10 @@ namespace slrd {
     class VKPipelineLayout;
 
     SLRD_RESOURCE_DEFINE_TYPE (VKShader);
-    class VKShader : public IShader,
+    class VKShader :
+            public VKDeviceObject<IShader>,
             public VKResource<VKShader> {
     private:
-        std::shared_ptr<VKDevice> m_device = nullptr;
         std::vector<VkPipelineShaderStageCreateInfo> m_stages;
         
         ShaderReflection m_reflection;
@@ -57,19 +57,18 @@ namespace slrd {
             return m_stages;
         }
 
-        int init (std::shared_ptr<VKDevice> device, const ShaderInfo& config);
+        int init (VKDevice *device, const ShaderInfo& config);
 
         /* Get pipeline layout for the shader */
         VKPipelineLayout *getOrCreatePipelineLayout ();
         VKPipelineLayout *grabOrCreatePipelineLayout ();
 
-        std::shared_ptr<IUniformSet> allocateUniformSet (uint32_t set) final override;
+        Ref<IUniformSet> allocateUniformSet (uint32_t set) final override;
 
         const ShaderReflection& getShaderReflection () const final override;
     };
 
-    inline std::shared_ptr<VKShader> createVKShader (std::shared_ptr<VKDevice> device,
-            const ShaderInfo& info) {
+    inline VKShader *createVKShader (VKDevice *device, const ShaderInfo& info) {
         return makeResource<VKShader> (device, info);
     }
 };

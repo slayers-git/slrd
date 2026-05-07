@@ -3,7 +3,10 @@
 #ifndef __SLRD_RENDERPASS_HPP__
 #define __SLRD_RENDERPASS_HPP__
 
+#include "object.hpp"
+
 #include "format.hpp"
+#include "slrd/ref.hpp"
 #include <optional>
 #include <memory>
 #include <span>
@@ -57,7 +60,7 @@ namespace slrd {
         std::optional<RenderPassAttachment> stencilAttachment = std::nullopt;
     };
 
-    class IRenderPass {
+    class IRenderPass : public IObject {
     public:
         virtual ~IRenderPass () = default;
 
@@ -67,14 +70,13 @@ namespace slrd {
          * you should set the textureView for these attachments to nullptr, then
          * in the rendering code, update them so that framebuffers can be created
          * for them */
-        virtual int setTextureViews (std::span<std::shared_ptr<ITextureView>> textureViews) = 0;
+        virtual int setTextureViews (std::span<ITextureView *> textureViews) = 0;
 
-        virtual int setDepthView   (const std::shared_ptr<ITextureView>& textureView) = 0;
-        virtual int setStencilView (const std::shared_ptr<ITextureView>& textureView) = 0;
+        virtual int setDepthView   (ITextureView *textureView) = 0;
+        virtual int setStencilView (ITextureView *textureView) = 0;
 
         /* Only call if the TextureView you set is part of a swapchain */
-        virtual int setTextureView (uint32_t index, const std::shared_ptr<ITextureView>& textureView) = 0;
-        virtual int setTextureView (uint32_t index, const ITextureView *textureView) = 0;
+        virtual int setTextureView (uint32_t index, ITextureView *textureView) = 0;
     };
 };
 

@@ -90,7 +90,7 @@ namespace slrd {
         return 0;
     }
 
-    std::shared_ptr<VKUniformSet> VKPipelineLayout::allocateUniformSet (uint32_t set) {
+    VKUniformSet *VKPipelineLayout::allocateUniformSet (uint32_t set) {
         return makeResource<VKUniformSet> (this, set);
     }
 

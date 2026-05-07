@@ -22,7 +22,7 @@ namespace slrd {
         return static_cast<VkSamplerAddressMode> (mode);
     }
 
-    int VKSampler::init (std::shared_ptr<VKDevice> device,
+    int VKSampler::init (VKDevice *device,
             const SamplerInfo& info) {
         SLRD_ASSERT (device != nullptr);
         
@@ -44,7 +44,7 @@ namespace slrd {
         
         VK_WRAP_RETURN (vkCreateSampler (device->getVkDevice (), &smpInfo, nullptr, &vksampler), -1);
 
-        m_device = device;
+        setParentDevice (device);
         m_sampler = vksampler;
 
         return 0;

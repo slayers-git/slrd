@@ -3,6 +3,7 @@
 #ifndef __SLRD_SAMPLER_HPP__
 #define __SLRD_SAMPLER_HPP__
 
+#include "object.hpp"
 #include "format.hpp"
 
 namespace slrd {
@@ -32,7 +33,7 @@ namespace slrd {
         float maxLod = 1.f;
     };
 
-    class ISampler {
+    class ISampler : public IObject {
     public:
         virtual ~ISampler () = default;
     };

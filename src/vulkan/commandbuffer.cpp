@@ -108,8 +108,7 @@ namespace slrd {
         }
     }
 
-    int VKCommandBuffer::init (std::shared_ptr<VKCommandQueue> queue,
-            bool primary) {
+    int VKCommandBuffer::init (VKCommandQueue *queue, bool primary) {
         SLRD_ASSERT (queue != nullptr);
 
         VkCommandBuffer vkbuffer;
@@ -150,12 +149,12 @@ namespace slrd {
         vkEndCommandBuffer (m_buffer);
     }
 
-    void VKCommandBuffer::beginRenderPass (std::shared_ptr<IRenderPass>& renderPass,
+    void VKCommandBuffer::beginRenderPass (IRenderPass *renderPass,
             const RenderPassBeginInfo& info) {
         SLRD_ASSERT (renderPass != nullptr);
         SLRD_ASSERT (m_renderpass == VK_NULL_HANDLE);
 
-        auto iRenderPass = static_cast<VKRenderPass *>(renderPass.get ());
+        auto iRenderPass = static_cast<VKRenderPass *>(renderPass);
         VkRenderPass vkrenderPass = iRenderPass->getRenderPass ();
 
         SLRD_DEBUG_CRIT_IF (
@@ -213,40 +212,41 @@ namespace slrd {
     }
 
 
-    void VKCommandBuffer::bindGraphicsPipeline (std::shared_ptr<IPipeline>& pipeline) {
+    void VKCommandBuffer::bindGraphicsPipeline (IPipeline *pipeline) {
         SLRD_ASSERT (pipeline != nullptr);
 
-        auto *ipipeline = static_cast<VKPipeline *> (pipeline.get ());
+        auto *ipipeline = static_cast<VKPipeline *> (pipeline);
         VkPipeline vkpipeline = m_queue->getDevice ()->
             getPipelineManager ()->getOrCreatePipeline (ipipeline->getState (),
                 m_renderpass);
         SLRD_DEBUG_CRIT_IF (!vkpipeline, "Failed to create a pipeline for the renderpass!");
 
         vkCmdBindPipeline (m_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkpipeline);
-        m_pipeline = static_cast<VKPipeline *>(pipeline.get ());
+        m_pipeline = ipipeline;
     }
 
-    void VKCommandBuffer::bindComputePipeline (std::shared_ptr<IPipeline>& pipeline) {
+    void VKCommandBuffer::bindComputePipeline (IPipeline *pipeline) {
         SLRD_ASSERT (pipeline != nullptr);
 
-        VkPipeline vkpipeline = static_cast<VKPipeline *> (pipeline.get ())->getPipeline ();
+        VkPipeline vkpipeline = static_cast<VKPipeline *> (pipeline)->getPipeline ();
         vkCmdBindPipeline (m_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkpipeline);
 
-        m_pipeline = static_cast<VKPipeline *>(pipeline.get ());
+        m_pipeline = static_cast<VKPipeline *>(pipeline);
     }
 
-    void VKCommandBuffer::bindVertexBuffer (std::shared_ptr<IBuffer>& buffer, uint32_t binding,
+    void VKCommandBuffer::bindVertexBuffer (IBuffer *buffer, uint32_t binding,
         DeviceSize offset) {
         SLRD_ASSERT (buffer != nullptr);
 
-        VkBuffer vkbuffer = std::static_pointer_cast<VKBuffer> (buffer)->getBuffer ();
+        VkBuffer vkbuffer = static_cast<VKBuffer *> (buffer)->getBuffer ();
         vkCmdBindVertexBuffers (m_buffer, 0, 1, &vkbuffer, &offset);
     }
-    void VKCommandBuffer::bindIndexBuffer (std::shared_ptr<IBuffer>& buffer,
+
+    void VKCommandBuffer::bindIndexBuffer (IBuffer *buffer,
             IndexType type, DeviceSize offset) {
         SLRD_ASSERT (buffer != nullptr);
 
-        VkBuffer vkbuffer = std::static_pointer_cast<VKBuffer> (buffer)->getBuffer ();
+        VkBuffer vkbuffer = static_cast<VKBuffer *> (buffer)->getBuffer ();
         vkCmdBindIndexBuffer (m_buffer, vkbuffer, offset, getVkIndexType (type));
     }
 

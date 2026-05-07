@@ -3,6 +3,8 @@
 #ifndef __SLRD_COMMAND_BUFFER_HPP__
 #define __SLRD_COMMAND_BUFFER_HPP__
 
+#include "object.hpp"
+
 #include "format.hpp"
 #include "texture.hpp"
 #include "types.hpp"
@@ -104,7 +106,7 @@ namespace slrd {
         RenderPassDepthStencilClearValue depthStencilClearValue {};
     };
 
-    class ICommandBuffer {
+    class ICommandBuffer : public IObject {
     public:
         virtual ~ICommandBuffer () = default;
 
@@ -113,18 +115,18 @@ namespace slrd {
         virtual void begin () = 0;
         virtual void end ()   = 0;
 
-        virtual void beginRenderPass (std::shared_ptr<IRenderPass>& renderPass, const RenderPassBeginInfo&) = 0;
+        virtual void beginRenderPass (IRenderPass *renderPass, const RenderPassBeginInfo&) = 0;
         virtual void endRenderPass () = 0;
 
         virtual void pushConstant (std::span<const uint8_t> data, slrd::StageFlags stage,
                 uint32_t offset = 0) = 0;
 
-        virtual void bindGraphicsPipeline (std::shared_ptr<IPipeline>& pipeline) = 0;
-        virtual void bindComputePipeline (std::shared_ptr<IPipeline>& pipeline) = 0;
+        virtual void bindGraphicsPipeline (IPipeline *pipeline) = 0;
+        virtual void bindComputePipeline (IPipeline *pipeline) = 0;
 
-        virtual void bindVertexBuffer (std::shared_ptr<IBuffer>& buffer, uint32_t binding,
+        virtual void bindVertexBuffer (IBuffer *buffer, uint32_t binding,
                 uint64_t offset = 0) = 0;
-        virtual void bindIndexBuffer (std::shared_ptr<IBuffer>& buffer,
+        virtual void bindIndexBuffer (IBuffer *buffer,
                 IndexType type = INDEX_TYPE_UINT16, DeviceSize offset = 0) = 0;
 
         virtual void setViewport (const Viewport& viewport) = 0;

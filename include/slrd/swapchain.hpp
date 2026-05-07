@@ -11,7 +11,7 @@
 namespace slrd {
     struct SwapchainInfo {
         uint32_t requestedImages = 2;
-        std::shared_ptr<ISurface> surface;
+        ISurface *surface;
 
         bool requireVSync = true;
 
@@ -30,14 +30,14 @@ namespace slrd {
         SWAPCHAIN_RESULT_OTHER = -2
     };
 
-    class ISwapchain {
+    class ISwapchain : public IObject {
     public:
         virtual ~ISwapchain () = default;
 
         virtual int acquireNextImage (uint32_t *next) = 0;
-        virtual std::shared_ptr<ITextureView>& getTextureView (uint32_t id) = 0;
+        virtual ITextureView *getTextureView (uint32_t id) = 0;
 
-        virtual std::shared_ptr<ITexture>& getTexture (uint32_t id) = 0;
+        virtual ITexture *getTexture (uint32_t id) = 0;
 
         virtual SwapchainResult present (const PresentInfo& info) = 0;
         /* recreate the swapchain */

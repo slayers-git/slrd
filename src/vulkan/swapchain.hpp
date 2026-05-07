@@ -3,6 +3,8 @@
 #ifndef __SLRD_VULKAN_SWAPCHAIN_HPP__
 #define __SLRD_VULKAN_SWAPCHAIN_HPP__
 
+#include "deviceobject.hpp"
+
 #include "slrd/types.hpp"
 #include "surface.hpp"
 #include "slrd/swapchain.hpp"
@@ -28,8 +30,8 @@ namespace slrd {
     };
 
     SLRD_RESOURCE_DEFINE_TYPE(VKSwapchain);
-    class VKSwapchain : public ISwapchain, 
-            public std::enable_shared_from_this<VKSwapchain>,
+    class VKSwapchain :
+            public VKDeviceObject<ISwapchain>,
             public VKResource<VKSwapchain> {
     public:
         /* How many images can we request and have in one swapchain */
@@ -40,8 +42,7 @@ namespace slrd {
         rocket::thread_safe_signal<void()> swapchainInvalidated;
 
     private:
-        std::shared_ptr<VKDevice> m_device;
-        std::shared_ptr<VKSurface> m_surface;
+        Ref<VKSurface> m_surface;
 
         SwapchainInfo m_info;
 
@@ -68,8 +69,8 @@ namespace slrd {
          * be recycled */
         std::vector<VkFence>     m_freeFences;
 
-        std::vector<std::shared_ptr<ITexture>> m_textures;
-        std::vector<std::shared_ptr<ITextureView>> m_textureViews;
+        std::vector<Ref<VKTexture>> m_textures;
+        std::vector<Ref<ITextureView>> m_textureViews;
 
         /* Fetch a free semaphore */
         VkSemaphore getFreeSemaphore ();
@@ -99,8 +100,8 @@ namespace slrd {
         }
 
         int acquireNextImage (uint32_t *next) final;
-        std::shared_ptr<ITextureView>& getTextureView (uint32_t id) final;
-        std::shared_ptr<ITexture>& getTexture (uint32_t id) final;
+        ITextureView *getTextureView (uint32_t id) final;
+        ITexture *getTexture (uint32_t id) final;
 
         SwapchainResult present (const PresentInfo& info) final;
         int resize (uint32_t width, uint32_t height) final;
@@ -111,7 +112,7 @@ namespace slrd {
         void free ();
 
         /* Initialize the swapchain */
-        int init (std::shared_ptr<VKDevice> device, const SwapchainInfo& info);
+        int init (VKDevice *device, const SwapchainInfo& info);
 
         /* Create the swapchain (for both recreation and initialization) */
         VkSwapchainKHR create (VkSwapchainKHR old, uint32_t w, uint32_t h);
@@ -119,8 +120,7 @@ namespace slrd {
         ~VKSwapchain ();
     };
 
-    inline std::shared_ptr<VKSwapchain> createVKSwapchain (std::shared_ptr<VKDevice> device,
-            const SwapchainInfo& info) {
+    inline VKSwapchain *createVKSwapchain (VKDevice *device, const SwapchainInfo& info) {
         return makeResource<VKSwapchain>(device, info);
     }
 };

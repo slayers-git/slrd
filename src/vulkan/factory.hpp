@@ -3,11 +3,13 @@
 #ifndef __SLRD_VULKAN_FACTORY_HPP__
 #define __SLRD_VULKAN_FACTORY_HPP__
 
-#include <memory>
+#include <slrd/ref.hpp>
+#include <utility>
+
 namespace slrd {
     template<typename T, typename... Args>
-    std::shared_ptr<T> makeResource (Args&&... args) {
-        std::shared_ptr<T> x = std::make_shared<T>();
+    T *makeResource (Args&&... args) {
+        T *x = new T;
         auto res = x->init (std::forward<Args>(args)...);
 
         return !res ? x : nullptr;

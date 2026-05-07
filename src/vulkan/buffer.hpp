@@ -3,6 +3,7 @@
 #ifndef __SLRD_VULKAN_BUFFER_HPP__
 #define __SLRD_VULKAN_BUFFER_HPP__
 
+#include "deviceobject.hpp"
 #include "slrd/format.hpp"
 #include "vulkan/device.hpp"
 #include "vulkan/factory.hpp"
@@ -46,10 +47,10 @@ namespace slrd {
     }
 
     SLRD_RESOURCE_DEFINE_TYPE(VKBuffer);
-    class VKBuffer : public IBuffer,
+    class VKBuffer :
+            public VKDeviceObject<IBuffer>,
             public VKResource<VKBuffer> {
     private:
-        std::shared_ptr<VKDevice> m_device = nullptr;
         VkBuffer m_buffer = VK_NULL_HANDLE;
         VmaAllocation m_allocation = VK_NULL_HANDLE;
 
@@ -62,7 +63,7 @@ namespace slrd {
         VKBuffer () = default;
         ~VKBuffer ();
 
-        int init (std::shared_ptr<VKDevice> device, const BufferInfo& info);
+        int init (VKDevice *device, const BufferInfo& info);
 
         [[nodiscard]] VkBuffer getBuffer () const {
             return m_buffer;
@@ -75,7 +76,7 @@ namespace slrd {
         int updateBuffer (const void *data, DeviceSize size) final override;
     };
 
-    inline std::shared_ptr<VKBuffer> createVKBuffer (std::shared_ptr<VKDevice> device, const BufferInfo& info) {
+    inline VKBuffer *createVKBuffer (VKDevice *device, const BufferInfo& info) {
         return makeResource<VKBuffer> (device, info);
     }
 };

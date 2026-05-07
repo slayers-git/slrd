@@ -7,7 +7,7 @@
 #include <vulkan/vulkan_core.h>
 
 namespace slrd {
-    int VKFence::init (std::shared_ptr<VKDevice> device, bool signalled) {
+    int VKFence::init (VKDevice *device, bool signalled) {
         VkFence fence;
 
         VkFenceCreateInfo fInfo {};
@@ -17,7 +17,7 @@ namespace slrd {
                 -1,
                 "Failed to create VkFence");
 
-        m_device = device;
+        setParentDevice (device);
         m_fence = fence;
 
         return 0;

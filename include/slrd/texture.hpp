@@ -3,6 +3,9 @@
 #ifndef __SLRD_TEXTURE_HPP__
 #define __SLRD_TEXTURE_HPP__
 
+#include "object.hpp"
+#include "ref.hpp"
+
 #include "format.hpp"
 #include <cstdint>
 #include <memory>
@@ -71,14 +74,14 @@ namespace slrd {
     class ITexture;
 
     /* A part of texture */
-    class ITextureView {
+    class ITextureView : public IObject {
     public:
         const TextureViewInfo& getTextureViewInfo () const;
-        const std::shared_ptr<ITexture>& getTexture ();
+        const ITexture *getTexture ();
     };
 
     /* Texture (array of textures) in memory */
-    class ITexture {
+    class ITexture : public IObject {
     public:
         virtual ~ITexture () = default;
 
@@ -86,7 +89,7 @@ namespace slrd {
         virtual int getDimensions (uint32_t& w, uint32_t& h, uint32_t& depth) = 0;
 
         /* Create a custom texture view */
-        virtual std::shared_ptr<ITextureView> createTextureView (const TextureViewInfo& view) = 0;
+        virtual Ref<ITextureView> createTextureView (const TextureViewInfo& view) = 0;
     };
 };
 

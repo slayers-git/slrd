@@ -3,7 +3,6 @@
 #ifndef __SLRD_VULKAN_PIPELINE_HPP__
 #define __SLRD_VULKAN_PIPELINE_HPP__
 
-#include <memory>
 #include "api.hpp"
 #include "debug.hpp"
 #include "vulkan/factory.hpp"
@@ -170,9 +169,10 @@ namespace slrd {
 
 
     SLRD_RESOURCE_DEFINE_TYPE(VKPipeline);
-    class VKPipeline : public IPipeline, public VKResource<VKPipeline> {
+    class VKPipeline :
+            public VKDeviceObject<IPipeline>,
+            public VKResource<VKPipeline> {
     private:
-        std::shared_ptr<VKDevice> m_device = nullptr;
         VkPipelineBindPoint m_bindPoint;
         /* If the pipeline is compute, then this variable will be used, since 
          * we don't have to provide a renderpass. Otherwise the pipeline object
@@ -201,20 +201,20 @@ namespace slrd {
             return m_bindPoint;
         }
 
-        int init (std::shared_ptr<VKDevice> device, const GraphicsPipelineInfo& info);
-        int init (std::shared_ptr<VKDevice> device, const ComputePipelineInfo& info);
+        int init (VKDevice *device, const GraphicsPipelineInfo& info);
+        int init (VKDevice *device, const ComputePipelineInfo& info);
 
         VKPipelineLayout *getPipelineLayout ();
 
-        std::shared_ptr<IUniformSet> allocateUniformSet (uint32_t set) final;
+        Ref<IUniformSet> allocateUniformSet (uint32_t set) final;
     };
 
-    inline std::shared_ptr<VKPipeline> createVKGraphicsPipeline (std::shared_ptr<VKDevice> device,
+    inline VKPipeline *createVKGraphicsPipeline (VKDevice *device,
             const GraphicsPipelineInfo& info) {
         return makeResource<VKPipeline> (device, info);
     }
     /* I have no idea why I made them separate functions */
-    inline std::shared_ptr<VKPipeline> createVKComputePipeline (std::shared_ptr<VKDevice> device,
+    inline VKPipeline *createVKComputePipeline (VKDevice *device,
             const ComputePipelineInfo& info) {
         return makeResource<VKPipeline> (device, info);
     }
