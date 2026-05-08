@@ -244,6 +244,9 @@ namespace slrd {
             m_textureViews[i] = std::move (image_view);
         }
 
+        if (!m_info.name.empty ())
+            setResourceName (m_info.name, VK_OBJECT_TYPE_SWAPCHAIN_KHR, sc);
+
         return sc;
 
     failed:
@@ -373,6 +376,10 @@ namespace slrd {
 
     slrd::Format VKSwapchain::getFormat () const {
         return getSLRDFormat (m_format);
+    }
+
+    std::string_view VKSwapchain::getName () const noexcept {
+        return getResourceName ();
     }
 
     VKSwapchain::~VKSwapchain () {

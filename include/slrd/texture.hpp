@@ -59,6 +59,9 @@ namespace slrd {
         TextureTilingMode tiling = TEXTURE_TILING_OPTIMAL;
 
         Format format = slrd::FORMAT_R8_UINT;
+
+        /* Debug name of the resource */
+        std::string_view name = "";
     };
 
     struct TextureViewInfo {
@@ -69,19 +72,22 @@ namespace slrd {
 
         uint32_t arrayLayers = 1;
         uint32_t mipLevels   = 1;
+
+        /* Debug name of the resource */
+        std::string_view name = "";
     };
 
     class ITexture;
 
     /* A part of texture */
-    class ITextureView : public IObject {
+    SLRD_DEFINE_NAMED_OBJECT (ITextureView) {
     public:
         const TextureViewInfo& getTextureViewInfo () const;
         const ITexture *getTexture ();
     };
 
     /* Texture (array of textures) in memory */
-    class ITexture : public IObject {
+    SLRD_DEFINE_NAMED_OBJECT (ITexture) {
     public:
         virtual ~ITexture () = default;
 

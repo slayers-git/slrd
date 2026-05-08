@@ -19,7 +19,7 @@ namespace slrd {
     class VKDevice;
     class VKPipelineLayout;
 
-    SLRD_RESOURCE_DEFINE_TYPE (VKShader);
+    SLRD_RESOURCE_DEFINE_TYPE (VKShader, VK_OBJECT_TYPE_SHADER_MODULE);
     class VKShader :
             public VKDeviceObject<IShader>,
             public VKResource<VKShader> {

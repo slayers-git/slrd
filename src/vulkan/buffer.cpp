@@ -63,6 +63,9 @@ namespace slrd {
         setParentDevice (device);
         m_coherent = info.coherent;
 
+        if (!info.name.empty ())
+            (void)setResourceName (info.name, VK_OBJECT_TYPE_BUFFER, m_buffer);
+
         return 0;
     }
 
@@ -108,6 +111,10 @@ namespace slrd {
             return -1;
 
         return 0;
+    }
+
+    std::string_view VKBuffer::getName () const noexcept {
+        return getResourceName ();
     }
 
     VKBuffer::~VKBuffer () {

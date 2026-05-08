@@ -47,8 +47,16 @@ namespace slrd {
         setParentDevice (device);
         m_sampler = vksampler;
 
+        if (!info.name.empty ())
+            setResourceName (info.name, VK_OBJECT_TYPE_SAMPLER, m_sampler);
+
         return 0;
     }
+
+    std::string_view VKSampler::getName () const noexcept {
+        return getResourceName ();
+    }
+
 
     VKSampler::~VKSampler () {
         if (m_sampler) {

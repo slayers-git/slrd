@@ -4,6 +4,7 @@
 #define __SLRD_COMMAND_BUFFER_HPP__
 
 #include "object.hpp"
+#include "resource.hpp"
 
 #include "format.hpp"
 #include "texture.hpp"

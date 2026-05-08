@@ -209,10 +209,16 @@ namespace slrd {
 			StencilOperation stencilFrontOperation = STENCIL_OPERATION_KEEP;
 			StencilOperation stencilBackOperation = STENCIL_OPERATION_KEEP;
 		} depthStencilConfig;
+
+        /* Debug name of the resource */
+        std::string_view name = "";
 	};
 
     struct ComputePipelineInfo {
         IShader *shader;
+
+        /* Debug name of the resource */
+        std::string_view name = "";
     };
 
     struct BindBufferInfo {

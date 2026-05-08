@@ -19,7 +19,7 @@ namespace slrd {
 
     class ITexture;
 
-    SLRD_RESOURCE_DEFINE_TYPE(VKCommandBuffer);
+    SLRD_RESOURCE_DEFINE_TYPE(VKCommandBuffer, VK_OBJECT_TYPE_COMMAND_BUFFER);
     class VKCommandBuffer :
             public VKDeviceObject<ICommandBuffer>,
             public VKResource<VKCommandBuffer> {
@@ -113,6 +113,9 @@ namespace slrd {
 
 
 
+        VkCommandBuffer handle () const {
+            return m_buffer;
+        }
 
     private:
         void transition (VkImageLayout oldLayout, VkImageLayout newLayout);

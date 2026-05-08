@@ -3,3 +3,4 @@
 #cmakedefine SLRD_VERSION "@SLRD_VERSION@"
 
 #cmakedefine01 SLRD_DEBUG
+#cmakedefine01 SLRD_REQUIRE_DEBUG_NAMES

@@ -14,10 +14,10 @@
 namespace slrd {
     class VKDevice;
 
-    SLRD_RESOURCE_DEFINE_TYPE(VKSurface);
+    SLRD_RESOURCE_DEFINE_TYPE(VKSurface, VK_OBJECT_TYPE_SURFACE_KHR);
     class VKSurface :
         public SimpleRefCounted<ISurface>,
-        VKResource<VKSurface> {
+        public VKResource<VKSurface> {
     private:
         VkSurfaceKHR m_surface;    
         VkSurfaceFormatKHR m_format;

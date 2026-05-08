@@ -58,6 +58,9 @@ namespace slrd {
         setParentDevice (device);
         m_valid = true;
 
+        if (!info.name.empty ())
+            setResourceName (info.name, VK_OBJECT_TYPE_IMAGE, m_image);
+
         return 0;
     }
 
@@ -118,6 +121,10 @@ namespace slrd {
         m_valid = false;
     }
 
+    std::string_view VKTexture::getName () const noexcept {
+        return getResourceName ();
+    }
+
 
 
     int VKTextureView::init (VKTexture *texture, const TextureViewInfo& viewData) {
@@ -151,7 +158,14 @@ namespace slrd {
         m_device  = texture->m_device;
         m_view    = imageView;
 
+        if (!viewData.name.empty ())
+            setResourceName (viewData.name, VK_OBJECT_TYPE_IMAGE_VIEW, m_view);
+
         return 0;
+    }
+
+    std::string_view VKTextureView::getName () const noexcept {
+        return getResourceName ();
     }
 
     VKTextureView::~VKTextureView () {

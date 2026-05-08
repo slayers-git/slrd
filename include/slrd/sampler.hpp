@@ -31,9 +31,12 @@ namespace slrd {
         float mipLodBias = 0.f;
         float minLod = 0.f;
         float maxLod = 1.f;
+
+        /* Debug name of the resource */
+        std::string_view name = "";
     };
 
-    class ISampler : public IObject {
+    SLRD_DEFINE_NAMED_OBJECT (ISampler) {
     public:
         virtual ~ISampler () = default;
     };

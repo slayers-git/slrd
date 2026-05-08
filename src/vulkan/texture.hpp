@@ -18,10 +18,10 @@ namespace slrd {
     class VKTexture;
     class VKTextureView;
 
-    SLRD_RESOURCE_DEFINE_TYPE(VKTextureView);
+    SLRD_RESOURCE_DEFINE_TYPE(VKTextureView, VK_OBJECT_TYPE_IMAGE_VIEW);
     class VKTextureView :
         public VKDeviceObject<ITextureView>,
-        VKResource<VKTextureView> {
+        public VKNamedResource<VKTextureView> {
     private:
         /* Strong reference, because we need the texture for as long as the
          * view lives */
@@ -65,12 +65,18 @@ namespace slrd {
         }
 
         int init (VKTexture *texture, const TextureViewInfo& viewData);
+
+        VkImageView handle () const {
+            return m_view;
+        }
+
+        std::string_view getName () const noexcept final;
     };
 
-    SLRD_RESOURCE_DEFINE_TYPE(VKTexture);
+    SLRD_RESOURCE_DEFINE_TYPE(VKTexture, VK_OBJECT_TYPE_IMAGE);
     class VKTexture :
             public VKDeviceObject<ITexture>,
-            VKResource<VKTexture> {
+            public VKNamedResource<VKTexture> {
     private:
         VkImage m_image = VK_NULL_HANDLE;
 
@@ -146,6 +152,11 @@ namespace slrd {
         Ref<ITextureView> createTextureView (const TextureViewInfo& view) final;
 
         ~VKTexture ();
+
+        VkImage handle () const {
+            return m_image;
+        }
+        std::string_view getName () const noexcept final;
 
         friend class VKTextureView;
     };

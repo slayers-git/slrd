@@ -5,13 +5,17 @@
 
 #include "vulkan/deviceobject.hpp"
 #include "vulkan/factory.hpp"
+#include "vulkan/resource.hpp"
 #include <slrd/sampler.hpp>
 #include <vulkan/vulkan.h>
 
 namespace slrd {
     class VKDevice;
 
-    class VKSampler : public VKDeviceObject<ISampler> {
+    SLRD_RESOURCE_DEFINE_TYPE (VKSampler, VK_OBJECT_TYPE_SAMPLER);
+    class VKSampler :
+        public VKDeviceObject<ISampler>,
+        public VKNamedResource<VKSampler> {
     private:
         VkSampler m_sampler = VK_NULL_HANDLE;
         
@@ -28,6 +32,12 @@ namespace slrd {
         }
 
         int init (VKDevice *device, const SamplerInfo& info);
+
+        VkSampler handle () const {
+            return m_sampler;
+        }
+
+        std::string_view getName () const noexcept final;
     };
 
     inline VKSampler *createVKSampler (VKDevice *device, const SamplerInfo& info) {

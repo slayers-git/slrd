@@ -237,7 +237,10 @@ struct App {
     float m_delta = 0.f;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_prevTime {};
 
-    slrd::Ref<slrd::ITexture> createTextureFromImage (const std::filesystem::path& path, slrd::Ref<slrd::ITextureView> *texView) {
+    slrd::Ref<slrd::ITexture> createTextureFromImage (
+            const std::filesystem::path& path,
+            slrd::Ref<slrd::ITextureView> *texView,
+            std::string_view name = "") {
         if (!std::filesystem::exists (path)) {
             return nullptr;
         }
@@ -257,6 +260,7 @@ struct App {
         bufInfo.coherent = true;
         bufInfo.properties = slrd::BUFFER_PROPERTY_TRANSFER_SRC;
         bufInfo.size = w * h * 4;
+        bufInfo.name = "staging_buf";
         slrd::Ref<slrd::IBuffer> stagingBuffer = m_device->createBuffer (bufInfo);
         if (!stagingBuffer) {
             std::cout << "Failed to create one time staging buffer\n";
@@ -273,6 +277,7 @@ struct App {
         stagingBuffer->unmap ();
 
         slrd::TextureInfo texInfo;
+        texInfo.name = name;
         texInfo.type = slrd::TEXTURE_TYPE_2D;
         texInfo.width = w;
         texInfo.height = h;
@@ -340,6 +345,8 @@ struct App {
         slrd::TextureViewInfo viewInfo;
         viewInfo.mipLevels = 1;
         viewInfo.arrayLayers = 1;
+        std::string view_name = std::string (name) + "_view";
+        viewInfo.name = view_name;
 
         slrd::Ref<slrd::ITextureView> view = texture->createTextureView (viewInfo);
         if (!view) {
@@ -380,7 +387,9 @@ struct App {
         config.app_version = { 1, 0, 0 }; 
         config.engine_version = { 0, 0, 1 };
         config.instance_extensions = instanceExtensions;
-        config.debug = false;
+
+        config.debug = true;
+        config.debug_flags = slrd::API_DEBUG_FLAG_NAMES;
 
         auto apis = slrd::querySupportedAPIs ();
         if (!(apis & slrd::API_VULKAN)) {
@@ -472,7 +481,11 @@ struct App {
         init ();
     }
 
-    slrd::Ref<slrd::IBuffer> createBufferWithData (slrd::BufferUsageFlags usage, void *data, size_t size) {
+    slrd::Ref<slrd::IBuffer> createBufferWithData (
+            slrd::BufferUsageFlags usage,
+            void *data,
+            size_t size,
+            std::string_view name = "") {
         slrd::Ref<slrd::IBuffer> result, stagingBuffer;
         auto oneTimeBuffer = m_commandQueue->getCommandBuffer (true);
         if (!oneTimeBuffer) {
@@ -486,6 +499,7 @@ struct App {
         stagingInfo.gpu = true;
         stagingInfo.size = size;
         stagingInfo.properties = slrd::BUFFER_PROPERTY_TRANSFER_SRC;
+        stagingInfo.name = "staging_buf";
 
         stagingBuffer = m_device->createBuffer (stagingInfo);
         if (!stagingBuffer) {
@@ -505,6 +519,7 @@ struct App {
         resultInfo.gpu = true;
         resultInfo.size = size;
         resultInfo.properties = slrd::BUFFER_PROPERTY_TRANSFER_DST;
+        resultInfo.name = name;
 
         result = m_device->createBuffer (resultInfo);
         if (!result) {
@@ -542,14 +557,14 @@ struct App {
             bi.size = sizeof (s_vertices);
 
             m_vertexBuffer = createBufferWithData (slrd::BUFFER_USAGE_VERTEX_BUFFER,
-                    (void *)s_vertices, sizeof (s_vertices));
+                    (void *)s_vertices, sizeof (s_vertices), "cube_vert");
             if (!m_vertexBuffer) {
                 std::cerr << "Failed to create buffer\n";
                 exit (1);
             }
 
             m_indexBuffer = createBufferWithData (slrd::BUFFER_USAGE_INDEX_BUFFER,
-                    (void *)s_indices, sizeof (s_indices));
+                    (void *)s_indices, sizeof (s_indices), "cube_idx");
             if (!m_indexBuffer) {
                 std::cerr << "Failed to create buffer\n";
                 exit (1);
@@ -644,7 +659,7 @@ struct App {
             }
         }
 
-        m_texture = createTextureFromImage ("res/test_texture.png", &m_textureView);
+        m_texture = createTextureFromImage ("res/test_texture.png", &m_textureView, "main_tex");
         if (!m_texture) {
             exit (1);
         }
@@ -728,6 +743,7 @@ struct App {
         ti.width = width;
         ti.height = height;
         ti.format = slrd::FORMAT_D24UNORMS8UINT;
+        ti.name = "depth_texture";
 
         m_depthTexture = m_device->createTexture (ti);
         if (!m_depthTexture) {
@@ -739,6 +755,7 @@ struct App {
         viewInfo.mipLevels = 1;
         viewInfo.arrayLayers = 1;
         viewInfo.aspect = slrd::TEXTURE_ASPECT_DEPTH;
+        viewInfo.name = "depth_view";
         m_depthTextureView = m_depthTexture->createTextureView (viewInfo);
     }
 

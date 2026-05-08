@@ -28,6 +28,7 @@ namespace slrd {
         struct VKFunctions {
             __DECLARE_PFN_NAME (vkCreateDebugUtilsMessengerEXT);
             __DECLARE_PFN_NAME (vkDestroyDebugUtilsMessengerEXT);
+            __DECLARE_PFN_NAME (vkSetDebugUtilsObjectNameEXT);
         } pfns;
 #undef __DECLARE_PFN_NAME
     };

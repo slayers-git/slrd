@@ -46,10 +46,10 @@ namespace slrd {
         return vktype;
     }
 
-    SLRD_RESOURCE_DEFINE_TYPE(VKBuffer);
+    SLRD_RESOURCE_DEFINE_TYPE(VKBuffer, VK_OBJECT_TYPE_BUFFER);
     class VKBuffer :
             public VKDeviceObject<IBuffer>,
-            public VKResource<VKBuffer> {
+            public VKNamedResource<VKBuffer> {
     private:
         VkBuffer m_buffer = VK_NULL_HANDLE;
         VmaAllocation m_allocation = VK_NULL_HANDLE;
@@ -74,6 +74,12 @@ namespace slrd {
 
         int setBuffer (const void *data, DeviceSize size) final override;
         int updateBuffer (const void *data, DeviceSize size) final override;
+
+        std::string_view getName () const noexcept final override;
+
+        VkBuffer handle () const {
+            return m_buffer;
+        }
     };
 
     inline VKBuffer *createVKBuffer (VKDevice *device, const BufferInfo& info) {

@@ -69,8 +69,12 @@ namespace slrd {
         std::vector<const char *> requestedInstanceExtensions (
                 config.instance_extensions.begin (), config.instance_extensions.end ());
 
-#if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED
-        requestedInstanceExtensions.push_back (VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#if defined (SLRD_VULKAN_DEBUG_MESSENGER_ENABLED) || defined (SLRD_REQUIRE_DEBUG_NAMING)
+        if (config.debug || config.debug_flags != 0) {
+            requestedInstanceExtensions.push_back (
+                    VK_EXT_DEBUG_UTILS_EXTENSION_NAME
+            );
+        }
 #endif
 
         for (auto& extension : requestedInstanceExtensions) {
@@ -88,7 +92,7 @@ namespace slrd {
 
         std::vector<const char *> requestedInstanceLayers (config.instance_layers.begin (),
                 config.instance_layers.end ());
-        if (config.debug) {
+        if (config.debug || (config.debug_flags & API_DEBUG_FLAG_LAYERS)) {
             requestedInstanceLayers.push_back ("VK_LAYER_KHRONOS_validation");
         }
 
@@ -134,21 +138,37 @@ namespace slrd {
         VK_WRAP_RETURN_LOGERROR (vkCreateInstance (&info, nullptr, &vkapi->instance), -1,
                 "Failed to create VkInstance");
 
+        if (config.debug) {
 #if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED
-        pfns.vkCreateDebugUtilsMessengerEXT = 
-            (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr (instance,
-                    "vkCreateDebugUtilsMessengerEXT");
-        RETURN_LOG_ERROR_IF (!pfns.vkCreateDebugUtilsMessengerEXT,
-                VK_ERROR_EXTENSION_NOT_PRESENT,
-                "failed to get vkCreateDebugUtilsMessengerEXT function");
+            if (config.debug_flags & API_DEBUG_FLAG_LAYERS) {
+                pfns.vkCreateDebugUtilsMessengerEXT = 
+                    (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr (instance,
+                            "vkCreateDebugUtilsMessengerEXT");
+                RETURN_LOG_ERROR_IF (!pfns.vkCreateDebugUtilsMessengerEXT,
+                        VK_ERROR_EXTENSION_NOT_PRESENT,
+                        "failed to get vkCreateDebugUtilsMessengerEXT function");
 
-        pfns.vkDestroyDebugUtilsMessengerEXT = 
-            (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr (instance,
-                    "vkDestroyDebugUtilsMessengerEXT");
-        RETURN_LOG_ERROR_IF (!pfns.vkDestroyDebugUtilsMessengerEXT, 
-                VK_ERROR_EXTENSION_NOT_PRESENT,
-                "failed to get vkDestroyDebugUtilsMessengerEXT function");
+                pfns.vkDestroyDebugUtilsMessengerEXT = 
+                    (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr (instance,
+                            "vkDestroyDebugUtilsMessengerEXT");
+                RETURN_LOG_ERROR_IF (!pfns.vkDestroyDebugUtilsMessengerEXT, 
+                        VK_ERROR_EXTENSION_NOT_PRESENT,
+                        "failed to get vkDestroyDebugUtilsMessengerEXT function");
+            }
 #endif
+
+#if SLRD_REQUIRE_DEBUG_NAMES
+            if (config.debug_flags & API_DEBUG_FLAG_NAMES) {
+                pfns.vkSetDebugUtilsObjectNameEXT = 
+                    (PFN_vkSetDebugUtilsObjectNameEXT) vkGetInstanceProcAddr (instance,
+                            "vkSetDebugUtilsObjectNameEXT");
+                RETURN_LOG_ERROR_IF (!pfns.vkSetDebugUtilsObjectNameEXT, 
+                        VK_ERROR_EXTENSION_NOT_PRESENT,
+                        "failed to get vkSetDebugUtilsObjectNameEXT function");
+            }
+#endif
+        }
+
         return 0;
     }
 

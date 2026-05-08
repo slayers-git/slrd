@@ -58,9 +58,12 @@ namespace slrd {
 
         std::optional<RenderPassAttachment> depthAttachment = std::nullopt;
         std::optional<RenderPassAttachment> stencilAttachment = std::nullopt;
+
+        /* Debug name of the resource */
+        std::string_view name = "";
     };
 
-    class IRenderPass : public IObject {
+    SLRD_DEFINE_NAMED_OBJECT (IRenderPass) {
     public:
         virtual ~IRenderPass () = default;
 

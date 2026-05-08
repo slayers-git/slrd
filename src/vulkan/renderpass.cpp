@@ -158,6 +158,9 @@ namespace slrd {
         setParentDevice (device);
         m_renderpass = renderpass;
 
+        if (!info.name.empty ())
+            setResourceName (info.name, VK_OBJECT_TYPE_RENDER_PASS, m_renderpass);
+
         m_textureViews.resize (attachments.size ());
         m_requiresFBRecreation = true;
 
@@ -352,6 +355,11 @@ namespace slrd {
         clearFramebuffers ();
         m_swapchainRecreated = true;
     }
+
+    std::string_view VKRenderPass::getName () const noexcept {
+        return getResourceName ();
+    }
+
 
     VKRenderPass::~VKRenderPass () {
         if (m_renderpass != VK_NULL_HANDLE)

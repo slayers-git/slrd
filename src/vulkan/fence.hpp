@@ -3,6 +3,8 @@
 #ifndef __SLRD_VULKAN_FENCE_HPP__
 #define __SLRD_VULKAN_FENCE_HPP__
 
+#include "resource.hpp"
+
 #include "slrd/fence.hpp"
 #include "vulkan/deviceobject.hpp"
 #include "vulkan/factory.hpp"
@@ -11,7 +13,10 @@
 namespace slrd {
     class VKDevice;
 
-    class VKFence : public VKDeviceObject<IFence> {
+    SLRD_RESOURCE_DEFINE_TYPE(VKFence, VK_OBJECT_TYPE_FENCE);
+    class VKFence :
+            public VKDeviceObject<IFence>,
+            public VKResource<VKFence> {
     private:
         VkFence m_fence = VK_NULL_HANDLE;
 
@@ -27,6 +32,10 @@ namespace slrd {
 
         int wait (uint64_t timeout) final override;
         void reset () final override;
+
+        VkFence handle () const {
+            return m_fence;
+        }
     };
 
     inline VKFence *createVKFence (VKDevice *device, bool signalled) {

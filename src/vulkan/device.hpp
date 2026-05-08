@@ -40,7 +40,10 @@ namespace slrd {
 
     /**
      * Implementation for a reference-counted Vulkan device */
-    class VKDevice : public SimpleRefCounted<IDevice> {
+    SLRD_RESOURCE_DEFINE_TYPE (VKDevice, VK_OBJECT_TYPE_DEVICE);
+    class VKDevice :
+        public SimpleRefCounted<IDevice>,
+        public VKNamedResource<VKDevice> {
     private:
         VkDevice m_device;
         /* A reference, not created, therefore doesn't need to be deallocated */

@@ -168,7 +168,7 @@ namespace slrd {
     }
 
 
-    SLRD_RESOURCE_DEFINE_TYPE(VKPipeline);
+    SLRD_RESOURCE_DEFINE_TYPE(VKPipeline, VK_OBJECT_TYPE_PIPELINE);
     class VKPipeline :
             public VKDeviceObject<IPipeline>,
             public VKResource<VKPipeline> {
@@ -207,6 +207,10 @@ namespace slrd {
         VKPipelineLayout *getPipelineLayout ();
 
         Ref<IUniformSet> allocateUniformSet (uint32_t set) final;
+
+        VkPipeline handle () const {
+            return m_pipeline;
+        }
     };
 
     inline VKPipeline *createVKGraphicsPipeline (VKDevice *device,

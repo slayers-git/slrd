@@ -35,9 +35,12 @@ namespace slrd {
 
         /* The size of the buffer */
         DeviceSize size = 0;
+
+        /* Debug name of the resource */
+        std::string_view name = "";
     };
 
-    class IBuffer : public IObject {
+    SLRD_DEFINE_NAMED_OBJECT (IBuffer) {
     public:
         virtual ~IBuffer () = default;
 

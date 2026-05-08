@@ -15,7 +15,7 @@ namespace slrd {
     class VKDevice;
     class VKCommandBuffer;
 
-    SLRD_RESOURCE_DEFINE_TYPE(VKCommandQueue);
+    SLRD_RESOURCE_DEFINE_TYPE(VKCommandQueue, VK_OBJECT_TYPE_COMMAND_POOL);
     class VKCommandQueue : 
             public VKDeviceObject<ICommandQueue>,
             public VKResource<VKCommandQueue> {
@@ -58,6 +58,10 @@ namespace slrd {
         int wait () final override;
 
         int submit (const SubmitInfo& info) final override;
+
+        VkQueue handle () const {
+            return m_queue;
+        }
     };
 
     inline VKCommandQueue *createVKCommandQueue (

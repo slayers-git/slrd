@@ -9,6 +9,10 @@ option (SLRD_VULKAN_DEBUG "Enable vulkan debug layers" TRUE)
 option (SLRD_TESTS "Compile tests" FALSE)
 option (SLRD_INSTALL "Install slrd" FALSE)
 
+option (SLRD_REQUIRE_DEBUG_NAMES
+    "Enable debug extensions loading, if required for object naming"
+    ON)
+
 # Bundled libraries
 option (SLRD_USE_VENDOR_VMA "Use bundled VMA" ON)
 option (SLRD_USE_VENDOR_SPIRV_REFLECT "Use bundled SPIRV-Reflect" ON)

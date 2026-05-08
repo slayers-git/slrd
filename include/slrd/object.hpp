@@ -3,6 +3,8 @@
 #ifndef __SLRD_OBJECT_HPP__
 #define __SLRD_OBJECT_HPP__
 
+#include "resource.hpp"
+
 namespace slrd {
     /**
      * An interface for any dynamic object that needs reference counting */
@@ -15,5 +17,8 @@ namespace slrd {
         virtual void release () noexcept = 0;
     };
 };
+
+#define SLRD_DEFINE_NAMED_OBJECT(__Name) \
+    class __Name : public IObject, INamedResource
 
 #endif /* #define __SLRD_OBJECT_HPP__ */

@@ -35,10 +35,10 @@ namespace slrd {
      * amplified cost.
      * This will remain a thing, until this library supports Vulkan 1.3. */
 
-    SLRD_RESOURCE_DEFINE_TYPE(VKRenderPass);
+    SLRD_RESOURCE_DEFINE_TYPE(VKRenderPass, VK_OBJECT_TYPE_RENDER_PASS);
     class VKRenderPass :
         public VKDeviceObject<IRenderPass>,
-        public VKResource<VKRenderPass> {
+        public VKNamedResource<VKRenderPass> {
     private:
         VkRenderPass m_renderpass = VK_NULL_HANDLE;
 
@@ -152,6 +152,12 @@ namespace slrd {
         /* Signal that the swapchain that this renderpass depends on is/being
          * recreated */
         void signalSwapchainRecreation ();
+
+        VkRenderPass handle () const {
+            return m_renderpass;
+        }
+
+        std::string_view getName () const noexcept final;
     };
 
     inline VKRenderPass *createVKRenderPass (VKDevice *device, const RenderPassInfo& info) {

@@ -3,20 +3,16 @@
 #ifndef __SLRD_RESOURCE_HPP__
 #define __SLRD_RESOURCE_HPP__
 
+#include <optional>
 #include <string>
 
 namespace slrd {
-    template<typename T>
-    class Resource {
-    private:
-        std::string m_name;
-        static std::string getDefaultName ();
-
+    class INamedResource {
     public:
-        [[nodiscard]] const std::string& getName () {
-            return m_name;
-        }
-        void setName (std::string_view name);
+        [[nodiscard]]
+        virtual std::string_view getName () const noexcept {
+            return "";
+        };
     };
 };
 

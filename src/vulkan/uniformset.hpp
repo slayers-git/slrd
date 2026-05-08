@@ -3,6 +3,8 @@
 #ifndef __SLRD_VULKAN_UNIFORM_SET_HPP__
 #define __SLRD_VULKAN_UNIFORM_SET_HPP__
 
+#include "resource.hpp"
+
 #include "vulkan/deviceobject.hpp"
 #include <slrd/uniformset.hpp>
 
@@ -12,8 +14,10 @@ namespace slrd {
     class VKPipelineLayout;
     class DescriptorPoolManager;
 
+    SLRD_RESOURCE_DEFINE_TYPE (VKUniformSet, VK_OBJECT_TYPE_DESCRIPTOR_SET);
     class VKUniformSet :
-            public VKDeviceObject<IUniformSet> {
+            public VKDeviceObject<IUniformSet>,
+            public VKResource<VKUniformSet> {
     private:
         VkDevice m_device = VK_NULL_HANDLE;
         VkDescriptorSet m_set = nullptr;

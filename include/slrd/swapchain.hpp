@@ -17,6 +17,9 @@ namespace slrd {
 
         uint32_t width{};
         uint32_t height{};
+
+        /* Debug name of the resource */
+        std::string_view name = "";
     };
 
     struct PresentInfo {
@@ -30,7 +33,7 @@ namespace slrd {
         SWAPCHAIN_RESULT_OTHER = -2
     };
 
-    class ISwapchain : public IObject {
+    SLRD_DEFINE_NAMED_OBJECT (ISwapchain) {
     public:
         virtual ~ISwapchain () = default;
 

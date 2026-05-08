@@ -213,7 +213,7 @@ namespace slrd {
         RETURN_LOG_ERROR_IF (result != VK_SUCCESS, -1, "Failed to create VmaAllocator");
 
 #if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED
-        if (config.debug) {
+        if (config.debug && (getAPIConfig ()->debug_flags & API_DEBUG_FLAG_LAYERS)) {
             VkDebugUtilsMessengerCreateInfoEXT debugInfo {};
             debugInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
             debugInfo.pfnUserCallback = slrdDebugMessager;
@@ -290,7 +290,9 @@ namespace slrd {
         vkDestroyDevice (m_device, nullptr);
 
 #if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED
-        vkapi->pfns.vkDestroyDebugUtilsMessengerEXT (vkapi->instance, m_debugMessenger, nullptr);
+        if (m_debugMessenger && (getAPIConfig ()->debug_flags & API_DEBUG_FLAG_LAYERS)) {
+            vkapi->pfns.vkDestroyDebugUtilsMessengerEXT (vkapi->instance, m_debugMessenger, nullptr);
+        }
 #endif
 
     }

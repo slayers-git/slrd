@@ -35,6 +35,10 @@ namespace slrd {
         VKDeviceObject (VKDeviceObject&&) noexcept = default;
         VKDeviceObject& operator= (VKDeviceObject&&) noexcept = default;
 
+        VKDevice *getDevice () noexcept {
+            return m_device.get ();
+        }
+
         void addRef () noexcept override {
             m_ref.fetch_add (1, std::memory_order_relaxed);
         }

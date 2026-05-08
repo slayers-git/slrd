@@ -29,10 +29,10 @@ namespace slrd {
         VkSemaphore renderFinished = VK_NULL_HANDLE;
     };
 
-    SLRD_RESOURCE_DEFINE_TYPE(VKSwapchain);
+    SLRD_RESOURCE_DEFINE_TYPE(VKSwapchain, VK_OBJECT_TYPE_SWAPCHAIN_KHR);
     class VKSwapchain :
             public VKDeviceObject<ISwapchain>,
-            public VKResource<VKSwapchain> {
+            public VKNamedResource<VKSwapchain> {
     public:
         /* How many images can we request and have in one swapchain */
         static constexpr uint32_t MAX_SWAPCHAIN_IMAGES = 8;
@@ -118,6 +118,12 @@ namespace slrd {
         VkSwapchainKHR create (VkSwapchainKHR old, uint32_t w, uint32_t h);
 
         ~VKSwapchain ();
+
+        VkSwapchainKHR handle () const {
+            return m_swapchain;
+        }
+
+        std::string_view getName () const noexcept final;
     };
 
     inline VKSwapchain *createVKSwapchain (VKDevice *device, const SwapchainInfo& info) {
