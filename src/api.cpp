@@ -8,6 +8,7 @@
 
 namespace slrd {
     static API s_currentAPI = API_NONE;
+    static APIConfig s_currentConfig;
 
     consteval uint8_t getSupportedApis () {
         uint8_t apis = API_NONE;
@@ -48,6 +49,7 @@ namespace slrd {
         if (res)
             return res;
 
+        s_currentConfig = config;
         s_currentAPI = api;
         return 0;
     }
@@ -62,6 +64,8 @@ namespace slrd {
             default:
                 return;
         }
+
+        s_currentAPI = API_NONE;
     }
 
     /* Current initialized API 
@@ -69,5 +73,12 @@ namespace slrd {
      * If not initialized should return API_NONE */
     API getCurrentAPI () {
         return s_currentAPI;
+    }
+
+    APIConfig *getAPIConfig () {
+        if (s_currentAPI == API_NONE)
+            return nullptr;
+
+        return &s_currentConfig;
     }
 };

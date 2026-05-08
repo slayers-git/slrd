@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <span>
 #include <string>
+#include <vector>
 
 namespace slrd {
     struct APIVersion {
@@ -18,6 +19,20 @@ namespace slrd {
             major(major), minor(minor), patch(patch) {}
     };
 
+    enum APIDebugFlag {
+        API_DEBUG_FLAG_NONE = 0,
+        /**
+         * Enable debug layers for Vulkan */
+        API_DEBUG_FLAG_LAYERS = 1,
+        /**
+         * Enable debug names in Vulkan.
+         *
+         * Setting this flag is necessary to be able to set debug names to
+         * Vulkan objects, unlike in OpenGL or D3D12, where this functionality
+         * is part of the core, and therefore are available at any time. */
+        API_DEBUG_FLAG_NAMES  = 2
+    };
+
     struct APIConfig {
         std::string app_name;
         std::string dev_name;
@@ -26,10 +41,15 @@ namespace slrd {
         APIVersion  engine_version;
         APIVersion  api_version;
 
+        /**
+         * Enable debug layers */
         bool debug = false;
+        /**
+         * Debug layer flags */
+        uint32_t debug_flags = API_DEBUG_FLAG_NONE;
 
-        std::span<const char *> instance_extensions;
-        std::span<const char *> instance_layers;
+        std::vector<const char *> instance_extensions;
+        std::vector<const char *> instance_layers;
     };
 
     enum API : uint8_t {
@@ -51,6 +71,10 @@ namespace slrd {
      *
      * If not initialized should return API_NONE */
     API getCurrentAPI ();
+
+    /**
+     * Get config used to initialize the currenly used API */
+    APIConfig *getAPIConfig ();
 };
 
 #endif /* #define __SLRD_API_HPP__ */
