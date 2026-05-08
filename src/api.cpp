@@ -75,7 +75,7 @@ namespace slrd {
         return s_currentAPI;
     }
 
-    APIConfig *getAPIConfig () {
+    const APIConfig *getAPIConfig () {
         if (s_currentAPI == API_NONE)
             return nullptr;
 

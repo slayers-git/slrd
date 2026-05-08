@@ -74,7 +74,7 @@ namespace slrd {
 
     /**
      * Get config used to initialize the currenly used API */
-    APIConfig *getAPIConfig ();
+    const APIConfig *getAPIConfig ();
 };
 
 #endif /* #define __SLRD_API_HPP__ */
