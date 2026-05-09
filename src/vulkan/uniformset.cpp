@@ -101,6 +101,9 @@ namespace slrd {
         std::tie (m_set, m_pool) = descPool->allocateSet (
                 pipelineLayout->getSetLayouts ()[set]);
         SLRD_COMPLAIN_IF(!m_set, "Failed to create VKUniformSet!");
+
+        pipelineLayout->getDevice ()->allocate (OBJECT_TYPE_UNIFORM_SET, 0);
+
         return !m_set;
     }
 

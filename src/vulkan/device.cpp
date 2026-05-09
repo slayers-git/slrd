@@ -234,6 +234,11 @@ namespace slrd {
 
         m_pipelineManager = std::make_unique<PipelineManager> (this);
 
+#ifdef SLRD_RESOURCE_PROFILER
+        if (getAPIConfig ()->debug_flags & API_DEBUG_RESOURCE_PROFILER)
+            m_profiler = std::make_unique<ResourceProfiler> ();
+#endif
+
         return 0;
     }
 
@@ -278,6 +283,24 @@ namespace slrd {
 
     void VKDevice::waitIdle () {
         vkDeviceWaitIdle (m_device);
+    }
+
+    void VKDevice::allocate (ObjectType type, DeviceSize size) noexcept {
+#ifdef SLRD_RESOURCE_PROFILER
+        if (m_profiler)
+            ResourceProfilerWriter (*m_profiler).allocate (type, size);
+#endif
+    }
+
+    void VKDevice::deallocate (ObjectType type, DeviceSize size) noexcept {
+#ifdef SLRD_RESOURCE_PROFILER
+        if (m_profiler)
+            ResourceProfilerWriter (*m_profiler).deallocate (type, size);
+#endif
+    }
+
+    const ResourceProfiler *VKDevice::getResourceProfiler () const noexcept {
+        return m_profiler.get ();
     }
 
     VKDevice::~VKDevice () {

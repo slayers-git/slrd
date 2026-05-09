@@ -47,6 +47,8 @@ namespace slrd {
         setParentDevice (device);
         m_sampler = vksampler;
 
+        device->allocate (OBJECT_TYPE_SAMPLER, 0);
+
         if (!info.name.empty ())
             setResourceName (info.name, VK_OBJECT_TYPE_SAMPLER, m_sampler);
 

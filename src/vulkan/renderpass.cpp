@@ -164,6 +164,8 @@ namespace slrd {
         m_textureViews.resize (attachments.size ());
         m_requiresFBRecreation = true;
 
+        device->allocate (OBJECT_TYPE_RENDER_PASS, 0);
+
         return 0;
     }
     

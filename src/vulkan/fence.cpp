@@ -20,6 +20,8 @@ namespace slrd {
         setParentDevice (device);
         m_fence = fence;
 
+        device->allocate (OBJECT_TYPE_FENCE, 0);
+
         return 0;
     }
 

@@ -30,7 +30,10 @@ namespace slrd {
          * Setting this flag is necessary to be able to set debug names to
          * Vulkan objects, unlike in OpenGL or D3D12, where this functionality
          * is part of the core, and therefore are available at any time. */
-        API_DEBUG_FLAG_NAMES  = 2
+        API_DEBUG_FLAG_NAMES  = 2,
+        /**
+         * Enable resource usage profiling */
+        API_DEBUG_RESOURCE_PROFILER = 4,
     };
 
     struct APIConfig {

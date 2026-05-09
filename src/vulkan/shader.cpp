@@ -361,6 +361,7 @@ namespace slrd {
 
         m_stages = stages;
 
+        device->allocate (OBJECT_TYPE_SHADER, 0);
         return 0;
     }
 

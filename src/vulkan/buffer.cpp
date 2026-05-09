@@ -66,6 +66,8 @@ namespace slrd {
         if (!info.name.empty ())
             (void)setResourceName (info.name, VK_OBJECT_TYPE_BUFFER, m_buffer);
 
+        device->allocate (OBJECT_TYPE_BUFFER, info.size);
+
         return 0;
     }
 

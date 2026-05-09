@@ -65,6 +65,8 @@ namespace slrd {
 
         std::unique_ptr<PipelineManager> m_pipelineManager;
 
+        std::unique_ptr<ResourceProfiler> m_profiler;
+
     public:
         VKDevice () = default;
         ~VKDevice ();
@@ -105,6 +107,13 @@ namespace slrd {
             return m_vma;
         }
 
+        /**
+         * Tell the device that an allocation happened */
+        void allocate (ObjectType type, DeviceSize size) noexcept;
+        /**
+         * Tell the device that a deallocation happened */
+        void deallocate (ObjectType type, DeviceSize size) noexcept;
+
         DescriptorPoolManager *allocateOrGetDescriptorManager (PoolKey key);
         void clearDescriptorManagers ();
 
@@ -131,6 +140,8 @@ namespace slrd {
         Ref<ISampler> createSampler (const SamplerInfo& info) final override;
 
         void waitIdle () final override;
+
+        const ResourceProfiler *getResourceProfiler () const noexcept final override;
     };
 
     inline IDevice *createVKDevice (const DeviceConfig& config) {

@@ -24,6 +24,8 @@ namespace slrd {
         setParentDevice (device);
         m_bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
+        device->allocate (OBJECT_TYPE_PIPELINE, 0);
+
         return 0;
     }
 
@@ -56,6 +58,8 @@ namespace slrd {
         m_pipeline = vkpipeline;
         m_bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
         m_state.shader = Ref<IShader>::share (info.shader);
+
+        device->allocate (OBJECT_TYPE_PIPELINE, 0);
 
         return 0;
     }

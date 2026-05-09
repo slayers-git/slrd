@@ -13,6 +13,8 @@ option (SLRD_REQUIRE_DEBUG_NAMES
     "Enable debug extensions loading, if required for object naming"
     ON)
 
+option (SLRD_RESOURCE_PROFILER "Enable the resource usage profiler" ON)
+
 # Bundled libraries
 option (SLRD_USE_VENDOR_VMA "Use bundled VMA" ON)
 option (SLRD_USE_VENDOR_SPIRV_REFLECT "Use bundled SPIRV-Reflect" ON)
@@ -27,6 +29,7 @@ set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set (SRC src/api.cpp
          src/device.cpp
+         src/profiler.cpp
          src/error.cpp
          src/surface.cpp
          src/uniformset.cpp)

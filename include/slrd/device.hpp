@@ -6,6 +6,8 @@
 #include "types.hpp"
 #include <span>
 
+#include "profiler.hpp"
+
 namespace slrd {
     struct DeviceConfig {
         std::span<const char *> device_extensions;
@@ -60,6 +62,14 @@ namespace slrd {
         virtual Ref<ISampler> createSampler (const SamplerInfo& info) = 0;
 
         virtual void waitIdle () = 0;
+
+        /**
+         * Get ResourceProfiler for this device 
+         *
+         * @note This method will return nullptr, if the device wasn't created
+         *       with resource profiling turned on or if it was disabled at
+         *       library compile time */
+        virtual const ResourceProfiler *getResourceProfiler () const noexcept = 0;
     };
 
     /* Create device with the given config for initialized API */

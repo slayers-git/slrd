@@ -4,10 +4,13 @@
 #define __SLRD_VULKAN_RESOURCE_HPP__
 
 #include "debug.hpp"
+#include "slrd/profiler.hpp"
 #include "vulkan/api.hpp"
 #include <memory>
 #include <typeinfo>
 #include <unordered_map>
+
+#include <atomic>
 
 namespace slrd {
     template<typename T>
@@ -17,21 +20,19 @@ namespace slrd {
         }
     };
 
-    struct VKResourceProfiler {
-        struct VKResourceUsage {
-            const char *name;
-            uint64_t allocations = 0;
-            uint64_t frees = 0;
-        };
-
-        std::unordered_map<size_t, VKResourceUsage> usages {};
-
-        template<typename T>
-        VKResourceUsage& get ();
-    };
-
-    inline std::unique_ptr<VKResourceProfiler> s_resourceProfiler;
-
+    // struct VKResourceProfiler : public ResourceProfiler {
+    //     struct VKResourceUsage {
+    //         std::atomic<uint64_t> allocated;
+    //         std::atomic<uint64_t> live;
+    //         std::atomic<uint64_t> memory;
+    //     };
+    //
+    //     std::unordered_map<size_t, VKResourceUsage> usages {};
+    //
+    //     template<typename T>
+    //     VKResourceUsage& get ();
+    // };
+    //
 #define SLRD_RESOURCE_DEFINE_TYPE(__ClassType, __VkType)   \
     class __ClassType;                           \
     template<>                                   \

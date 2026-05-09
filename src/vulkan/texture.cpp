@@ -61,6 +61,9 @@ namespace slrd {
         if (!info.name.empty ())
             setResourceName (info.name, VK_OBJECT_TYPE_IMAGE, m_image);
 
+        // FIXME: The actual size is not calculated and set
+        device->allocate (OBJECT_TYPE_TEXTURE, 0);
+
         return 0;
     }
 
@@ -160,6 +163,8 @@ namespace slrd {
 
         if (!viewData.name.empty ())
             setResourceName (viewData.name, VK_OBJECT_TYPE_IMAGE_VIEW, m_view);
+
+        m_device->allocate (OBJECT_TYPE_TEXTURE_VIEW, 0);
 
         return 0;
     }

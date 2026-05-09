@@ -35,6 +35,8 @@ namespace slrd {
         m_pool  = vkpool;
         setParentDevice (device);
 
+        device->allocate (OBJECT_TYPE_COMMAND_QUEUE, 0);
+
         return 0;
     }
 

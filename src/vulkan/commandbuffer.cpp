@@ -136,6 +136,7 @@ namespace slrd {
         };
 #endif
 
+        queue->getDevice()->allocate (OBJECT_TYPE_COMMAND_BUFFER, 0);
         return 0;
     }
 

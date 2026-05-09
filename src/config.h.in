@@ -4,3 +4,4 @@
 
 #cmakedefine01 SLRD_DEBUG
 #cmakedefine01 SLRD_REQUIRE_DEBUG_NAMES
+#cmakedefine01 SLRD_RESOURCE_PROFILER

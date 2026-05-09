@@ -292,6 +292,8 @@ namespace slrd {
         m_surface = Ref<VKSurface>::share (surface);
         m_swapchain = create (VK_NULL_HANDLE, info.width, info.height);
 
+        device->allocate (OBJECT_TYPE_SWAPCHAIN, 0);
+
         return !m_swapchain;
     }
 
