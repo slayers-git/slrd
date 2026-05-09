@@ -194,6 +194,8 @@ namespace slrd {
         std::vector<VkImage> images;
         const char *errFn = "";
 
+        auto name = getResourceName ();
+
         VkSwapchainKHR sc = nullptr;
         if (vkCreateSwapchainKHR (m_device->getVkDevice (), &scInfo, nullptr, &sc) != VK_SUCCESS) {
             errFn = "vkCreateSwapchainKHR";
@@ -244,8 +246,8 @@ namespace slrd {
             m_textureViews[i] = std::move (image_view);
         }
 
-        if (!m_info.name.empty ())
-            setResourceName (m_info.name, VK_OBJECT_TYPE_SWAPCHAIN_KHR, sc);
+        if (!name.empty ())
+            setResourceName (name, VK_OBJECT_TYPE_SWAPCHAIN_KHR, sc);
 
         return sc;
 

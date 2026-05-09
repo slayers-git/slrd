@@ -44,8 +44,6 @@ namespace slrd {
     private:
         Ref<VKSurface> m_surface;
 
-        SwapchainInfo m_info;
-
         uint32_t m_imageCount;
         VkFormat m_format;
         VkColorSpaceKHR m_colorSpace;
