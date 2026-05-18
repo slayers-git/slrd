@@ -83,7 +83,7 @@ target_precompile_headers (slrd PRIVATE ${PCH})
 if (SLRD_VULKAN_ENABLED)
     if (SLRD_USE_VENDOR_VMA)
         message ("Using vendor-provided VMA")
-        set (SLRD_VMA_PATH "${CMAKE_SOURCE_DIR}/vendor/VulkanMemoryAllocator/include")
+        set (SLRD_VMA_PATH "${PROJECT_SOURCE_DIR}/vendor/VulkanMemoryAllocator/include")
     else ()
         if (NOT SLRD_VMA_PATH)
             message (FATAL_ERROR
@@ -97,7 +97,7 @@ if (SLRD_VULKAN_ENABLED)
 
     if (SLRD_USE_VENDOR_SPIRV_REFLECT)
         message ("Using vendor-provided SPIRV-Reflect")
-        set (SLRD_SPIRV_REFLECT_PATH "${CMAKE_SOURCE_DIR}/vendor/SPIRV-Reflect")
+        set (SLRD_SPIRV_REFLECT_PATH "${PROJECT_SOURCE_DIR}/vendor/SPIRV-Reflect")
     else ()
         if (NOT SLRD_SPIRV_REFLECT_PATH)
             message (FATAL_ERROR
@@ -114,7 +114,7 @@ if (SLRD_VULKAN_ENABLED)
     target_include_directories (slrd PRIVATE
         $<BUILD_INTERFACE:${SLRD_SPIRV_REFLECT_PATH}>
         $<BUILD_INTERFACE:${SLRD_VMA_PATH}>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/vendor/rocket>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/vendor/rocket>
     )
     # include_directories (vendor/rocket)
 
