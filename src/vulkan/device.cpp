@@ -184,8 +184,8 @@ namespace slrd {
         VkDeviceCreateInfo dvcInfo = {};
         dvcInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         dvcInfo.pEnabledFeatures = &enabledFeatures;
-        dvcInfo.enabledExtensionCount = config.device_extensions.size ();
-        dvcInfo.ppEnabledExtensionNames = config.device_extensions.data ();
+        dvcInfo.enabledExtensionCount = config.deviceExtensions.size ();
+        dvcInfo.ppEnabledExtensionNames = config.deviceExtensions.data ();
         dvcInfo.queueCreateInfoCount = queueCreateInfos;
         dvcInfo.pQueueCreateInfos = qInfo;
 
@@ -213,7 +213,7 @@ namespace slrd {
         RETURN_LOG_ERROR_IF (result != VK_SUCCESS, -1, "Failed to create VmaAllocator");
 
 #if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED
-        if (config.debug && (getAPIConfig ()->debug_flags & API_DEBUG_FLAG_LAYERS)) {
+        if (config.debug && (getAPIConfig ()->debugFlags & API_DEBUG_FLAG_LAYERS)) {
             VkDebugUtilsMessengerCreateInfoEXT debugInfo {};
             debugInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
             debugInfo.pfnUserCallback = slrdDebugMessager;
@@ -235,11 +235,11 @@ namespace slrd {
         m_pipelineManager = std::make_unique<PipelineManager> (this);
 
 #ifdef SLRD_RESOURCE_PROFILER
-        if (getAPIConfig ()->debug_flags & API_DEBUG_RESOURCE_PROFILER) {
-            if (config.debug && config.debug_flags & DEVICE_DEBUG_FLAG_RESOURCE_PROFILER)
+        if (getAPIConfig ()->debugFlags & API_DEBUG_RESOURCE_PROFILER) {
+            if (config.debug && config.debugFlags & DEVICE_DEBUG_FLAG_RESOURCE_PROFILER)
                 m_profiler = std::make_unique<ResourceProfiler> ();
 
-            if (config.debug && config.debug_flags & DEVICE_DEBUG_FLAG_API_RESOURCE_PROFILER)
+            if (config.debug && config.debugFlags & DEVICE_DEBUG_FLAG_API_RESOURCE_PROFILER)
                 m_vkprofiler = std::make_unique<VKResourceProfiler> ();
         }
 #endif
@@ -336,7 +336,7 @@ namespace slrd {
         vkDestroyDevice (m_device, nullptr);
 
 #if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED
-        if (m_debugMessenger && (getAPIConfig ()->debug_flags & API_DEBUG_FLAG_LAYERS)) {
+        if (m_debugMessenger && (getAPIConfig ()->debugFlags & API_DEBUG_FLAG_LAYERS)) {
             vkapi->pfns.vkDestroyDebugUtilsMessengerEXT (vkapi->instance, m_debugMessenger, nullptr);
         }
 #endif

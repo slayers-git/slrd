@@ -20,10 +20,10 @@ namespace slrd {
     };
 
     struct DeviceConfig {
-        std::span<const char *> device_extensions;
+        std::span<const char *> deviceExtensions;
 
         bool debug = false;
-        uint32_t debug_flags = DEVICE_DEBUG_FLAG_NONE;
+        uint32_t debugFlags = DEVICE_DEBUG_FLAG_NONE;
 
         DeviceConfig () = default;
     };

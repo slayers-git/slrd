@@ -94,12 +94,12 @@ App::App (const AppInit& init) {
     }
 
     slrd::APIConfig config;
-    config.app_name = init.name;
-    config.dev_name = "slayer";
-    config.engine_name = "slrd";
-    config.app_version = { 1, 0, 0 }; 
-    config.engine_version = { 0, 0, 1 };
-    config.instance_extensions = instanceExtensions;
+    config.appName = init.name;
+    config.devName = "slayer";
+    config.engineName = "slrd";
+    config.appVersion = { 1, 0, 0 }; 
+    config.engineVersion = { 0, 0, 1 };
+    config.instanceExtensions = instanceExtensions;
     config.debug = true;
 
     auto apis = slrd::querySupportedAPIs ();
@@ -115,7 +115,7 @@ App::App (const AppInit& init) {
         static const char *devext[] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
         slrd::DeviceConfig devconf;
-        devconf.device_extensions = devext;
+        devconf.deviceExtensions = devext;
         devconf.debug = true;
         m_device = slrd::createDevice (devconf);
         if (!m_device) {

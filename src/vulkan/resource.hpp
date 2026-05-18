@@ -58,7 +58,7 @@ namespace slrd {
         bool setResourceName (std::string_view name, VkObjectType type, T handle) noexcept {
 #if defined (SLRD_REQUIRE_DEBUG_NAMES)
             SLRD_COMPLAIN_RETURN (
-                    !(getAPIConfig ()->debug_flags & API_DEBUG_FLAG_NAMES),
+                    !(getAPIConfig ()->debugFlags & API_DEBUG_FLAG_NAMES),
                     false,
                     "setResourceName() is used, but API_DEBUG_FLAG_NAMES is not set");
 

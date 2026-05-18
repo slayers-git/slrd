@@ -37,22 +37,23 @@ namespace slrd {
     };
 
     struct APIConfig {
-        std::string app_name;
-        std::string dev_name;
-        std::string engine_name;
-        APIVersion  app_version;
-        APIVersion  engine_version;
-        APIVersion  api_version;
+        std::string appName;
+        std::string devName;
+        std::string engineName;
+        APIVersion  appVersion;
+        APIVersion  engineVersion;
+        APIVersion  apiVersion;
 
         /**
-         * Enable debug layers */
+         * Enable debug */
         bool debug = false;
-        /**
-         * Debug layer flags */
-        uint32_t debug_flags = API_DEBUG_FLAG_NONE;
 
-        std::vector<const char *> instance_extensions;
-        std::vector<const char *> instance_layers;
+        /**
+         * Debug flags */
+        uint32_t debugFlags = API_DEBUG_FLAG_NONE;
+
+        std::vector<const char *> instanceExtensions;
+        std::vector<const char *> instanceLayers;
     };
 
     enum API : uint8_t {

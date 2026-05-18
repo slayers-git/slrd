@@ -67,10 +67,10 @@ namespace slrd {
         auto supportedLayers     = getSupportedLayers ();
 
         std::vector<const char *> requestedInstanceExtensions (
-                config.instance_extensions.begin (), config.instance_extensions.end ());
+                config.instanceExtensions.begin (), config.instanceExtensions.end ());
 
 #if defined (SLRD_VULKAN_DEBUG_MESSENGER_ENABLED) || defined (SLRD_REQUIRE_DEBUG_NAMING)
-        if (config.debug || config.debug_flags != 0) {
+        if (config.debug || config.debugFlags != 0) {
             requestedInstanceExtensions.push_back (
                     VK_EXT_DEBUG_UTILS_EXTENSION_NAME
             );
@@ -90,9 +90,9 @@ namespace slrd {
                     "Extension {} not present", extension);
         }
 
-        std::vector<const char *> requestedInstanceLayers (config.instance_layers.begin (),
-                config.instance_layers.end ());
-        if (config.debug || (config.debug_flags & API_DEBUG_FLAG_LAYERS)) {
+        std::vector<const char *> requestedInstanceLayers (config.instanceLayers.begin (),
+                config.instanceLayers.end ());
+        if (config.debug || (config.debugFlags & API_DEBUG_FLAG_LAYERS)) {
             requestedInstanceLayers.push_back ("VK_LAYER_KHRONOS_validation");
         }
 
@@ -117,12 +117,12 @@ namespace slrd {
         VkApplicationInfo appInfo = {
             .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
             .pNext = NULL,
-            .pApplicationName = config.app_name.c_str (),
-            .applicationVersion = VK_MAKE_VERSION (config.app_version.major,
-                    config.app_version.minor, config.app_version.major),
-            .pEngineName = config.engine_name.c_str (),
-            .engineVersion = VK_MAKE_VERSION (config.engine_version.major,
-                    config.engine_version.minor, config.engine_version.patch),
+            .pApplicationName = config.appName.c_str (),
+            .applicationVersion = VK_MAKE_VERSION (config.appVersion.major,
+                    config.appVersion.minor, config.appVersion.major),
+            .pEngineName = config.engineName.c_str (),
+            .engineVersion = VK_MAKE_VERSION (config.engineVersion.major,
+                    config.engineVersion.minor, config.engineVersion.patch),
             .apiVersion = VK_API_VERSION_1_0
         };
         VkInstanceCreateInfo info = {
@@ -140,7 +140,7 @@ namespace slrd {
 
         if (config.debug) {
 #if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED
-            if (config.debug_flags & API_DEBUG_FLAG_LAYERS) {
+            if (config.debugFlags & API_DEBUG_FLAG_LAYERS) {
                 pfns.vkCreateDebugUtilsMessengerEXT = 
                     (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr (instance,
                             "vkCreateDebugUtilsMessengerEXT");
@@ -158,7 +158,7 @@ namespace slrd {
 #endif
 
 #if SLRD_REQUIRE_DEBUG_NAMES
-            if (config.debug_flags & API_DEBUG_FLAG_NAMES) {
+            if (config.debugFlags & API_DEBUG_FLAG_NAMES) {
                 pfns.vkSetDebugUtilsObjectNameEXT = 
                     (PFN_vkSetDebugUtilsObjectNameEXT) vkGetInstanceProcAddr (instance,
                             "vkSetDebugUtilsObjectNameEXT");

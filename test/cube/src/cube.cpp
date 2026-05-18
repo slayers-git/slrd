@@ -381,15 +381,15 @@ struct App {
         }
 
         slrd::APIConfig config;
-        config.app_name = "Test SLRD";
-        config.dev_name = "slayer";
-        config.engine_name = "slrd";
-        config.app_version = { 1, 0, 0 }; 
-        config.engine_version = { 0, 0, 1 };
-        config.instance_extensions = instanceExtensions;
+        config.appName = "Test SLRD";
+        config.devName = "slayer";
+        config.engineName = "slrd";
+        config.appVersion = { 1, 0, 0 }; 
+        config.engineVersion = { 0, 0, 1 };
+        config.instanceExtensions = instanceExtensions;
 
         config.debug = true;
-        config.debug_flags = slrd::API_DEBUG_FLAG_NAMES;
+        config.debugFlags = slrd::API_DEBUG_FLAG_NAMES | slrd::API_DEBUG_RESOURCE_PROFILER;
 
         auto apis = slrd::querySupportedAPIs ();
         if (!(apis & slrd::API_VULKAN)) {
@@ -406,8 +406,10 @@ struct App {
             static const char *devext[] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
             slrd::DeviceConfig devconf;
-            devconf.device_extensions = devext;
+            devconf.deviceExtensions = devext;
             devconf.debug = true;
+            devconf.debugFlags = slrd::DEVICE_DEBUG_FLAG_RESOURCE_PROFILER |
+                slrd::DEVICE_DEBUG_FLAG_API_RESOURCE_PROFILER;
             m_device = slrd::createDevice (devconf);
             if (!m_device) {
                 std::cerr << slrd::getErrorString ();
