@@ -166,15 +166,8 @@ namespace slrd {
     };
 
     class IShader : public IObject {
-    protected:
-        ShaderType m_shaderType;
-
     public:
         virtual ~IShader () = default;
-
-        ShaderType getType () const {
-            return m_shaderType;
-        }
 
         /* Get shader reflection data */
         virtual const ShaderReflection& getShaderReflection () const = 0;
