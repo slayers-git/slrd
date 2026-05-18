@@ -227,7 +227,7 @@ namespace slrd {
             rp->getHash ()
         };
 
-        auto hash = XXH64 (combined, sizeof (combined) / sizeof (combined[0]), 0);
+        auto hash = XXH64 (combined, sizeof (combined), 0);
 
         if (auto it = m_stateRpToPipeline.find (hash);
                 it != m_stateRpToPipeline.end ()) {
