@@ -36,6 +36,7 @@ namespace slrd {
         setParentDevice (device);
 
         device->allocate (OBJECT_TYPE_COMMAND_QUEUE, 0);
+        device->vkallocate (VK_OBJECT_TYPE_COMMAND_POOL, 0);
 
         return 0;
     }
@@ -56,6 +57,8 @@ namespace slrd {
 
         if (m_pool) {
             vkDestroyCommandPool (m_device->getVkDevice (), m_pool, nullptr);
+            m_device->deallocate (OBJECT_TYPE_COMMAND_QUEUE, 0);
+            m_device->vkdeallocate (VK_OBJECT_TYPE_COMMAND_POOL, 0);
         }
     }
 

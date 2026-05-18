@@ -62,11 +62,13 @@ namespace slrd {
         m_buffer = buffer;
         setParentDevice (device);
         m_coherent = info.coherent;
+        m_size = info.size;
 
         if (!info.name.empty ())
             (void)setResourceName (info.name, VK_OBJECT_TYPE_BUFFER, m_buffer);
 
         device->allocate (OBJECT_TYPE_BUFFER, info.size);
+        device->vkallocate (VK_OBJECT_TYPE_BUFFER, info.size);
 
         return 0;
     }
@@ -123,6 +125,9 @@ namespace slrd {
         if (m_buffer != VK_NULL_HANDLE) {
             unmap ();
             vmaDestroyBuffer (m_device->getVkAllocator (), m_buffer, m_allocation);
+
+            m_device->deallocate (OBJECT_TYPE_BUFFER, m_size);
+            m_device->vkdeallocate (VK_OBJECT_TYPE_BUFFER, m_size);
         }
     }
 };

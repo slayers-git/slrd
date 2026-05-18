@@ -388,5 +388,6 @@ namespace slrd {
 
     VKSwapchain::~VKSwapchain () {
         free ();
+        m_device->deallocate (OBJECT_TYPE_SWAPCHAIN, 0);
     }
 };

@@ -63,6 +63,7 @@ namespace slrd {
 
         // FIXME: The actual size is not calculated and set
         device->allocate (OBJECT_TYPE_TEXTURE, 0);
+        device->vkallocate (VK_OBJECT_TYPE_IMAGE, 0);
 
         return 0;
     }
@@ -82,14 +83,23 @@ namespace slrd {
         
         m_swapchain = swapchain;
         m_valid = true;
+
+        // FIXME: The actual size is not calculated and set
+        device->allocate (OBJECT_TYPE_TEXTURE, 0);
+        device->vkallocate (VK_OBJECT_TYPE_IMAGE, 0);
         
         return 0;
     }
 
     VKTexture::~VKTexture () {
         /* If the image is managed by this class, destroy it */
-        if (m_image && m_allocation)
+        if (m_image && m_allocation) {
             vmaDestroyImage (m_device->getVkAllocator (), m_image, m_allocation);
+        }
+
+        // FIXME: The actual size is not calculated and set
+        m_device->deallocate (OBJECT_TYPE_TEXTURE, 0);
+        m_device->vkdeallocate (VK_OBJECT_TYPE_IMAGE, 0);
     }
 
     static constexpr VkImageViewType getVkImageViewType (TextureType tt) {
@@ -165,6 +175,7 @@ namespace slrd {
             setResourceName (viewData.name, VK_OBJECT_TYPE_IMAGE_VIEW, m_view);
 
         m_device->allocate (OBJECT_TYPE_TEXTURE_VIEW, 0);
+        m_device->vkallocate (VK_OBJECT_TYPE_IMAGE_VIEW, 0);
 
         return 0;
     }
@@ -176,6 +187,9 @@ namespace slrd {
     VKTextureView::~VKTextureView () {
         if (m_view) {
             vkDestroyImageView (m_device->getVkDevice (), m_view, nullptr);
+
+            m_device->deallocate (OBJECT_TYPE_TEXTURE_VIEW, 0);
+            m_device->vkdeallocate (VK_OBJECT_TYPE_IMAGE_VIEW, 0);
         }
     }
 };

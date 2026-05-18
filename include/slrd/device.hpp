@@ -9,9 +9,21 @@
 #include "profiler.hpp"
 
 namespace slrd {
+    enum DeviceDebugFlag {
+        DEVICE_DEBUG_FLAG_NONE = 0,
+        /**
+         * Enable resource profiling for this device */
+        DEVICE_DEBUG_FLAG_RESOURCE_PROFILER = 1,
+        /**
+         * Enable underlying API resource profiling for this device */
+        DEVICE_DEBUG_FLAG_API_RESOURCE_PROFILER = 2,
+    };
+
     struct DeviceConfig {
         std::span<const char *> device_extensions;
+
         bool debug = false;
+        uint32_t debug_flags = DEVICE_DEBUG_FLAG_NONE;
 
         DeviceConfig () = default;
     };

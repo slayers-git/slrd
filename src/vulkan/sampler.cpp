@@ -48,6 +48,7 @@ namespace slrd {
         m_sampler = vksampler;
 
         device->allocate (OBJECT_TYPE_SAMPLER, 0);
+        device->vkallocate (VK_OBJECT_TYPE_SAMPLER, 0);
 
         if (!info.name.empty ())
             setResourceName (info.name, VK_OBJECT_TYPE_SAMPLER, m_sampler);
@@ -63,6 +64,9 @@ namespace slrd {
     VKSampler::~VKSampler () {
         if (m_sampler) {
             vkDestroySampler (m_device->getVkDevice (), m_sampler, nullptr);
+
+            m_device->deallocate (OBJECT_TYPE_SAMPLER, 0);
+            m_device->vkdeallocate (VK_OBJECT_TYPE_SAMPLER, 0);
         }
     }
 };

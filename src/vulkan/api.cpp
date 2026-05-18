@@ -231,4 +231,11 @@ namespace slrd::platform::vulkan {
         auto vkswapchain = static_cast<VKSwapchain *> (swapchain);
         return vkswapchain->getSwapchain ();
     }
+
+    const VKResourceProfiler *getVulkanResourceProfiler (IDevice *device) {
+        SLRD_ASSERT (device != nullptr);
+
+        auto *vkdevice = static_cast<VKDevice *> (device);
+        return vkdevice->getVkResourceProfiler ();
+    }
 }

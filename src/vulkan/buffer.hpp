@@ -55,6 +55,7 @@ namespace slrd {
         VmaAllocation m_allocation = VK_NULL_HANDLE;
 
         bool m_coherent;
+        VkDeviceSize m_size;
 
         /* persistent map */
         void *m_mapping{};

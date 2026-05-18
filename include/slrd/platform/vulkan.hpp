@@ -3,8 +3,7 @@
 #ifndef __SLRD_PLATFORM_VULKAN_HPP__
 #define __SLRD_PLATFORM_VULKAN_HPP__
 
-#include <memory>
-#include <vector>
+#include "slrd/profiler.hpp"
 #include <vulkan/vulkan.h>
 
 namespace slrd {
@@ -16,6 +15,8 @@ namespace slrd {
     class ITextureView;
     class ISampler;
     class ISwapchain;
+
+    class VKDevice;
 
     /**
      * Global state that is used by the Vulkan backend */
@@ -53,6 +54,38 @@ namespace slrd {
         VkSampler getSampler (const ISampler *sampler);
 
         VkSwapchainKHR getSwapchain (ISwapchain *swapchain);
+
+
+        /**
+         * Class that exposes Vulkan resource usage */
+        class VKResourceProfiler {
+        public:
+            /**
+             * Query resource usage data for a Vulkan object type */
+            const ResourceUsage& query (VkObjectType resource_type) const noexcept;
+
+            VKResourceProfiler () noexcept;
+            ~VKResourceProfiler () noexcept = default;
+        
+        private:
+            void allocate (VkObjectType type, VkDeviceSize size) noexcept;
+            void deallocate (VkObjectType type, VkDeviceSize size) noexcept;
+
+            std::mutex m_mtx;
+
+            /* We don't care about extension object types */
+            static constexpr unsigned MAX_RESOURCE_TYPES = 32;
+            ResourceUsage m_resources[MAX_RESOURCE_TYPES];
+
+            friend class slrd::VKDevice;
+        };
+
+        /**
+         * Get Vulkan resource profiler for the given device 
+         *
+         * @note The device must be created with respective flags set,
+         *       otherwise this function will return nullptr */
+        const VKResourceProfiler *getVulkanResourceProfiler (IDevice *device);
     }
 }
 

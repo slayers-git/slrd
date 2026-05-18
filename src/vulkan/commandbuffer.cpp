@@ -103,6 +103,9 @@ namespace slrd {
 
     VKCommandBuffer::~VKCommandBuffer () {
         if (m_buffer) {
+            m_queue->getDevice()->deallocate (OBJECT_TYPE_COMMAND_BUFFER, 0);
+            m_queue->getDevice()->vkdeallocate (VK_OBJECT_TYPE_COMMAND_BUFFER, 0);
+
             vkFreeCommandBuffers (m_queue->getDevice ()->getVkDevice (),
                     m_owningPool, 1, &m_buffer);
         }
@@ -137,6 +140,8 @@ namespace slrd {
 #endif
 
         queue->getDevice()->allocate (OBJECT_TYPE_COMMAND_BUFFER, 0);
+        queue->getDevice()->vkallocate (VK_OBJECT_TYPE_COMMAND_BUFFER, 0);
+
         return 0;
     }
 

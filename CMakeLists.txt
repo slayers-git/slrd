@@ -51,7 +51,8 @@ set (VULKAN_SRC
          src/vulkan/sampler.cpp
          src/vulkan/uniformset.cpp
          src/vulkan/descpoolmanager.cpp
-         src/vulkan/pipelinemanager.cpp)
+         src/vulkan/pipelinemanager.cpp
+         src/vulkan/resourceprofiler.cpp)
 
 if (SLRD_VULKAN_ENABLED)
     message ("Compiling with Vulkan support")

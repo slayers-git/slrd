@@ -235,8 +235,13 @@ namespace slrd {
         m_pipelineManager = std::make_unique<PipelineManager> (this);
 
 #ifdef SLRD_RESOURCE_PROFILER
-        if (getAPIConfig ()->debug_flags & API_DEBUG_RESOURCE_PROFILER)
-            m_profiler = std::make_unique<ResourceProfiler> ();
+        if (getAPIConfig ()->debug_flags & API_DEBUG_RESOURCE_PROFILER) {
+            if (config.debug && config.debug_flags & DEVICE_DEBUG_FLAG_RESOURCE_PROFILER)
+                m_profiler = std::make_unique<ResourceProfiler> ();
+
+            if (config.debug && config.debug_flags & DEVICE_DEBUG_FLAG_API_RESOURCE_PROFILER)
+                m_vkprofiler = std::make_unique<VKResourceProfiler> ();
+        }
 #endif
 
         return 0;
@@ -299,8 +304,26 @@ namespace slrd {
 #endif
     }
 
+    void VKDevice::vkallocate (VkObjectType type, VkDeviceSize size) noexcept {
+#ifdef SLRD_RESOURCE_PROFILER
+        if (m_vkprofiler)
+            m_vkprofiler->allocate (type, size);
+#endif
+    }
+
+    void VKDevice::vkdeallocate (VkObjectType type, VkDeviceSize size) noexcept {
+#ifdef SLRD_RESOURCE_PROFILER
+        if (m_vkprofiler)
+            m_vkprofiler->deallocate (type, size);
+#endif
+    }
+
     const ResourceProfiler *VKDevice::getResourceProfiler () const noexcept {
         return m_profiler.get ();
+    }
+
+    const VKResourceProfiler *VKDevice::getVkResourceProfiler () const noexcept {
+        return m_vkprofiler.get ();
     }
 
     VKDevice::~VKDevice () {

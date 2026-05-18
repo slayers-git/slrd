@@ -38,6 +38,8 @@ namespace slrd {
     class VKBuffer;
     class VKSampler;
 
+    using platform::vulkan::VKResourceProfiler;
+
     /**
      * Implementation for a reference-counted Vulkan device */
     SLRD_RESOURCE_DEFINE_TYPE (VKDevice, VK_OBJECT_TYPE_DEVICE);
@@ -65,7 +67,10 @@ namespace slrd {
 
         std::unique_ptr<PipelineManager> m_pipelineManager;
 
+#ifdef SLRD_RESOURCE_PROFILER
         std::unique_ptr<ResourceProfiler> m_profiler;
+        std::unique_ptr<VKResourceProfiler> m_vkprofiler;
+#endif
 
     public:
         VKDevice () = default;
@@ -113,6 +118,16 @@ namespace slrd {
         /**
          * Tell the device that a deallocation happened */
         void deallocate (ObjectType type, DeviceSize size) noexcept;
+
+        /**
+         * Tell the device that a Vulkan object was allocated/created */
+        void vkallocate (VkObjectType type, VkDeviceSize size) noexcept;
+
+        /**
+         * Tell the device that a Vulkan object was deallocated/destroyed */
+        void vkdeallocate (VkObjectType type, VkDeviceSize size) noexcept;
+
+        const VKResourceProfiler *getVkResourceProfiler () const noexcept;
 
         DescriptorPoolManager *allocateOrGetDescriptorManager (PoolKey key);
         void clearDescriptorManagers ();

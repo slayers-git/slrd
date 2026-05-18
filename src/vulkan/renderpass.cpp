@@ -165,6 +165,7 @@ namespace slrd {
         m_requiresFBRecreation = true;
 
         device->allocate (OBJECT_TYPE_RENDER_PASS, 0);
+        device->vkallocate (VK_OBJECT_TYPE_RENDER_PASS, 0);
 
         return 0;
     }
@@ -364,8 +365,12 @@ namespace slrd {
 
 
     VKRenderPass::~VKRenderPass () {
-        if (m_renderpass != VK_NULL_HANDLE)
+        if (m_renderpass != VK_NULL_HANDLE) {
             vkDestroyRenderPass (m_device->getVkDevice (), m_renderpass, nullptr);
+
+            m_device->deallocate (OBJECT_TYPE_RENDER_PASS, 0);
+            m_device->vkdeallocate (VK_OBJECT_TYPE_RENDER_PASS, 0);
+        }
 
         clearFramebuffers ();
     }

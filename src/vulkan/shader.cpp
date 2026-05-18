@@ -357,6 +357,7 @@ namespace slrd {
                     config.bytecodes[i].size (), &stages[i]);
 
             WRAP_COND_RETURN (result != VK_SUCCESS, -1);
+            device->vkallocate (VK_OBJECT_TYPE_SHADER_MODULE, 0);
         }
 
         m_stages = stages;
@@ -385,12 +386,16 @@ namespace slrd {
 
     VKShader::~VKShader () {
         for (auto& stage : m_stages) {
-            if (stage.module)
+            if (stage.module) {
                 vkDestroyShaderModule (m_device->getVkDevice (), stage.module, nullptr);
+                m_device->vkdeallocate (VK_OBJECT_TYPE_SHADER_MODULE, 0);
+            }
         }
 
         if (m_layoutHash) {
             m_device->getPipelineManager ()->releasePipelineLayout (m_layoutHash);
         }
+
+        m_device->deallocate (OBJECT_TYPE_SHADER, 0);
     }
 }

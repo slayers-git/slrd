@@ -10,8 +10,10 @@
 
 namespace slrd {
     VKPipeline::~VKPipeline () {
-        if (m_pipeline)
+        if (m_pipeline) {
             vkDestroyPipeline (m_device->getVkDevice (), m_pipeline, nullptr);
+            m_device->deallocate (OBJECT_TYPE_PIPELINE, 0);
+        }
     }
 
     int VKPipeline::init (VKDevice *device, const GraphicsPipelineInfo& info) {

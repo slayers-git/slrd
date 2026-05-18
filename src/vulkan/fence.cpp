@@ -21,6 +21,7 @@ namespace slrd {
         m_fence = fence;
 
         device->allocate (OBJECT_TYPE_FENCE, 0);
+        device->vkallocate (VK_OBJECT_TYPE_FENCE, 0);
 
         return 0;
     }
@@ -44,6 +45,9 @@ namespace slrd {
     VKFence::~VKFence () {
         if (m_fence != VK_NULL_HANDLE) {
             vkDestroyFence (m_device->getVkDevice (), m_fence, nullptr);
+
+            m_device->deallocate (OBJECT_TYPE_FENCE, 0);
+            m_device->vkdeallocate (VK_OBJECT_TYPE_FENCE, 0);
         }
     }
 };
