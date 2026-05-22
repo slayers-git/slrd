@@ -150,6 +150,7 @@ namespace slrd {
         Ref<IBuffer> createBuffer (const BufferInfo& info) final override;
         Ref<IFence> createFence (bool signalled = false) final override;
 
+        Ref<ICommandPool> createCommandPool (const CommandPoolInfo& info) final override;
         Ref<ICommandQueue> createCommandQueue (const CommandQueueInfo& info) final override;
 
         Ref<ISampler> createSampler (const SamplerInfo& info) final override;

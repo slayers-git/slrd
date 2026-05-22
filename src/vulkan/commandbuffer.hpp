@@ -16,6 +16,7 @@ namespace slrd {
     class VKSwapchain;
     class VKRenderPass;
     class VKPipeline;
+    class VKCommandPool;
 
     class ITexture;
 
@@ -24,11 +25,13 @@ namespace slrd {
             public VKDeviceObject<ICommandBuffer>,
             public VKResource<VKCommandBuffer> {
     public:
-        rocket::scoped_connection_container m_queueConnections;
+        rocket::scoped_connection_container m_poolConnections;
 
     private:
         /* Queue to which this command buffer belongs */
         VKCommandQueue *m_queue;
+
+        Ref<VKCommandPool> m_pool;
 
         /* The list of swapchains we should signal to that the rendering
          * is finished */
@@ -70,7 +73,7 @@ namespace slrd {
             return m_swapchainsToSignal;
         }
 
-        int init (VKCommandQueue *queue, bool primary);
+        int init (VKCommandPool *pool, const CommandBufferInfo& info);
 
         void reset () final override;
 

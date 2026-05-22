@@ -23,12 +23,7 @@ namespace slrd {
     public:
         virtual ~ICommandQueue () = default;
 
-        /* Get command buffer from this queue */
-        virtual ICommandBuffer *getCommandBuffer (bool primary = true) = 0;
-
-        /* Reset buffers inherited from here (Only works in specific cases) */
-        virtual int reset () = 0;
-        /* Wait for the queue to finish (only works if the HARDWARE flag is not specified) */
+        /* Wait for the queue to finish */
         virtual int wait () = 0;
 
         /* Submit work to the gpu */
@@ -40,6 +35,7 @@ namespace slrd {
         COMMAND_QUEUE_TRANSFER = 4,
         COMMAND_QUEUE_COMPUTE  = 8
     };
+
     using CommandQueueFlags = uint32_t;
 
     struct CommandQueueInfo {

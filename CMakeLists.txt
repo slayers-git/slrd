@@ -45,6 +45,7 @@ set (VULKAN_SRC
          src/vulkan/buffer.cpp
          src/vulkan/texture.cpp
          src/vulkan/commandqueue.cpp
+         src/vulkan/commandpool.cpp
          src/vulkan/commandbuffer.cpp
          src/vulkan/renderpass.cpp
          src/vulkan/fence.cpp

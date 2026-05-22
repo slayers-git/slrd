@@ -28,13 +28,10 @@ namespace util {
     }
 
     slrd::Ref<slrd::IBuffer> createBufferWithData (slrd::IDevice *device,
-            slrd::ICommandQueue *queue, slrd::BufferUsageFlags usage,
+            slrd::ICommandBuffer *buffer, slrd::ICommandQueue *queue,
+            slrd::BufferUsageFlags usage,
             void *data, size_t size) {
         slrd::Ref<slrd::IBuffer> result, stagingBuffer;
-        auto oneTimeBuffer = queue->getCommandBuffer (true);
-        if (!oneTimeBuffer) {
-            throw std::runtime_error ("Failed to create onetime command buffer");
-        }
 
         slrd::BufferInfo stagingInfo {};
         stagingInfo.usage = 0;
@@ -67,18 +64,19 @@ namespace util {
             throw std::runtime_error ("Failed to create the buffer");
         }
 
-        oneTimeBuffer->begin ();
+        buffer->begin ();
 
         slrd::BufferCopyInfo copyInfo;
         copyInfo.srcBuffer = stagingBuffer.get ();
         copyInfo.dstBuffer = result.get ();
         copyInfo.size = size;
-        oneTimeBuffer->copyBuffer (copyInfo);
 
-        oneTimeBuffer->end ();
+        buffer->copyBuffer (copyInfo);
+
+        buffer->end ();
 
         slrd::SubmitInfo submitInfo {};
-        submitInfo.commandBuffers = { &oneTimeBuffer, 1 };
+        submitInfo.commandBuffers = { &buffer, 1 };
         if (queue->submit (submitInfo)) {
             throw std::runtime_error ("Failed to submit one time command buffer");
         }
@@ -88,7 +86,8 @@ namespace util {
         return result;
     }
 
-    slrd::Ref<slrd::ITexture> loadCubeMap (slrd::IDevice *device, slrd::ICommandQueue *queue,
+    slrd::Ref<slrd::ITexture> loadCubeMap (slrd::IDevice *device,
+            slrd::ICommandBuffer *cmd_buffer, slrd::ICommandQueue *queue,
             const std::filesystem::path& path,
             slrd::ITextureView **view) {
         uint8_t *images[6] = {};
@@ -180,27 +179,23 @@ namespace util {
             regions[i].rect = { 0, 0, 0, width, height, 1 };
         }
 
-        auto oneTime = queue->getCommandBuffer ();
-        if (!oneTime) {
-            throw std::runtime_error ("Failed to create one time command buffer");
-        }
-
-        oneTime->begin ();
+        cmd_buffer->begin ();
 
             slrd::BufferTextureCopyInfo btInfo;
             btInfo.buffer = buffer.get ();
             btInfo.texture = texture.get ();
             btInfo.regions = regions;
 
-            oneTime->copyBufferToImage (btInfo);
+            cmd_buffer->copyBufferToImage (btInfo);
 
-        oneTime->end ();
+        cmd_buffer->end ();
 
         slrd::SubmitInfo sbInfo;
-        sbInfo.commandBuffers = { &oneTime, 1 };
+        sbInfo.commandBuffers = { &cmd_buffer, 1 };
         if (queue->submit (sbInfo)) {
             throw std::runtime_error ("Failed to submit to command queue");
         }
+
         queue->wait ();
 
         slrd::TextureViewInfo vInfo;

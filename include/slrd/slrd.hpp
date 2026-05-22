@@ -15,6 +15,7 @@
 #include "swapchain.hpp"
 #include "texture.hpp"
 #include "pipeline.hpp"
+#include "commandpool.hpp"
 #include "commandqueue.hpp"
 #include "commandbuffer.hpp"
 #include "uniformset.hpp"

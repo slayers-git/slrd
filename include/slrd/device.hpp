@@ -38,6 +38,7 @@ namespace slrd {
     class ISurface;
     class IFence;
     class ICommandQueue;
+    class ICommandPool;
     class ICommandBuffer;
     class ISampler;
 
@@ -50,6 +51,7 @@ namespace slrd {
     struct GraphicsPipelineInfo;
     struct PipelineLayoutInfo;
     struct CommandQueueInfo;
+    struct CommandPoolInfo;
     struct ComputePipelineInfo;
 
     /* The logical device interface */
@@ -69,6 +71,7 @@ namespace slrd {
         virtual Ref<IPipeline> createGraphicsPipeline (const GraphicsPipelineInfo& info) = 0;
         virtual Ref<IPipeline> createComputePipeline (const ComputePipelineInfo& info) = 0;
 
+        virtual Ref<ICommandPool> createCommandPool (const CommandPoolInfo& info) = 0;
         virtual Ref<ICommandQueue> createCommandQueue (const CommandQueueInfo& info) = 0;
 
         virtual Ref<ISampler> createSampler (const SamplerInfo& info) = 0;

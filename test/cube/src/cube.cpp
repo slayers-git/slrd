@@ -216,8 +216,9 @@ struct App {
     slrd::Ref<slrd::IBuffer> m_vertexBuffer;
     slrd::Ref<slrd::IBuffer> m_indexBuffer;
 
+    slrd::Ref<slrd::ICommandPool> m_commandPool;
     slrd::Ref<slrd::ICommandQueue> m_commandQueue;
-    slrd::ICommandBuffer *m_commandBuffer;
+    slrd::Ref<slrd::ICommandBuffer> m_commandBuffer;
 
     slrd::Ref<slrd::IUniformSet> m_uniformSet;
 
@@ -248,7 +249,7 @@ struct App {
         int w, h, c;
         uint8_t *const udata = stbi_load (path.c_str (), &w, &h, &c, 4);
 
-        auto oneTime = m_commandQueue->getCommandBuffer ();
+        auto oneTime = m_commandPool->allocate ({});
         if (!oneTime) {
             std::cout << "Failed to create one time command buffer\n";
             return nullptr;
@@ -332,7 +333,10 @@ struct App {
         oneTime->end ();
 
         slrd::SubmitInfo info;
-        info.commandBuffers = { &oneTime, 1 };
+        slrd::ICommandBuffer *cmd_buffers[] = {
+            oneTime.get ()
+        };
+        info.commandBuffers = { cmd_buffers, 1 };
         int res = m_commandQueue->submit (info);
         if (res) {
             std::cout << "Failed to submit one time command buffer\n";
@@ -471,7 +475,16 @@ struct App {
                 exit (1);
             }
 
-            m_commandBuffer = m_commandQueue->getCommandBuffer ();
+
+            slrd::CommandPoolInfo pInfo;
+            pInfo.queue = m_commandQueue.get ();
+            m_commandPool = m_device->createCommandPool (pInfo);
+            if (!m_commandPool) {
+                std::cerr << slrd::getErrorString ();
+                exit (1);
+            }
+
+            m_commandBuffer = m_commandPool->allocate ({});
             if (!m_commandBuffer) {
                 std::cerr << slrd::getErrorString ();
                 exit (1);
@@ -489,7 +502,7 @@ struct App {
             size_t size,
             std::string_view name = "") {
         slrd::Ref<slrd::IBuffer> result, stagingBuffer;
-        auto oneTimeBuffer = m_commandQueue->getCommandBuffer (true);
+        auto oneTimeBuffer = m_commandPool->allocate ({});
         if (!oneTimeBuffer) {
             std::cout << "Failed to create a one time buffer\n";
             return nullptr;
@@ -539,7 +552,10 @@ struct App {
         oneTimeBuffer->end ();
 
         slrd::SubmitInfo submitInfo {};
-        submitInfo.commandBuffers = { &oneTimeBuffer, 1 };
+        slrd::ICommandBuffer *cmd_buffers[] = {
+            oneTimeBuffer.get ()
+        };
+        submitInfo.commandBuffers = { cmd_buffers, 1 };
         if (m_commandQueue->submit (submitInfo)) {
             return nullptr;
         }
@@ -820,8 +836,8 @@ struct App {
          * to the existing one if imageless-framebuffers are supported) */
         m_renderPass->setTextureView (0, texture_view);
 
-        /* Reset the command buffer */
-        m_commandBuffer->reset ();
+        /* Reset all command buffers that were allocated from this pool */
+        m_commandPool->reset ();
 
         int w, h;
         SDL_GL_GetDrawableSize (m_window, &w, &h);
@@ -873,7 +889,7 @@ struct App {
         slrd::SubmitInfo submitInfo;
         submitInfo.fence = m_fence.get ();
 
-        slrd::ICommandBuffer *cmdBuffers[] = { m_commandBuffer };
+        slrd::ICommandBuffer *cmdBuffers[] = { m_commandBuffer.get () };
         submitInfo.commandBuffers = cmdBuffers;
 
         profiler.startScope ("Submit");

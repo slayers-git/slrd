@@ -8,10 +8,10 @@
 #include "pipeline.hpp"
 #include "buffer.hpp"
 #include "renderpass.hpp"
+#include "commandpool.hpp"
 #include "vulkan/format.hpp"
 #include "vulkan/pipelinelayout.hpp"
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include "uniformset.hpp"
 
@@ -111,15 +111,18 @@ namespace slrd {
         }
     }
 
-    int VKCommandBuffer::init (VKCommandQueue *queue, bool primary) {
-        SLRD_ASSERT (queue != nullptr);
+    int VKCommandBuffer::init (VKCommandPool *pool, const CommandBufferInfo& info) {
+        SLRD_ASSERT (pool != nullptr);
 
         VkCommandBuffer vkbuffer;
+        VKCommandQueue *queue = pool->getQueue ();
 
         VkCommandBufferAllocateInfo ainfo {};
         ainfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        ainfo.level = primary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-        ainfo.commandPool = queue->getCommandPool ();
+        ainfo.level = info.primary ?
+            VK_COMMAND_BUFFER_LEVEL_PRIMARY :
+            VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+        ainfo.commandPool = pool->getVkCommandPool ();
         ainfo.commandBufferCount = 1;
 
         VK_WRAP_RETURN (
@@ -127,15 +130,13 @@ namespace slrd {
                 -1);
 
         m_queue = queue;
-        m_owningPool = queue->getCommandPool ();
+        m_pool  = Ref<VKCommandPool>::share (pool);
+        m_owningPool = pool->getVkCommandPool ();
         m_buffer = vkbuffer;
 
-#if SLRD_DEBUG
-        /* In case we need to track the state, connect with the queue, so it
-         * notifies us of reset() */
-        m_queueConnections += {
-            queue->commandQueueReset.connect (this, 
-                    &VKCommandBuffer::signalReset)
+#ifdef SLRD_DEBUG
+        m_poolConnections += {
+            pool->commandPoolReset.connect (this, &VKCommandBuffer::signalReset)
         };
 #endif
 
@@ -152,8 +153,13 @@ namespace slrd {
     }
 
     void VKCommandBuffer::reset () {
+        SLRD_DEBUG_CRIT_IF (
+                !(m_pool->getFlags () & COMMAND_POOL_FLAG_INDIVIDUAL_RESET),
+                "VKCommandBuffer::reset() on a CommandBuffer allocated from "
+                "a pool created without the COMMAND_POOL_FLAG_INDIVIDUAL_RESET "
+                "flag set is not supported");
+
         vkResetCommandBuffer (m_buffer, 0);
-        m_swapchainsToSignal.clear ();
 
 #if SLRD_DEBUG
         m_state = STATE_INITIAL;
@@ -162,6 +168,9 @@ namespace slrd {
 
     void VKCommandBuffer::begin () {
         SLRD_ASSERT (m_state == STATE_INITIAL);
+
+        /* Reset the swapchains immediately */
+        m_swapchainsToSignal.clear ();
 
         VkCommandBufferBeginInfo begInfo {};
         begInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

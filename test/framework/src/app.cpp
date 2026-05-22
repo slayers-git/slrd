@@ -160,11 +160,18 @@ App::App (const AppInit& init) {
         }
     }
 
-    slrd::CommandQueueInfo cqInfo;
+    slrd::CommandQueueInfo cqInfo {};
     cqInfo.flags = slrd::COMMAND_QUEUE_GRAPHICS;
     m_commandQueue = m_device->createCommandQueue (cqInfo);
     if (!m_commandQueue) {
         throw std::runtime_error ("Failed to create the command queue");
+    }
+
+    slrd::CommandPoolInfo pInfo {};
+    pInfo.queue = m_commandQueue.get ();
+    m_commandPool = m_device->createCommandPool (pInfo);
+    if (!m_commandQueue) {
+        throw std::runtime_error ("Failed to create the command pool");
     }
 
     createDepthResource (init.width, init.height);
@@ -327,6 +334,7 @@ App::~App () {
     m_depth = nullptr;
     m_depthView = nullptr;
     m_commandQueue = nullptr;
+    m_commandPool = nullptr;
     m_fence = nullptr;
 
     if (m_imCtx)

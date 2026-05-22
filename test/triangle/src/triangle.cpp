@@ -88,7 +88,8 @@ struct App {
     slrd::Ref<slrd::IBuffer> m_triangleBuffer;
 
     slrd::Ref<slrd::ICommandQueue> m_commandQueue;
-    slrd::ICommandBuffer *m_commandBuffer;
+    slrd::Ref<slrd::ICommandPool> m_commandPool;
+    slrd::Ref<slrd::ICommandBuffer> m_commandBuffer;
 
     bool m_shouldRecreateSwapchain = false;
 
@@ -202,7 +203,7 @@ struct App {
              *
              * As such, commiting actually happens to one queue, requested 
              * during the creation of IDevice. */
-            slrd::CommandQueueInfo cInfo;
+            slrd::CommandQueueInfo cInfo {};
             cInfo.flags = slrd::COMMAND_QUEUE_GRAPHICS;
             m_commandQueue = m_device->createCommandQueue (cInfo);
             if (!m_commandQueue) {
@@ -210,7 +211,16 @@ struct App {
                 exit (1);
             }
 
-            m_commandBuffer = m_commandQueue->getCommandBuffer ();
+            slrd::CommandPoolInfo pInfo {};
+            pInfo.queue = m_commandQueue.get ();
+
+            m_commandPool = m_device->createCommandPool (pInfo);
+            if (!m_commandQueue) {
+                std::cerr << slrd::getErrorString ();
+                exit (1);
+            }
+
+            m_commandBuffer = m_commandPool->allocate ({});
             if (!m_commandBuffer) {
                 std::cerr << slrd::getErrorString ();
                 exit (1);
@@ -344,12 +354,13 @@ struct App {
     ~App () {
         m_device->waitIdle ();
 
-        m_commandQueue = nullptr;
         m_fence = nullptr;
         m_renderPass = nullptr;
         m_triangleBuffer = nullptr;
         m_pipeline = nullptr;
         m_commandBuffer = nullptr;
+        m_commandPool = nullptr;
+        m_commandQueue = nullptr;
 
         m_swapchain = nullptr;
         m_device = nullptr;
@@ -404,8 +415,8 @@ struct App {
          * to the existing one if imageless-framebuffers are supported) */
         m_renderPass->setTextureView (0, texture_view);
 
-        /* Reset the command buffer */
-        m_commandBuffer->reset ();
+        /* Reset the command buffers allocated from this pool */
+        m_commandPool->reset ();
 
         int w, h;
         SDL_GL_GetDrawableSize (m_window, &w, &h);
@@ -431,7 +442,7 @@ struct App {
         slrd::SubmitInfo submitInfo;
         submitInfo.fence = m_fence.get ();
 
-        slrd::ICommandBuffer *cmdBuffers[] = { m_commandBuffer };
+        slrd::ICommandBuffer *cmdBuffers[] = { m_commandBuffer.get () };
         submitInfo.commandBuffers = cmdBuffers;
 
         m_commandQueue->submit (submitInfo);

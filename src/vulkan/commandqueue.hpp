@@ -19,13 +19,8 @@ namespace slrd {
     class VKCommandQueue : 
             public VKDeviceObject<ICommandQueue>,
             public VKResource<VKCommandQueue> {
-    public:
-        rocket::thread_safe_signal<void()> commandQueueReset;
-
     private:
         VkQueue m_queue = VK_NULL_HANDLE;
-        VkCommandPool m_pool = VK_NULL_HANDLE;
-
         uint32_t m_queueFamily;
 
         /* The buffers allocated from this queue */
@@ -47,14 +42,8 @@ namespace slrd {
             return m_device;
         }
 
-        [[nodiscard]] VkCommandPool getCommandPool () const {
-            return m_pool;
-        }
-
         int init (VKDevice *device, const CommandQueueInfo& info);
-        ICommandBuffer *getCommandBuffer (bool primary) final override;
 
-        int reset () final override;
         int wait () final override;
 
         int submit (const SubmitInfo& info) final override;

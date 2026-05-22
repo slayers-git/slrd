@@ -10,10 +10,12 @@ namespace util {
     slrd::Ref<slrd::IShader> loadShader (slrd::IDevice *device, const std::vector<std::filesystem::path>& paths);
 
     slrd::Ref<slrd::IBuffer> createBufferWithData (slrd::IDevice *device,
-            slrd::ICommandQueue *queue, slrd::BufferUsageFlags usage,
+            slrd::ICommandBuffer *buffer, slrd::ICommandQueue *queue,
+            slrd::BufferUsageFlags usage,
             void *data, size_t size);
 
-    slrd::Ref<slrd::ITexture> loadCubeMap (slrd::IDevice *device, slrd::ICommandQueue *queue,
+    slrd::Ref<slrd::ITexture> loadCubeMap (slrd::IDevice *device,
+            slrd::ICommandBuffer *queue,
             const std::filesystem::path& path,
             slrd::ITextureView **tv);
 }

@@ -20,6 +20,10 @@ namespace slrd {
     class IUniformSet;
     class ITexture;
 
+    struct CommandBufferInfo {
+        bool primary = true;
+    };
+
     enum MemoryAccessFlag : uint64_t {
         MEMORY_ACCESS_FLAG_NONE  = 0,
         MEMORY_ACCESS_FLAG_READ  = 1,

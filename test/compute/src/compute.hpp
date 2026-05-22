@@ -64,7 +64,8 @@ private:
     slrd::Ref<slrd::IPipeline> m_graphicsPipeline;
 
     slrd::Ref<slrd::IRenderPass> m_renderPass;
-    slrd::ICommandBuffer *m_commandBuffer;
+
+    slrd::Ref<slrd::ICommandBuffer> m_commandBuffer;
 
     uint32_t m_currentSSBO = 0;
     slrd::Ref<slrd::IBuffer> m_particleSSBOs[2];

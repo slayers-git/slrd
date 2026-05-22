@@ -15,65 +15,19 @@ namespace slrd {
     int VKCommandQueue::init (VKDevice *device, const CommandQueueInfo& info) {
         SLRD_ASSERT (device != nullptr);
 
-        VkCommandPool vkpool;
-
-        VkCommandPoolCreateInfo pinfo {};
-        pinfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        /* TODO: For now the API only supports multi-purpose 
-         * compute/transfer/graphics queue. */
-        pinfo.queueFamilyIndex = device->getQueueIndices ().graphics;
-
-        pinfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-        m_queueFamily = device->getQueueIndices ().graphics;
-
-        VK_WRAP_RETURN_RESULT_LOGERROR (
-                vkCreateCommandPool (device->getVkDevice (), &pinfo, nullptr, &vkpool),
-                "Failed to create command pool");
-
         m_queue = device->getGraphicsQueue ();
-        m_pool  = vkpool;
+        m_queueFamily = device->getQueueIndices ().graphics;
         setParentDevice (device);
 
         device->allocate (OBJECT_TYPE_COMMAND_QUEUE, 0);
-        device->vkallocate (VK_OBJECT_TYPE_COMMAND_POOL, 0);
 
         return 0;
     }
 
-    ICommandBuffer *VKCommandQueue::getCommandBuffer (bool primary) {
-        SLRD_ASSERT (m_pool != VK_NULL_HANDLE);
-        auto buffer = makeResource<VKCommandBuffer> (this, primary);
-        if (buffer) {
-            m_buffers.push_back (Ref<VKCommandBuffer>::adopt (buffer));
-        }
-
-        return buffer;
-    }
-
     VKCommandQueue::~VKCommandQueue () {
         wait ();
-        m_buffers.clear ();
-
-        if (m_pool) {
-            vkDestroyCommandPool (m_device->getVkDevice (), m_pool, nullptr);
-            m_device->deallocate (OBJECT_TYPE_COMMAND_QUEUE, 0);
-            m_device->vkdeallocate (VK_OBJECT_TYPE_COMMAND_POOL, 0);
-        }
     }
 
-    int VKCommandQueue::reset () {
-        SLRD_ASSERT (m_pool != VK_NULL_HANDLE);
-        vkResetCommandPool (m_device->getVkDevice (), m_pool, 0);
-
-#if SLRD_DEBUG
-        /* In case we track it (which only happens when we track the state),
-         * notify all of the connected queues about the reset */
-        commandQueueReset ();
-#endif
-
-        return -1;
-    }
     int VKCommandQueue::wait () {
         SLRD_ASSERT (m_queue != VK_NULL_HANDLE);
         vkQueueWaitIdle (m_queue);

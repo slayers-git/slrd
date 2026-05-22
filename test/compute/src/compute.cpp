@@ -28,10 +28,25 @@ void Compute::initParticleBuffer () {
         particle.color = glm::vec4 (rndDist (rndEngine), rndDist(rndEngine), rndDist(rndEngine), 1.0f);
     }
 
-    m_particleSSBOs[0] = util::createBufferWithData (m_device.get (), m_commandQueue.get (),
+    slrd::CommandPoolInfo pool_info;
+    pool_info.queue = m_commandQueue.get ();
+    pool_info.flags = slrd::COMMAND_POOL_FLAG_TRANSIENT;
+    auto pool = m_device->createCommandPool (pool_info);
+    if (!pool)
+        throw std::runtime_error ("Failed to create a command pool");
+    auto cmd_buffer = pool->allocate ({});
+    if (!cmd_buffer)
+        throw std::runtime_error ("Failed to create a command buffer");
+
+    m_particleSSBOs[0] = util::createBufferWithData (m_device.get (),
+            cmd_buffer.get (), m_commandQueue.get (),
             slrd::BUFFER_USAGE_VERTEX_BUFFER | slrd::BUFFER_USAGE_STORAGE_BUFFER,
             particles.data (), sizeof (Particle) * MAX_PARTICLES);
-    m_particleSSBOs[1] = util::createBufferWithData (m_device.get (), m_commandQueue.get (),
+
+    pool->reset ();
+
+    m_particleSSBOs[1] = util::createBufferWithData (m_device.get (),
+            cmd_buffer.get (), m_commandQueue.get (),
             slrd::BUFFER_USAGE_VERTEX_BUFFER | slrd::BUFFER_USAGE_STORAGE_BUFFER,
             particles.data (), sizeof (Particle) * MAX_PARTICLES);
 }
@@ -102,7 +117,7 @@ Compute::Compute () :
         }
     }
 
-    m_commandBuffer = m_commandQueue->getCommandBuffer ();
+    m_commandBuffer = m_commandPool->allocate ({});
     if (!m_commandBuffer)
         throw std::runtime_error ("Failed to get the command buffer");
 
@@ -158,7 +173,7 @@ void Compute::updateCompute () {
 
 void Compute::draw () {
     m_fence->wait ();
-    m_commandBuffer->reset ();
+    m_commandPool->reset ();
 
     m_profiler->newFrame ();
 
@@ -235,9 +250,12 @@ void Compute::draw () {
 
     m_commandBuffer->end ();
 
+    slrd::ICommandBuffer *cmd_buffers[] = {
+        m_commandBuffer.get ()
+    };
     slrd::SubmitInfo submitInfo;
     submitInfo.fence = getCurrentFence ();
-    submitInfo.commandBuffers = { &m_commandBuffer, 1 };
+    submitInfo.commandBuffers = { cmd_buffers, 1 };
 
     m_profiler->startScope ("Submit");
     m_commandQueue->submit (submitInfo);

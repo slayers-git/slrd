@@ -9,6 +9,7 @@
 #include "error.hpp"
 #include "vulkan/buffer.hpp"
 #include "vulkan/commandbuffer.hpp"
+#include "vulkan/commandpool.hpp"
 #include "vulkan/commandqueue.hpp"
 #include "vulkan/fence.hpp"
 #include "vulkan/pipeline.hpp"
@@ -272,6 +273,10 @@ namespace slrd {
 
     Ref<IFence> VKDevice::createFence (bool signalled) {
         return Ref<IFence>::adopt (createVKFence (this, signalled));
+    }
+
+    Ref<ICommandPool> VKDevice::createCommandPool (const CommandPoolInfo& info) {
+        return Ref<ICommandPool>::adopt (createVKCommandPool (this, info));
     }
 
     Ref<ICommandQueue> VKDevice::createCommandQueue (const CommandQueueInfo& info) {

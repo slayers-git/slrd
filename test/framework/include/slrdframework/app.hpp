@@ -7,6 +7,7 @@
 #include <slrd/api.hpp>
 #include <slrd/types.hpp>
 #include <slrd/pipeline.hpp>
+#include <slrd/commandpool.hpp>
 
 #include <imgui.h>
 
@@ -62,6 +63,7 @@ protected:
     slrd::Ref<slrd::IFence> m_fence;
 
     slrd::Ref<slrd::ICommandQueue> m_commandQueue;
+    slrd::Ref<slrd::ICommandPool> m_commandPool;
 
     slrd::Ref<slrd::ITexture> m_depth;
     slrd::Ref<slrd::ITextureView> m_depthView;
