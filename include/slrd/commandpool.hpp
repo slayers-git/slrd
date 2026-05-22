@@ -10,6 +10,7 @@ namespace slrd {
     class ICommandQueue;
 
     enum CommandPoolFlag {
+        COMMAND_POOL_FLAG_NONE = 0,
         /**
          * Make it possible for the buffers allocated from this pool to be
          * individually reset.
@@ -24,8 +25,8 @@ namespace slrd {
     };
 
     struct CommandPoolInfo {
-        ICommandQueue *queue;
-        uint32_t flags;
+        ICommandQueue *queue = nullptr;
+        uint32_t flags = COMMAND_POOL_FLAG_NONE;
     };
 
     /**
