@@ -197,14 +197,8 @@ struct App {
         }
 
         {
-            /* Since we use the Vulkan API here, it's important to understand that
-             * terminology of CommandQueue comes from D3D12. In reality, what is
-             * happening is that we create a VkCommandPool here.
-             *
-             * As such, commiting actually happens to one queue, requested 
-             * during the creation of IDevice. */
             slrd::CommandQueueInfo cInfo {};
-            cInfo.flags = slrd::COMMAND_QUEUE_GRAPHICS;
+            cInfo.type = slrd::COMMAND_QUEUE_TYPE_GRAPHICS;
             m_commandQueue = m_device->createCommandQueue (cInfo);
             if (!m_commandQueue) {
                 std::cerr << slrd::getErrorString ();
@@ -212,7 +206,7 @@ struct App {
             }
 
             slrd::CommandPoolInfo pInfo {};
-            pInfo.queue = m_commandQueue.get ();
+            pInfo.type = slrd::COMMAND_QUEUE_TYPE_GRAPHICS;
 
             m_commandPool = m_device->createCommandPool (pInfo);
             if (!m_commandQueue) {

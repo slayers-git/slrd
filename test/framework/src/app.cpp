@@ -161,14 +161,14 @@ App::App (const AppInit& init) {
     }
 
     slrd::CommandQueueInfo cqInfo {};
-    cqInfo.flags = slrd::COMMAND_QUEUE_GRAPHICS;
+    cqInfo.type = slrd::COMMAND_QUEUE_TYPE_GRAPHICS;
     m_commandQueue = m_device->createCommandQueue (cqInfo);
     if (!m_commandQueue) {
         throw std::runtime_error ("Failed to create the command queue");
     }
 
     slrd::CommandPoolInfo pInfo {};
-    pInfo.queue = m_commandQueue.get ();
+    pInfo.type = slrd::COMMAND_QUEUE_TYPE_GRAPHICS;
     m_commandPool = m_device->createCommandPool (pInfo);
     if (!m_commandQueue) {
         throw std::runtime_error ("Failed to create the command pool");

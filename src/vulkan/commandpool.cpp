@@ -29,8 +29,6 @@ namespace slrd {
 
         m_flags = info.flags;
         m_pool  = vkpool;
-        m_queue = Ref<VKCommandQueue>::share (
-                static_cast<VKCommandQueue *>(info.queue));
 
         setParentDevice (device);
         device->allocate (OBJECT_TYPE_COMMAND_POOL, 0);

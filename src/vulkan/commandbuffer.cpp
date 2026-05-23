@@ -68,7 +68,7 @@ namespace slrd {
     }
 
     static constexpr VkPipelineStageFlags getVkPipelineStageForLayout (
-            auto& device,
+            slrd::VKDevice *device,
             slrd::TextureLayout layout) {
         VkPipelineStageFlags stage;
 
@@ -103,10 +103,10 @@ namespace slrd {
 
     VKCommandBuffer::~VKCommandBuffer () {
         if (m_buffer) {
-            m_queue->getDevice()->deallocate (OBJECT_TYPE_COMMAND_BUFFER, 0);
-            m_queue->getDevice()->vkdeallocate (VK_OBJECT_TYPE_COMMAND_BUFFER, 0);
+            getDevice()->deallocate (OBJECT_TYPE_COMMAND_BUFFER, 0);
+            getDevice()->vkdeallocate (VK_OBJECT_TYPE_COMMAND_BUFFER, 0);
 
-            vkFreeCommandBuffers (m_queue->getDevice ()->getVkDevice (),
+            vkFreeCommandBuffers (getDevice ()->getVkDevice (),
                     m_owningPool, 1, &m_buffer);
         }
     }
@@ -115,7 +115,6 @@ namespace slrd {
         SLRD_ASSERT (pool != nullptr);
 
         VkCommandBuffer vkbuffer;
-        VKCommandQueue *queue = pool->getQueue ();
 
         VkCommandBufferAllocateInfo ainfo {};
         ainfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -126,10 +125,9 @@ namespace slrd {
         ainfo.commandBufferCount = 1;
 
         VK_WRAP_RETURN (
-                vkAllocateCommandBuffers (queue->getDevice ()->getVkDevice (), &ainfo, &vkbuffer),
+                vkAllocateCommandBuffers (pool->getDevice ()->getVkDevice (), &ainfo, &vkbuffer),
                 -1);
 
-        m_queue = queue;
         m_pool  = Ref<VKCommandPool>::share (pool);
         m_owningPool = pool->getVkCommandPool ();
         m_buffer = vkbuffer;
@@ -140,8 +138,10 @@ namespace slrd {
         };
 #endif
 
-        queue->getDevice()->allocate (OBJECT_TYPE_COMMAND_BUFFER, 0);
-        queue->getDevice()->vkallocate (VK_OBJECT_TYPE_COMMAND_BUFFER, 0);
+        setParentDevice (pool->getDevice ());
+
+        getDevice()->allocate (OBJECT_TYPE_COMMAND_BUFFER, 0);
+        getDevice()->vkallocate (VK_OBJECT_TYPE_COMMAND_BUFFER, 0);
 
         return 0;
     }
@@ -263,7 +263,7 @@ namespace slrd {
         SLRD_ASSERT (pipeline != nullptr);
 
         auto *ipipeline = static_cast<VKPipeline *> (pipeline);
-        VkPipeline vkpipeline = m_queue->getDevice ()->
+        VkPipeline vkpipeline = getDevice ()->
             getPipelineManager ()->getOrCreatePipeline (ipipeline->getState (),
                 m_renderpass);
         SLRD_DEBUG_CRIT_IF (!vkpipeline, "Failed to create a pipeline for the renderpass!");
@@ -450,9 +450,9 @@ namespace slrd {
         barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
-        VkPipelineStageFlags srcStage = getVkPipelineStageForLayout (m_queue->getDevice (),
+        VkPipelineStageFlags srcStage = getVkPipelineStageForLayout (getDevice (),
                                     info.currentTextureLayout),
-                             dstStage = getVkPipelineStageForLayout (m_queue->getDevice (),
+                             dstStage = getVkPipelineStageForLayout (getDevice (),
                                     info.newTextureLayout);
 
         vkCmdPipelineBarrier (m_buffer, srcStage, dstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);

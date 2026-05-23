@@ -5,6 +5,7 @@
 
 #include "object.hpp"
 #include "commandbuffer.hpp"
+#include "commandqueue.hpp"
 
 namespace slrd {
     class ICommandQueue;
@@ -25,7 +26,11 @@ namespace slrd {
     };
 
     struct CommandPoolInfo {
-        ICommandQueue *queue = nullptr;
+        /**
+         * What type of commands will be written to this queue */
+        CommandQueueType type = COMMAND_QUEUE_TYPE_GRAPHICS;
+        /**
+         * Command pool flags */
         uint32_t flags = COMMAND_POOL_FLAG_NONE;
     };
 

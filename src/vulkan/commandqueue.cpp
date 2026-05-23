@@ -44,9 +44,6 @@ namespace slrd {
         std::vector<VkCommandBuffer> vkbuffers (info.commandBuffers.size ());
         for (unsigned i = 0; i < info.commandBuffers.size (); ++i) {
             auto *cmdbuffer = static_cast<VKCommandBuffer *>(info.commandBuffers[i]);
-
-            /* Check that this command buffer was created by the same queue */
-            SLRD_ASSERT (cmdbuffer->getCommandQueue () == this);
             SLRD_ASSERT (cmdbuffer != nullptr);
             
             vkbuffers[i] = cmdbuffer->getCommandBuffer ();

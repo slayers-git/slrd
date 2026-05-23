@@ -30,16 +30,26 @@ namespace slrd {
         virtual int submit (const SubmitInfo& info) = 0;
     };
 
-    enum CommandQueueFlag {
-        COMMAND_QUEUE_GRAPHICS = 2,
-        COMMAND_QUEUE_TRANSFER = 4,
-        COMMAND_QUEUE_COMPUTE  = 8
+    enum CommandQueueType {
+        /**
+         * This queue has to support graphics commands */
+        COMMAND_QUEUE_TYPE_GRAPHICS = 1,
+        /**
+         * This queue has to support compute commands */
+        COMMAND_QUEUE_TYPE_COMPUTE  = 2,
+        /**
+         * This queue has to support transfer commands */
+        COMMAND_QUEUE_TYPE_TRANSFER = 3,
     };
 
-    using CommandQueueFlags = uint32_t;
-
     struct CommandQueueInfo {
-        CommandQueueFlags flags;
+        /**
+         * Type of the queue that defines what commands can be processed by it
+         *
+         * @note Depending on the API a command queue of type graphics may also
+         *       be able to execute compute. However, for async compute prefer
+         *       creating two separate queues with types graphics and compute. */
+        CommandQueueType type;
     };
 };
 

@@ -19,8 +19,6 @@ namespace slrd {
         rocket::thread_safe_signal<void()> commandPoolReset;
 
     private:
-        /* The queue from which this command pool is allocated */
-        Ref<VKCommandQueue> m_queue;
         VkCommandPool m_pool = VK_NULL_HANDLE;
 
         uint32_t m_flags;
@@ -34,10 +32,6 @@ namespace slrd {
         /**
          * Reset buffers that were allocated from this pool */
         int reset () override final;
-
-        inline VKCommandQueue *getQueue () noexcept {
-            return m_queue.get ();
-        }
 
         inline VkCommandPool getVkCommandPool () const noexcept {
             return m_pool;

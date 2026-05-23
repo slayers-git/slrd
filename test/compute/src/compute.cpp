@@ -29,7 +29,7 @@ void Compute::initParticleBuffer () {
     }
 
     slrd::CommandPoolInfo pool_info;
-    pool_info.queue = m_commandQueue.get ();
+    pool_info.type = slrd::COMMAND_QUEUE_TYPE_GRAPHICS;
     pool_info.flags = slrd::COMMAND_POOL_FLAG_TRANSIENT;
     auto pool = m_device->createCommandPool (pool_info);
     if (!pool)

@@ -28,9 +28,6 @@ namespace slrd {
         rocket::scoped_connection_container m_poolConnections;
 
     private:
-        /* Queue to which this command buffer belongs */
-        VKCommandQueue *m_queue;
-
         Ref<VKCommandPool> m_pool;
 
         /* The list of swapchains we should signal to that the rendering
@@ -63,10 +60,6 @@ namespace slrd {
 
         [[nodiscard]] VkCommandBuffer getCommandBuffer () const {
             return m_buffer;
-        }
-
-        [[nodiscard]] auto& getCommandQueue () const {
-            return m_queue;
         }
 
         [[nodiscard]] const auto& getSwapchainsToSingal () const {
