@@ -49,7 +49,7 @@ namespace slrd {
          * @note Depending on the API a command queue of type graphics may also
          *       be able to execute compute. However, for async compute prefer
          *       creating two separate queues with types graphics and compute. */
-        CommandQueueType type;
+        CommandQueueType type = COMMAND_QUEUE_TYPE_GRAPHICS;
     };
 };
 
