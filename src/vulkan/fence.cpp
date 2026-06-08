@@ -41,6 +41,18 @@ namespace slrd {
     void VKFence::reset () {
         vkResetFences (m_device->getVkDevice (), 1, &m_fence);
     }
+        
+    uint64_t VKFence::getValue () const {
+        auto status = vkGetFenceStatus (m_device->getVkDevice (), m_fence);
+        switch (status) {
+            case VK_SUCCESS:
+                return 1;
+            case VK_NOT_READY:
+                return 0;
+            default:
+                return 0; // FIXME?
+        }
+    }
 
     VKFence::~VKFence () {
         if (m_fence != VK_NULL_HANDLE) {

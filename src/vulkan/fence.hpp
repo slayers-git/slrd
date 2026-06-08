@@ -33,6 +33,8 @@ namespace slrd {
         int wait (uint64_t timeout) final override;
         void reset () final override;
 
+        uint64_t getValue () const final override;
+
         VkFence handle () const {
             return m_fence;
         }

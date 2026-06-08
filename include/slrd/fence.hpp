@@ -13,6 +13,8 @@ namespace slrd {
 
         virtual int wait (uint64_t timeout = UINT64_MAX) = 0;
         virtual void reset () = 0;
+
+        virtual uint64_t getValue () const = 0;
     };
 };
 
