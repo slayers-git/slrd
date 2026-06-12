@@ -171,7 +171,7 @@ namespace slrd {
     }
     
     int VKRenderPass::setTextureViews (std::span<ITextureView *> textureViews) {
-        SLRD_ASSERT (m_textureViews.size () != m_colorAttachments);
+        SLRD_ASSERT (textureViews.size () == m_colorAttachments);
         SLRD_ASSERT (m_renderpass != nullptr);
 
         uint32_t width  = 0;
