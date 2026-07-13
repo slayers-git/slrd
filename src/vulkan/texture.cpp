@@ -11,7 +11,11 @@ namespace slrd {
     int VKTexture::init (VKDevice *device, const TextureInfo& info) {
         VkImage image;
 
-        m_format = ::slrd::getVkFormat (info.format);
+        Format format = isDepthFormat (info.format) ?
+            ::slrd::getFittingDepthFormat (device, info.format) :
+            info.format;
+            
+        m_format = ::slrd::getVkFormat (format);
         m_width = info.width;
         m_height = info.height;
         m_depth = info.depth;

@@ -632,7 +632,7 @@ struct App {
             attachment.storeOp = slrd::STORE_OPERATION_STORE;
             attachment.presentable = true;
 
-            depth.format = slrd::FORMAT_D24UNORMS8UINT;
+            depth.format = slrd::FORMAT_D24_UNORM_S8_UINT;
             depth.loadOp = slrd::LOAD_OPERATION_CLEAR;
             depth.storeOp = slrd::STORE_OPERATION_DONT_CARE;
             depth.presentable = false;
@@ -653,7 +653,7 @@ struct App {
             plInfo.vertexConfig.vertexBindings = Vertex::getBindingDescriptions ();
             plInfo.vertexConfig.attributeDescs = Vertex::getAttributeDescription ();
             plInfo.rasterizerConfig.cullMode = slrd::CULL_MODE_BACK;
-            plInfo.depthStencilConfig.depthFormat = slrd::FORMAT_D24UNORMS8UINT;
+            plInfo.depthStencilConfig.depthFormat = slrd::FORMAT_D24_UNORM_S8_UINT;
             plInfo.depthStencilConfig.depthTestEnabled = true;
             plInfo.depthStencilConfig.depthWriteEnabled = true;
             plInfo.depthStencilConfig.compareOperator = slrd::COMPARE_OPERATOR_LESS;
@@ -754,7 +754,7 @@ struct App {
         ti.usage = slrd::TEXTURE_USAGE_DEPTH | slrd::TEXTURE_USAGE_STENCIL;
         ti.width = width;
         ti.height = height;
-        ti.format = slrd::FORMAT_D24UNORMS8UINT;
+        ti.format = slrd::FORMAT_D24_UNORM_S8_UINT;
         ti.name = "depth_texture";
 
         m_depthTexture = m_device->createTexture (ti);

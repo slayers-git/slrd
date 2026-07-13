@@ -192,7 +192,7 @@ void App::createDepthResource (uint32_t width, uint32_t height) {
     ti.usage = slrd::TEXTURE_USAGE_DEPTH | slrd::TEXTURE_USAGE_STENCIL;
     ti.width = width;
     ti.height = height;
-    ti.format = slrd::FORMAT_D24UNORMS8UINT;
+    ti.format = slrd::FORMAT_D24_UNORM_S8_UINT;
 
     m_depth = m_device->createTexture (ti);
     if (!m_depth) {

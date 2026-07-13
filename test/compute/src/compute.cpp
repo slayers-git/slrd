@@ -62,7 +62,7 @@ Compute::Compute () :
     color.finalLayout   = slrd::TEXTURE_LAYOUT_SWAPCHAIN_SRC;
     color.presentable = true;
 
-    depth.format = slrd::FORMAT_D24UNORMS8UINT;
+    depth.format = slrd::FORMAT_D24_UNORM_S8_UINT;
     depth.loadOp = slrd::LOAD_OPERATION_CLEAR;
     depth.storeOp = slrd::STORE_OPERATION_DONT_CARE;
     depth.initialLayout = slrd::TEXTURE_LAYOUT_UNDEFINED;
@@ -85,7 +85,7 @@ Compute::Compute () :
         slrd::GraphicsPipelineInfo pInfo;
         pInfo.shader = gShader.get ();
         pInfo.rasterizerConfig.cullMode = slrd::CULL_MODE_NONE;
-        pInfo.depthStencilConfig.depthFormat = slrd::FORMAT_D24UNORMS8UINT;
+        pInfo.depthStencilConfig.depthFormat = slrd::FORMAT_D24_UNORM_S8_UINT;
         pInfo.depthStencilConfig.depthTestEnabled = true;
         pInfo.depthStencilConfig.depthWriteEnabled = true;
         pInfo.depthStencilConfig.compareOperator = slrd::COMPARE_OPERATOR_LESS;

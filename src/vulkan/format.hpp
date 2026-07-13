@@ -9,93 +9,16 @@
 #include <slrd/format.hpp>
 
 namespace slrd {
-    inline constexpr VkFormat getVkFormat (slrd::Format format) {
-#define __FORMAT_CASE(__Internal, __Vk) \
-        case __Internal: vkformat = __Vk; break;
+    struct VKDevice;
 
-        VkFormat vkformat = VK_FORMAT_UNDEFINED;
+    [[nodiscard]]
+    VkFormat getVkFormat (slrd::Format format);
 
-        switch (format) {
-            case FORMAT_UNDEFINED:
-                break;
-
-            __FORMAT_CASE (FORMAT_BGRA8_UNORM, VK_FORMAT_B8G8R8A8_UNORM);
-            __FORMAT_CASE (FORMAT_RGBA8_UNORM, VK_FORMAT_R8G8B8A8_UNORM);
-            __FORMAT_CASE (FORMAT_RGBA16_UNORM, VK_FORMAT_R16G16B16A16_UNORM);
-            __FORMAT_CASE (FORMAT_RGBA16_SNORM, VK_FORMAT_R16G16B16A16_SNORM);
-            __FORMAT_CASE (FORMAT_RGBA8_UINT, VK_FORMAT_R8G8B8A8_UINT);
-            __FORMAT_CASE (FORMAT_RGBA16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT);
-            __FORMAT_CASE (FORMAT_RGBA32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT);
-
-            __FORMAT_CASE (FORMAT_R8_UINT, VK_FORMAT_R8_UINT);
-            __FORMAT_CASE (FORMAT_R16_FLOAT, VK_FORMAT_R16_SFLOAT);
-            __FORMAT_CASE (FORMAT_R32_UINT, VK_FORMAT_R32_UINT);
-            __FORMAT_CASE (FORMAT_R32_FLOAT, VK_FORMAT_R32_SFLOAT);
-
-            __FORMAT_CASE (FORMAT_D32SFLOAT, VK_FORMAT_D32_SFLOAT);
-            __FORMAT_CASE (FORMAT_D24UNORMS8UINT, VK_FORMAT_D24_UNORM_S8_UINT);
-
-            __FORMAT_CASE (FORMAT_RGB8_UINT, VK_FORMAT_R8G8B8_UINT);
-            __FORMAT_CASE (FORMAT_RGB8_SINT, VK_FORMAT_R8G8B8_SINT);
-            __FORMAT_CASE (FORMAT_RGB8_UNORM, VK_FORMAT_R8G8B8_UNORM);
-            
-            __FORMAT_CASE (FORMAT_RGB32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT);
-            __FORMAT_CASE (FORMAT_RG32_SFLOAT,  VK_FORMAT_R32G32_SFLOAT);
-            __FORMAT_CASE (FORMAT_RGB32_UINT,   VK_FORMAT_R32G32B32_UINT);
-            __FORMAT_CASE (FORMAT_RG32_UINT,    VK_FORMAT_R32G32_UINT);
-            __FORMAT_CASE (FORMAT_RGB32_SINT,   VK_FORMAT_R32G32_SINT);
-            __FORMAT_CASE (FORMAT_RG32_SINT,    VK_FORMAT_R32G32_SINT);
-
-            default:
-                SLRD_DEBUG_CRIT ("getVkFormat: invalid enum");
-                break;
-        }
-#undef __FORMAT_CASE
-
-        return vkformat;
-    }   
-
-    inline constexpr Format getSLRDFormat (VkFormat vkformat) {
-#define __FORMAT_CASE(__Internal, __Vk) \
-        case __Vk: format = __Internal; break;
-
-        Format format = FORMAT_UNDEFINED;
-
-        switch (vkformat) {
-            case VK_FORMAT_UNDEFINED:
-                break;
-
-            __FORMAT_CASE (FORMAT_BGRA8_UNORM, VK_FORMAT_B8G8R8A8_UNORM);
-            __FORMAT_CASE (FORMAT_RGBA8_UNORM, VK_FORMAT_R8G8B8A8_UNORM);
-            __FORMAT_CASE (FORMAT_RGBA16_UNORM, VK_FORMAT_R16G16B16A16_UNORM);
-            __FORMAT_CASE (FORMAT_RGBA16_SNORM, VK_FORMAT_R16G16B16A16_SNORM);
-            __FORMAT_CASE (FORMAT_RGBA8_UINT, VK_FORMAT_R8G8B8A8_UINT);
-            __FORMAT_CASE (FORMAT_RGBA16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT);
-            __FORMAT_CASE (FORMAT_RGBA32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT);
-
-            __FORMAT_CASE (FORMAT_R8_UINT, VK_FORMAT_R8_UINT);
-            __FORMAT_CASE (FORMAT_R16_FLOAT, VK_FORMAT_R16_SFLOAT);
-            __FORMAT_CASE (FORMAT_R32_UINT, VK_FORMAT_R32_UINT);
-            __FORMAT_CASE (FORMAT_R32_FLOAT, VK_FORMAT_R32_SFLOAT);
-
-            __FORMAT_CASE (FORMAT_D32SFLOAT, VK_FORMAT_D32_SFLOAT);
-            __FORMAT_CASE (FORMAT_D24UNORMS8UINT, VK_FORMAT_D24_UNORM_S8_UINT);
-            
-            __FORMAT_CASE (FORMAT_RGB32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT);
-            __FORMAT_CASE (FORMAT_RG32_SFLOAT,  VK_FORMAT_R32G32_SFLOAT);
-            __FORMAT_CASE (FORMAT_RGB32_UINT,   VK_FORMAT_R32G32_UINT);
-            /*__FORMAT_CASE (FORMAT_RG32_UINT,    VK_FORMAT_R32G32_UINT);*/
-            __FORMAT_CASE (FORMAT_RGB32_SINT,   VK_FORMAT_R32G32_SINT);
-            /*__FORMAT_CASE (FORMAT_RG32_SINT,    VK_FORMAT_R32G32_SINT);*/
-
-            default:
-                SLRD_DEBUG_CRIT ("getSLRDFormat: invalid enum");
-                break;
-        }
-#undef __FORMAT_CASE
-
-        return format;
-    }
+    [[nodiscard]]
+    slrd::Format getSLRDFormat (VkFormat vkformat);
+    
+    [[nodiscard]]
+    slrd::Format getFittingDepthFormat (VKDevice *device, slrd::Format format);
 
     /* Should technically allow for a bitset, but ... */
     inline constexpr VkSampleCountFlagBits getVkSampleCount (slrd::MSAACount type) {

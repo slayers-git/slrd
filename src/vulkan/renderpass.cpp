@@ -27,12 +27,16 @@ namespace slrd {
         /* Depth reference */
         VkAttachmentReference sdref {};
 
-        auto convAttachment = [](const RenderPassAttachment& attachment, VkAttachmentDescription& result,
+        auto convAttachment = [device](const RenderPassAttachment& attachment, VkAttachmentDescription& result,
                 bool depth) -> bool {
             SLRD_COMPLAIN_IF (attachment.format == FORMAT_UNDEFINED,
                     "RenderPass attachment's format shouldn't be undefined.");
 
-            result.format = slrd::getVkFormat (attachment.format);
+            Format format = isDepthFormat (attachment.format) ?
+                ::slrd::getFittingDepthFormat (device, attachment.format) :
+                attachment.format;
+            
+            result.format = slrd::getVkFormat (format);
             result.loadOp = slrd::getVkLoadOp (attachment.loadOp);
             result.storeOp = slrd::getVkStoreOp (attachment.storeOp);
             result.stencilLoadOp = slrd::getVkLoadOp (attachment.stencilLoadOp);

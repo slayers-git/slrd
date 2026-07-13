@@ -37,6 +37,7 @@ set (SRC src/api.cpp
 set (VULKAN_SRC
          src/vulkan/api.cpp
          src/vulkan/device.cpp
+         src/vulkan/format.cpp
          src/vulkan/surface.cpp
          src/vulkan/swapchain.cpp
          src/vulkan/shader.cpp

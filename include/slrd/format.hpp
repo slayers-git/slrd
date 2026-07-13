@@ -10,32 +10,83 @@ namespace slrd {
         FORMAT_UNDEFINED,
 
         FORMAT_BGRA8_UNORM,
+        FORMAT_BGRA8_SRGB,
+
+        FORMAT_RGBA8_UINT,
+        FORMAT_RGBA8_SINT,
         FORMAT_RGBA8_UNORM,
+        FORMAT_RGBA8_SNORM,
+        FORMAT_RGBA8_SRGB,
+
+        FORMAT_RGBA16_UINT,
+        FORMAT_RGBA16_SINT,
         FORMAT_RGBA16_UNORM,
         FORMAT_RGBA16_SNORM,
-        FORMAT_RGBA8_UINT,
         FORMAT_RGBA16_SFLOAT,
+
+        FORMAT_RGBA32_UINT,
+        FORMAT_RGBA32_SINT,
         FORMAT_RGBA32_SFLOAT,
 
         FORMAT_R8_UINT,
-        FORMAT_R16_FLOAT,
+        FORMAT_R8_SINT,
+        FORMAT_R8_UNORM,
+        FORMAT_R8_SNORM,
+
+        FORMAT_R16_UINT,
+        FORMAT_R16_SINT,
+        FORMAT_R16_UNORM,
+        FORMAT_R16_SNORM,
+        FORMAT_R16_SFLOAT,
+
         FORMAT_R32_UINT,
-        FORMAT_R32_FLOAT,
+        FORMAT_R32_SINT,
+        FORMAT_R32_SFLOAT,
 
-        FORMAT_RGB32_SFLOAT,
-        FORMAT_RG32_SFLOAT,
-        FORMAT_RGB32_UINT,
+        FORMAT_RG8_UINT,
+        FORMAT_RG8_SINT,
+        FORMAT_RG8_UNORM,
+        FORMAT_RG8_SNORM,
+
+        FORMAT_RG16_UINT,
+        FORMAT_RG16_SINT,
+        FORMAT_RG16_UNORM,
+        FORMAT_RG16_SNORM,
+        FORMAT_RG16_SFLOAT,
+
         FORMAT_RG32_UINT,
-        FORMAT_RGB32_SINT,
         FORMAT_RG32_SINT,
+        FORMAT_RG32_SFLOAT,
 
-        FORMAT_RGB8_UNORM,
-        FORMAT_RGB8_SINT,
-        FORMAT_RGB8_UINT,
+        FORMAT_RGB32_UINT,
+        FORMAT_RGB32_SINT,
+        FORMAT_RGB32_SFLOAT,
 
-		FORMAT_D32SFLOAT,
-		FORMAT_D24UNORMS8UINT,
+        FORMAT_RGB10A2_UINT,
+        FORMAT_RGB10A2_UNORM,
+
+        FORMAT_RG11B10_UFLOAT,
+
+		FORMAT_D16_UNORM,
+		FORMAT_D32_SFLOAT,
+        FORMAT_D32_SFLOAT_S8_UINT,
+        /**
+         * @note In Vulkan, specifically using RADV drivers, the support for
+         *       this format is not guaranteed. In slrd, if this format is not 
+         *       supported, the texture created will be of D32_SFLOAT_S8_UINT
+         *       format instead. */
+		FORMAT_D24_UNORM_S8_UINT,
     };
+
+    [[nodiscard]]
+    constexpr bool isDepthFormat (Format format) {
+        return format >= FORMAT_D16_UNORM && format <= FORMAT_D24_UNORM_S8_UINT;
+    }
+
+    [[nodiscard]]
+    constexpr bool hasStencil (Format format) {
+        return format == FORMAT_D32_SFLOAT_S8_UINT || format == FORMAT_D24_UNORM_S8_UINT;
+    }
 
     enum MSAACount {
         MSAA_COUNT_1  = 1,
