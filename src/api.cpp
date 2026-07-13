@@ -59,10 +59,10 @@ namespace slrd {
 #if SLRD_VULKAN_ENABLED
             case API_VULKAN:
                 deinitVulkanAPI ();
-                return;
+                break;
 #endif
             default:
-                return;
+                break;
         }
 
         s_currentAPI = API_NONE;

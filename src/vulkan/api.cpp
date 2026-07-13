@@ -119,7 +119,7 @@ namespace slrd {
             .pNext = NULL,
             .pApplicationName = config.appName.c_str (),
             .applicationVersion = VK_MAKE_VERSION (config.appVersion.major,
-                    config.appVersion.minor, config.appVersion.major),
+                    config.appVersion.minor, config.appVersion.patch),
             .pEngineName = config.engineName.c_str (),
             .engineVersion = VK_MAKE_VERSION (config.engineVersion.major,
                     config.engineVersion.minor, config.engineVersion.patch),
