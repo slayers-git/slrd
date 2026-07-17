@@ -53,6 +53,7 @@ namespace slrd {
     struct CommandQueueInfo;
     struct CommandPoolInfo;
     struct ComputePipelineInfo;
+    struct FenceInfo;
 
     /* The logical device interface */
     class IDevice : public IObject {
@@ -66,7 +67,7 @@ namespace slrd {
         virtual Ref<IBuffer> createBuffer (const BufferInfo& info) = 0;
 
         virtual Ref<IRenderPass> createRenderPass (const RenderPassInfo&) = 0;
-        virtual Ref<IFence> createFence (bool signalled = false) = 0;
+        virtual Ref<IFence> createFence (const FenceInfo&) = 0;
 
         virtual Ref<IPipeline> createGraphicsPipeline (const GraphicsPipelineInfo& info) = 0;
         virtual Ref<IPipeline> createComputePipeline (const ComputePipelineInfo& info) = 0;

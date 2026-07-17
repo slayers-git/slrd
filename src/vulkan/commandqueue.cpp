@@ -52,12 +52,38 @@ namespace slrd {
                     cmdbuffer->getSwapchainsToSingal ().end ());
         }
 
+        const auto nr_wait = info.waitFences.size() + swapchains.size();
+        const auto nr_signal = info.signalFences.size() + swapchains.size();
+
         std::vector<VkSemaphore> waitSemaphores;
         std::vector<VkSemaphore> signalSemaphores;
-        std::vector<VkPipelineStageFlags> waitStages (swapchains.size (),
+        std::vector<uint64_t> waitValues (nr_wait, 0);
+        std::vector<uint64_t> signalValues (nr_signal, 0);
+        std::vector<VkPipelineStageFlags> waitStages (nr_wait,
                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-        waitSemaphores.reserve (swapchains.size ());
-        signalSemaphores.reserve (swapchains.size ());
+
+        waitSemaphores.reserve (nr_wait);
+        signalSemaphores.reserve (nr_signal);
+
+        for (int i = 0; i < info.waitFences.size(); ++i) {
+            const auto& fence_data = info.waitFences[i];
+
+            SLRD_ASSERT(fence_data.fence != nullptr);
+            waitValues[i] = fence_data.value;
+
+            VKFence *fence = static_cast<VKFence *> (fence_data.fence);
+            waitSemaphores.emplace_back (fence->getSemaphore());
+        }
+
+        for (int i = 0; i < info.signalFences.size(); ++i) {
+            const auto& fence_data = info.signalFences[i];
+
+            SLRD_ASSERT(fence_data.fence != nullptr);
+            signalValues[i] = fence_data.value;
+
+            VKFence *fence = static_cast<VKFence *> (fence_data.fence);
+            signalSemaphores.emplace_back (fence->getSemaphore());
+        }
 
         for (auto& sc : swapchains) {
             /* Mark that we should wait for the rendering to be finished */
@@ -68,6 +94,13 @@ namespace slrd {
             signalSemaphores.push_back (semaphores.second);
         }
 
+        VkTimelineSemaphoreSubmitInfo tl_info{};
+        tl_info.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+        tl_info.pWaitSemaphoreValues = waitValues.data();
+        tl_info.waitSemaphoreValueCount = waitValues.size();
+        tl_info.pSignalSemaphoreValues = signalValues.data();
+        tl_info.signalSemaphoreValueCount = signalValues.size();
+
         VkSubmitInfo queueInfo {};
         queueInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         queueInfo.pCommandBuffers = vkbuffers.data ();
@@ -77,15 +110,11 @@ namespace slrd {
         queueInfo.signalSemaphoreCount = signalSemaphores.size ();
         queueInfo.pSignalSemaphores = signalSemaphores.data ();
         queueInfo.pWaitDstStageMask = waitStages.data ();
-
-        VkFence fence = VK_NULL_HANDLE;
-        if (info.fence) {
-            fence = static_cast<VKFence *> (info.fence)->getFence ();
-        }
+        queueInfo.pNext = &tl_info;
 
         /* FIXME: Queue is always graphics. */
         VK_WRAP_RETURN (
-                vkQueueSubmit (m_device->getGraphicsQueue (), 1, &queueInfo, fence),
+                vkQueueSubmit (m_device->getGraphicsQueue (), 1, &queueInfo, nullptr),
                 -1);
 
         return 0;

@@ -209,6 +209,7 @@ struct App {
 
     /* This program uses one inflight frame */
 
+    uint64_t m_frameNumber = 0;
     slrd::Ref<slrd::IFence> m_fence;
 
     slrd::Ref<slrd::IBuffer> m_vpBuffer;
@@ -453,7 +454,9 @@ struct App {
                 exit (1);
             }
 
-            m_fence = m_device->createFence (true);
+            slrd::FenceInfo fence_info;
+            fence_info.initialValue = 0;
+            m_fence = m_device->createFence (fence_info);
             if (!m_fence) {
                 std::cerr << slrd::getErrorString ();
                 exit (1);
@@ -787,7 +790,6 @@ struct App {
         if (res) {
             throw std::runtime_error ("Failed to resize the swapchain");
         }
-        m_fence = m_device->createFence (true);
 
         m_currentVP.proj = glm::perspective <float> (90, (float)w/h, 0.1f, 100.f);
         m_currentVP.mergedVP = m_currentVP.proj * m_currentVP.view;
@@ -799,7 +801,7 @@ struct App {
     }
 
     void draw () {
-        m_fence->wait ();
+        m_fence->wait (m_frameNumber);
 
         if (m_shouldRecreateSwapchain) {
             recreateSwapchain ();
@@ -817,8 +819,6 @@ struct App {
 
             throw std::runtime_error (slrd::getErrorString ());
         }
-
-        m_fence->reset ();
 
         /* Get the next image in the swapchain */
         auto texture_view = m_swapchain->getTextureView (imageIdx);
@@ -881,10 +881,21 @@ struct App {
         static int frame = 0;
 
         slrd::SubmitInfo submitInfo;
-        submitInfo.fence = m_fence.get ();
+        
+        slrd::FenceSubmitInfo wait_fence;
+        wait_fence.fence = m_fence.get();
+        wait_fence.value = m_frameNumber;
+
+        slrd::FenceSubmitInfo signal_fence;
+        signal_fence.fence = m_fence.get();
+        signal_fence.value = m_frameNumber + 1;
+
+        submitInfo.waitFences = { &wait_fence, 1 };
+        submitInfo.signalFences = { &signal_fence, 1 };
 
         slrd::ICommandBuffer *cmdBuffers[] = { m_commandBuffer.get () };
         submitInfo.commandBuffers = cmdBuffers;
+        ++m_frameNumber;
 
         profiler.startScope ("Submit");
         if (m_commandQueue->submit (submitInfo)) {
@@ -904,7 +915,7 @@ struct App {
         if (result == slrd::SWAPCHAIN_RESULT_OTHER) {
             throw std::runtime_error ("Queue presentation failed");
         }
-        std::cout << "FRAME SURVIVED: " << frame++ << '\n';
+        // std::cout << "FRAME SURVIVED: " << frame++ << '\n';
     }
 
     static std::vector<char> loadFileContents (const std::filesystem::path& path) {

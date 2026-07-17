@@ -148,7 +148,7 @@ namespace slrd {
         Ref<IPipeline> createComputePipeline (const ComputePipelineInfo& info) final override;
 
         Ref<IBuffer> createBuffer (const BufferInfo& info) final override;
-        Ref<IFence> createFence (bool signalled = false) final override;
+        Ref<IFence> createFence (const FenceInfo& info) final override;
 
         Ref<ICommandPool> createCommandPool (const CommandPoolInfo& info) final override;
         Ref<ICommandQueue> createCommandQueue (const CommandQueueInfo& info) final override;

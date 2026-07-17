@@ -154,7 +154,9 @@ App::App (const AppInit& init) {
             
         }
 
-        m_fence = m_device->createFence (true);
+        slrd::FenceInfo fence_info;
+        fence_info.initialValue = 0;
+        m_fence = m_device->createFence (fence_info);
         if (!m_fence) {
             throw std::runtime_error ("Failed to create the fence");
         }
@@ -215,8 +217,7 @@ slrd::ITextureView *App::nextFrame () {
         m_shouldRecreateSwapchain = false;
     }
 
-    m_fence->wait ();
-    m_fence->reset ();
+    m_fence->wait (m_frameNumber);
 
     uint32_t image;
     auto res = m_swapchain->acquireNextImage (&image);
@@ -244,7 +245,6 @@ void App::recreateSwapchain () {
     if (res) {
         throw std::runtime_error ("Failed to resize the swapchain");
     }
-    m_fence = m_device->createFence (true);
 
     m_width = w;
     m_height = h;
@@ -258,6 +258,8 @@ void App::recreateSwapchain () {
 void App::present () {
     slrd::PresentInfo presentInfo;
     presentInfo.image = m_currentImage;
+
+    ++m_frameNumber;
 
     if (m_swapchain->present (presentInfo) == slrd::SWAPCHAIN_RESULT_NEEDS_RESIZE) {
         m_shouldRecreateSwapchain = true;

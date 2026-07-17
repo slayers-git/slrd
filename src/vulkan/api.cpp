@@ -63,6 +63,13 @@ namespace slrd {
     }
 
     int VKAPI::init (const APIConfig& config) {
+        {
+            uint32_t version = 0;
+            auto result = vkEnumerateInstanceVersion (&version);
+            RETURN_LOG_ERROR_IF (result != VK_SUCCESS || version < VK_VERSION_1_2,
+                    -1, "Vulkan 1.2 is not supported");
+        }
+
         auto supportedExtensions = getSupportedExtensions ();
         auto supportedLayers     = getSupportedLayers ();
 
@@ -123,8 +130,9 @@ namespace slrd {
             .pEngineName = config.engineName.c_str (),
             .engineVersion = VK_MAKE_VERSION (config.engineVersion.major,
                     config.engineVersion.minor, config.engineVersion.patch),
-            .apiVersion = VK_API_VERSION_1_0
+            .apiVersion = VK_API_VERSION_1_2
         };
+
         VkInstanceCreateInfo info = {
             .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
             .pNext = NULL,

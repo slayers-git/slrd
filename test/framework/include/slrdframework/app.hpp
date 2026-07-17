@@ -62,6 +62,8 @@ protected:
     slrd::Ref<slrd::ISwapchain> m_swapchain;
     slrd::Ref<slrd::IFence> m_fence;
 
+    uint64_t m_frameNumber = 0;
+
     slrd::Ref<slrd::ICommandQueue> m_commandQueue;
     slrd::Ref<slrd::ICommandPool> m_commandPool;
 
@@ -80,6 +82,10 @@ protected:
     }
     inline uint32_t getHeight () const {
         return m_height;
+    }
+
+    uint64_t getCurrentFrameNumber () const {
+        return m_frameNumber;
     }
 
     float getElapsedTime () const;

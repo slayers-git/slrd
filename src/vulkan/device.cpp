@@ -115,13 +115,19 @@ namespace slrd {
         for (uint32_t i = 0; i < devices.size (); ++i) {
             uint32_t score = 0;
 
-            VkPhysicalDeviceProperties props;
-            vkGetPhysicalDeviceProperties (devices[i], &props);
+            VkPhysicalDeviceProperties2 props{};
+            props.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+            vkGetPhysicalDeviceProperties2 (devices[i], &props);
 
-            VkPhysicalDeviceFeatures features;
-            vkGetPhysicalDeviceFeatures (devices[i], &features);
+            VkPhysicalDeviceTimelineSemaphoreFeatures tl_feature{};
+            tl_feature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES;
 
-            switch (props.deviceType) {
+            VkPhysicalDeviceFeatures2 features{};
+            features.pNext = &tl_feature;
+            features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+            vkGetPhysicalDeviceFeatures2 (devices[i], &features);
+
+            switch (props.properties.deviceType) {
                 case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
                     score += 1000;
                     break;
@@ -139,8 +145,8 @@ namespace slrd {
             }
 
             /* Skip over devices that don't have the features that we need */
-            if (!features.samplerAnisotropy &&
-                    !features.geometryShader) {
+            if (!features.features.samplerAnisotropy ||
+                    !tl_feature.timelineSemaphore) {
                 continue;
             }
 
@@ -180,6 +186,11 @@ namespace slrd {
 
         /* Create the logical device */
         VkPhysicalDeviceFeatures enabledFeatures = {};
+
+        VkPhysicalDeviceTimelineSemaphoreFeatures tl_feature{};
+        tl_feature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES;
+        tl_feature.timelineSemaphore = VK_TRUE;
+
         enabledFeatures.samplerAnisotropy = VK_TRUE;
 
         VkDeviceCreateInfo dvcInfo = {};
@@ -189,6 +200,7 @@ namespace slrd {
         dvcInfo.ppEnabledExtensionNames = config.deviceExtensions.data ();
         dvcInfo.queueCreateInfoCount = queueCreateInfos;
         dvcInfo.pQueueCreateInfos = qInfo;
+        dvcInfo.pNext = &tl_feature;
 
         VkResult result;
         result = vkCreateDevice (m_physicalDevice, &dvcInfo, nullptr, &m_device);
@@ -271,8 +283,8 @@ namespace slrd {
         return Ref<IBuffer>::adopt (createVKBuffer (this, info));
     }
 
-    Ref<IFence> VKDevice::createFence (bool signalled) {
-        return Ref<IFence>::adopt (createVKFence (this, signalled));
+    Ref<IFence> VKDevice::createFence (const FenceInfo& info) {
+        return Ref<IFence>::adopt (createVKFence (this, info));
     }
 
     Ref<ICommandPool> VKDevice::createCommandPool (const CommandPoolInfo& info) {

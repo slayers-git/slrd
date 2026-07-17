@@ -18,30 +18,34 @@ namespace slrd {
             public VKDeviceObject<IFence>,
             public VKResource<VKFence> {
     private:
-        VkFence m_fence = VK_NULL_HANDLE;
+        VkSemaphore m_semaphore = VK_NULL_HANDLE;
 
     public:
         VKFence () {}
         ~VKFence ();
 
-        [[nodiscard]] VkFence getFence () const {
-            return m_fence;
+        // [[nodiscard]] VkFence getFence () const {
+        //     return m_fence;
+        // }
+
+        [[nodiscard]]
+        VkSemaphore getSemaphore () const {
+            return m_semaphore;
         }
 
-        int init (VKDevice *device, bool signalled);
+        int init (VKDevice *device, const FenceInfo& info);
 
-        int wait (uint64_t timeout) final override;
-        void reset () final override;
-
+        int signal (uint64_t value) final override;
+        int wait (uint64_t value, uint64_t timeout) final override;
         uint64_t getValue () const final override;
 
-        VkFence handle () const {
-            return m_fence;
+        VkSemaphore handle () const {
+            return m_semaphore;
         }
     };
 
-    inline VKFence *createVKFence (VKDevice *device, bool signalled) {
-        return makeResource<VKFence> (device, signalled);
+    inline VKFence *createVKFence (VKDevice *device, const FenceInfo& info) {
+        return makeResource<VKFence> (device, info);
     }
 };
 

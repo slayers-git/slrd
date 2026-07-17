@@ -12,9 +12,17 @@ namespace slrd {
     class ICommandBuffer;
     class IFence;
 
+    struct FenceSubmitInfo {
+        IFence *fence = nullptr;
+        uint64_t value = 0;
+    };
+
     struct SubmitInfo {
-        /* Fence to singal when the execution is complete. */
-        IFence *fence;
+        /* Fences to wait on, before executing the command buffers */
+        std::span<FenceSubmitInfo> waitFences;
+        /* Fences to signal after executing the command buffers */
+        std::span<FenceSubmitInfo> signalFences;
+
         /* Which command buffers need to be executed */
         std::span<ICommandBuffer *> commandBuffers;
     };

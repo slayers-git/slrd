@@ -172,9 +172,9 @@ void Compute::updateCompute () {
 }
 
 void Compute::draw () {
-    m_fence->wait ();
-    m_commandPool->reset ();
+    m_fence->wait (getCurrentFrameNumber ());
 
+    m_commandPool->reset ();
     m_profiler->newFrame ();
 
     auto niTexView = nextFrame ();
@@ -254,7 +254,18 @@ void Compute::draw () {
         m_commandBuffer.get ()
     };
     slrd::SubmitInfo submitInfo;
-    submitInfo.fence = getCurrentFence ();
+
+    slrd::FenceSubmitInfo wait_fence;
+    wait_fence.fence = m_fence.get();
+    wait_fence.value = m_frameNumber;
+
+    slrd::FenceSubmitInfo signal_fence;
+    signal_fence.fence = m_fence.get();
+    signal_fence.value = m_frameNumber + 1;
+
+    submitInfo.waitFences = { &wait_fence, 1 };
+    submitInfo.signalFences = { &signal_fence, 1 };
+
     submitInfo.commandBuffers = { cmd_buffers, 1 };
 
     m_profiler->startScope ("Submit");
