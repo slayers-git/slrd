@@ -28,7 +28,7 @@ namespace slrd {
         m_semaphore = semaphore;
 
         device->allocate (OBJECT_TYPE_FENCE, 0);
-        device->vkallocate (VK_OBJECT_TYPE_FENCE, 0);
+        device->vkallocate (VK_OBJECT_TYPE_SEMAPHORE, 0);
 
         return 0;
     }
@@ -83,7 +83,7 @@ namespace slrd {
             vkDestroySemaphore (m_device->getVkDevice(), m_semaphore, nullptr);
 
             m_device->deallocate (OBJECT_TYPE_FENCE, 0);
-            m_device->vkdeallocate (VK_OBJECT_TYPE_FENCE, 0);
+            m_device->vkdeallocate (VK_OBJECT_TYPE_SEMAPHORE, 0);
         }
     }
 };
