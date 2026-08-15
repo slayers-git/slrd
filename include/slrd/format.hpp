@@ -201,6 +201,11 @@ namespace slrd {
         T x, y, z, w, h, d;
     };
 
+    template<typename T>
+    struct Offset3D {
+        T x{}, y{}, z{};
+    };
+
     using StageFlags = uint32_t;
 };
 
