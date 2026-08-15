@@ -9,6 +9,7 @@
 namespace slrd {
     class IDevice;
     class ICommandQueue;
+    class ICommandPool;
     class ICommandBuffer;
     class IRenderPass;
     class ITexture;
@@ -45,6 +46,7 @@ namespace slrd {
         VkQueue getQueue (ICommandQueue *queue);
         uint32_t getQueueFamily (ICommandQueue *queue);
 
+        VkCommandPool getCommandPool (ICommandPool *commandPool);
         VkCommandBuffer getCommandBuffer (ICommandBuffer *commandBuffer);
 
         VkRenderPass getRenderPass (IRenderPass *renderPass);
@@ -54,7 +56,6 @@ namespace slrd {
         VkSampler getSampler (const ISampler *sampler);
 
         VkSwapchainKHR getSwapchain (ISwapchain *swapchain);
-
 
         /**
          * Class that exposes Vulkan resource usage */
