@@ -67,6 +67,34 @@ namespace slrd {
 
         FORMAT_RG11B10_UFLOAT,
 
+        /********************/
+        /* Block Compressed */
+        /********************/
+
+        FORMAT_BC1_RGB_UNORM,
+        FORMAT_BC1_RGB_SRGB,
+        FORMAT_BC1_RGBA_UNORM,
+        FORMAT_BC1_RGBA_SRGB,
+
+        FORMAT_BC3_UNORM,
+        FORMAT_BC3_SRGB,
+
+        FORMAT_BC4_UNORM,
+        FORMAT_BC4_SNORM,
+
+        FORMAT_BC5_UNORM,
+        FORMAT_BC5_SNORM,
+
+        FORMAT_BC6H_UFLOAT,
+        FORMAT_BC6H_SFLOAT,
+
+        FORMAT_BC7_UNORM,
+        FORMAT_BC7_SRGB,
+
+        /*********/
+        /* Depth */
+        /*********/
+
 		FORMAT_D16_UNORM,
 		FORMAT_D32_SFLOAT,
         FORMAT_D32_SFLOAT_S8_UINT,

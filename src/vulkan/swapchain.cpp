@@ -60,6 +60,9 @@ namespace slrd {
     }
 
     void VKSwapchain::releaseFence (VkFence fence) {
+        /* Apparently, this is necessary even if vkAcquireNextImageKHR() fails? */
+        vkWaitForFences(m_device->getVkDevice(), 1, &fence, true, UINT64_MAX);
+
         m_freeFences.push_back (fence);
         VK_WRAP_CRASH (vkResetFences (m_device->getVkDevice (), 1, &fence));
     }
