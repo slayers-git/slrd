@@ -12,6 +12,22 @@
 namespace slrd {
     class VKDevice;
 
+    /* As long as values are 1:1 */
+    constexpr VkFilter getVkFilter (Filter filter) {
+        SLRD_ASSERT (filter < FILTER_MAX_ENUM);
+        return static_cast<VkFilter>(filter);
+    }
+
+    constexpr VkSamplerMipmapMode getVkSamplerMipmapMode (MipmapMode mode) {
+        SLRD_ASSERT (mode < MIPMAP_MODE_MAX_ENUM);
+        return static_cast<VkSamplerMipmapMode> (mode);
+    }
+
+    constexpr VkSamplerAddressMode getVkSamplerAddressMode (SamplerAddressMode mode) {
+        SLRD_ASSERT (mode < SAMPLER_ADDRESS_MODE_MAX_ENUM);
+        return static_cast<VkSamplerAddressMode> (mode);
+    }
+
     SLRD_RESOURCE_DEFINE_TYPE (VKSampler, VK_OBJECT_TYPE_SAMPLER);
     class VKSampler :
         public VKDeviceObject<ISampler>,

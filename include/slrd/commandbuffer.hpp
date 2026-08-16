@@ -32,6 +32,13 @@ namespace slrd {
 
     using MemoryAccessFlags = uint64_t;
 
+    struct TextureSubresource {
+        TextureAspectFlags aspect = slrd::TEXTURE_ASPECT_COLOR;
+        uint32_t mipLevel    = 0;
+        uint32_t arrayLayer  = 0;
+        uint32_t arrayLayers = 1;
+    };
+
     struct BufferTextureRegion {
         /* The mip and layer of the texture to which the copy is due */
         TextureViewInfo textureViewInfo;
@@ -79,6 +86,26 @@ namespace slrd {
 
         MemoryAccessFlags srcAccessFlags = MEMORY_ACCESS_FLAG_NONE;
         MemoryAccessFlags dstAccessFlags = MEMORY_ACCESS_FLAG_NONE;
+    };
+
+    struct TextureBlitRegion {
+        TextureSubresource srcSubresource{};
+        TextureSubresource dstSubresource{};
+
+        Offset3D<int32_t> srcOffsets[2]{};
+        Offset3D<int32_t> dstOffsets[2]{};
+    };
+
+    struct TextureBlitInfo {
+        ITexture *srcTexture = nullptr;
+        ITexture *dstTexture = nullptr;
+
+        TextureLayout srcTextureLayout = slrd::TEXTURE_LAYOUT_UNDEFINED;
+        TextureLayout dstTextureLayout = slrd::TEXTURE_LAYOUT_UNDEFINED; 
+
+        std::span<const TextureBlitRegion> regions;
+        
+        Filter filter;
     };
 
     struct DispatchInfo {
@@ -151,6 +178,8 @@ namespace slrd {
 
         virtual void pipelineTextureBarrier (const TextureBarrierInfo& info) = 0;
         virtual void pipelineBufferBarrier (const BufferBarrierInfo& info) = 0;
+
+        virtual void blitTexture(const TextureBlitInfo& info) = 0;
 
         virtual void dispatch (const DispatchInfo&) = 0;
     };

@@ -256,6 +256,8 @@ struct App {
             return nullptr;
         }
 
+        const uint32_t nr_levels = floor(log2(std::max(w, h))) + 1;
+
         slrd::BufferInfo bufInfo;
         bufInfo.usage = 0;
         bufInfo.gpu = true;
@@ -283,8 +285,9 @@ struct App {
         texInfo.type = slrd::TEXTURE_TYPE_2D;
         texInfo.width = w;
         texInfo.height = h;
-        texInfo.usage = slrd::TEXTURE_USAGE_SAMPLED | slrd::TEXTURE_USAGE_TRANSFER_DST;
-        texInfo.format = slrd::FORMAT_RGBA8_UNORM;
+        texInfo.mipmaps = nr_levels;
+        texInfo.usage = slrd::TEXTURE_USAGE_SAMPLED | slrd::TEXTURE_USAGE_TRANSFER_DST | slrd::TEXTURE_USAGE_TRANSFER_SRC;
+        texInfo.format = slrd::FORMAT_RGBA8_SRGB;
         texInfo.tiling = slrd::TEXTURE_TILING_OPTIMAL;
 
         slrd::Ref<slrd::ITexture> texture = m_device->createTexture (texInfo);
@@ -308,7 +311,7 @@ struct App {
         region.textureViewInfo.arrayLayer = 0;
         region.textureViewInfo.arrayLayers = 1;
         region.textureViewInfo.mipLevel = 0;
-        region.textureViewInfo.mipLevels = 1;
+        region.textureViewInfo.mipLevels = nr_levels;
 
         bufTexCopyInfo.buffer = stagingBuffer.get ();
         bufTexCopyInfo.texture = texture.get ();
@@ -318,7 +321,7 @@ struct App {
         tbInfo.texture = texture.get ();
         tbInfo.currentTextureLayout = slrd::TEXTURE_LAYOUT_UNDEFINED;
         tbInfo.newTextureLayout = slrd::TEXTURE_LAYOUT_TRANSFER_DST;
-        tbInfo.viewInfo.mipLevels = 1;
+        tbInfo.viewInfo.mipLevels = nr_levels;
         tbInfo.viewInfo.mipLevel  = 0;
         tbInfo.viewInfo.aspect = slrd::TEXTURE_ASPECT_COLOR;
         tbInfo.viewInfo.arrayLayer = 0;
@@ -327,8 +330,50 @@ struct App {
         oneTime->pipelineTextureBarrier (tbInfo);
         oneTime->copyBufferToImage (bufTexCopyInfo);
 
+        /* Mipmaps */
+        int mip_w = w;
+        int mip_h = h;
+        for (int i = 1; i < nr_levels; ++i) {
+            slrd::TextureBarrierInfo tb;
+            tb.texture = texture.get();
+            tb.currentTextureLayout = slrd::TEXTURE_LAYOUT_TRANSFER_DST;
+            tb.newTextureLayout = slrd::TEXTURE_LAYOUT_TRANSFER_SRC;
+            tb.viewInfo.aspect = slrd::TEXTURE_ASPECT_COLOR;
+            tb.viewInfo.mipLevel = i - 1;
+
+            oneTime->pipelineTextureBarrier(tb);
+
+            slrd::TextureBlitRegion region;
+            region.srcSubresource.mipLevel = i - 1;
+            region.dstSubresource.mipLevel = i;
+            region.srcOffsets[0] = { };
+            region.srcOffsets[1] = { mip_w, mip_h, 1 };
+            region.dstOffsets[0] = { };
+            region.dstOffsets[1] = { 
+                std::max(1, mip_w / 2), std::max(1,  mip_h / 2), 1
+            };
+
+            slrd::TextureBlitInfo tbl;
+            tbl.srcTexture = texture.get();
+            tbl.dstTexture = texture.get();
+            tbl.srcTextureLayout = slrd::TEXTURE_LAYOUT_TRANSFER_SRC;
+            tbl.dstTextureLayout = slrd::TEXTURE_LAYOUT_TRANSFER_DST;
+            tbl.regions = { &region, 1 };
+            tbl.filter = slrd::FILTER_LINEAR;
+            oneTime->blitTexture(tbl);
+
+            tb.currentTextureLayout = slrd::TEXTURE_LAYOUT_TRANSFER_SRC;
+            tb.newTextureLayout = slrd::TEXTURE_LAYOUT_SHADER_READ_ONLY;
+            oneTime->pipelineTextureBarrier (tb);
+
+            mip_w = std::max(1, mip_w / 2);
+            mip_h = std::max(1, mip_h / 2);
+        }
+
         tbInfo.currentTextureLayout = slrd::TEXTURE_LAYOUT_TRANSFER_DST;
         tbInfo.newTextureLayout = slrd::TEXTURE_LAYOUT_SHADER_READ_ONLY;
+        tbInfo.viewInfo.mipLevel = nr_levels - 1;
+        tbInfo.viewInfo.mipLevels = 1;
         oneTime->pipelineTextureBarrier (tbInfo);
 
         oneTime->end ();
@@ -348,7 +393,7 @@ struct App {
         m_commandQueue->wait ();
 
         slrd::TextureViewInfo viewInfo;
-        viewInfo.mipLevels = 1;
+        viewInfo.mipLevels = nr_levels;
         viewInfo.arrayLayers = 1;
         std::string view_name = std::string (name) + "_view";
         viewInfo.name = view_name;

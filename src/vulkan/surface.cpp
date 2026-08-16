@@ -100,30 +100,24 @@ namespace slrd {
     }
 
     VkSurfaceFormatKHR VKSurface::SurfaceCapabilities::selectBestFormatAvailable () const {
-        static const VkFormat bestFormats[] = {
-            VK_FORMAT_B8G8R8A8_UNORM,
-            VK_FORMAT_R8G8B8A8_UNORM
+        static const VkFormat best_formats[] = {
+            VK_FORMAT_B8G8R8A8_SRGB,
+            VK_FORMAT_R8G8B8A8_SRGB
         };
 
-        VkFormat format = VK_FORMAT_UNDEFINED;
-        VkColorSpaceKHR color_space = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-        if (formats.size () == 1 && formats[0].format == VK_FORMAT_UNDEFINED) {
-            format = VK_FORMAT_B8G8R8A8_UNORM;
-            /*color_space = formats[0].colorSpace;*/
-        } else if (formats.size () > 0) {
-            // Use one of the supported formats, prefer B8G8R8A8_UNORM.
-            for (auto currentFormat : formats) {
-                for (uint32_t i = 0; i < formats.size (); i++) {
-                    if (currentFormat.format == bestFormats[i]) {
-                        format = currentFormat.format;
-                        return currentFormat;
-                    }
-                }
-            }
-        } else {
-            return { VK_FORMAT_UNDEFINED, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+        if (formats.size() && formats[0].format == VK_FORMAT_UNDEFINED) {
+            return { best_formats[0], formats[0].colorSpace };
         }
 
-        return { format, color_space };
+        for (const auto& format : formats) {
+            for (auto best_format : best_formats) {
+                if (format.format == best_format &&
+                        format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+                    return format;
+                }
+            }
+        }
+
+        return { VK_FORMAT_UNDEFINED, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
     }
 };

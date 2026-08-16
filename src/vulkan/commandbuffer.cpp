@@ -16,6 +16,7 @@
 #include "uniformset.hpp"
 
 #include "texture.hpp"
+#include "sampler.hpp"
 
 namespace slrd {
     static constexpr VkAccessFlags getVkAccessFlags (slrd::MemoryAccessFlags flags) {
@@ -482,6 +483,55 @@ namespace slrd {
 
         vkCmdPipelineBarrier (m_buffer, srcStage, dstStage, 0, 0, nullptr, 0,
                 &barrier, 0, nullptr);
+    }
+
+    void VKCommandBuffer::blitTexture(const TextureBlitInfo& info) {
+        SLRD_ASSERT(info.srcTexture && info.dstTexture && info.regions.size() != 0);
+
+        VKTexture *src_tex = static_cast<VKTexture *>(info.srcTexture);
+        VKTexture *dst_tex = static_cast<VKTexture *>(info.dstTexture);
+
+        VkImage src_vktex = src_tex->getImage();
+        VkImage dst_vktex = dst_tex->getImage();
+
+        SLRD_ASSERT(src_vktex != VK_NULL_HANDLE && dst_vktex != VK_NULL_HANDLE);
+
+        std::vector<VkImageBlit> regions(info.regions.size());
+        for (int i = 0; i < regions.size(); ++i) {
+            auto& src = info.regions[i];
+            auto& dst = regions[i];
+
+            dst.srcSubresource.aspectMask = getVkTextureAspectFlags(
+                    src.srcSubresource.aspect);
+            dst.srcSubresource.mipLevel = src.srcSubresource.mipLevel;
+            dst.srcSubresource.baseArrayLayer = src.srcSubresource.arrayLayer;
+            dst.srcSubresource.layerCount = src.srcSubresource.arrayLayers;
+
+            dst.dstSubresource.aspectMask = getVkTextureAspectFlags(
+                    src.dstSubresource.aspect);
+            dst.dstSubresource.mipLevel = src.dstSubresource.mipLevel;
+            dst.dstSubresource.baseArrayLayer = src.dstSubresource.arrayLayer;
+            dst.dstSubresource.layerCount = src.dstSubresource.arrayLayers;
+
+            for (int i = 0; i < 2; ++i) {
+                dst.srcOffsets[i].x = src.srcOffsets[i].x;
+                dst.srcOffsets[i].y = src.srcOffsets[i].y;
+                dst.srcOffsets[i].z = src.srcOffsets[i].z;
+
+                dst.dstOffsets[i].x = src.dstOffsets[i].x;
+                dst.dstOffsets[i].y = src.dstOffsets[i].y;
+                dst.dstOffsets[i].z = src.dstOffsets[i].z;
+            }
+        }
+
+        vkCmdBlitImage(m_buffer,
+                src_vktex,
+                getVkTextureLayout(info.srcTextureLayout),
+                dst_vktex,
+                getVkTextureLayout(info.dstTextureLayout),
+                regions.size(),
+                regions.data(),
+                getVkFilter(info.filter));
     }
 
     void VKCommandBuffer::dispatch (const DispatchInfo& info) {

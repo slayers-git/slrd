@@ -11,6 +11,7 @@
 
 #include "device.hpp"
 #include "commandqueue.hpp"
+#include "commandpool.hpp"
 #include "commandbuffer.hpp"
 #include "renderpass.hpp"
 #include "texture.hpp"
@@ -209,6 +210,11 @@ namespace slrd::platform::vulkan {
     uint32_t getQueueFamily (ICommandQueue *queue) {
         auto vkqueue = static_cast<VKCommandQueue *> (queue);
         return vkqueue->getCommandQueueFamily ();
+    }
+
+    VkCommandPool getCommandPool (ICommandPool *commandPool) {
+        auto vkpool = static_cast<VKCommandPool *> (commandPool);
+        return vkpool->getVkCommandPool();
     }
 
     VkCommandBuffer getCommandBuffer (ICommandBuffer *commandBuffer) {

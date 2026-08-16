@@ -105,6 +105,8 @@ namespace slrd {
         void pipelineTextureBarrier (const TextureBarrierInfo& info) final override;
         void pipelineBufferBarrier (const BufferBarrierInfo& info) final override;
 
+        void blitTexture(const TextureBlitInfo& info) final override;
+
         void dispatch (const DispatchInfo&) final override;
 
 
