@@ -286,7 +286,7 @@ struct App {
         texInfo.height = h;
         texInfo.mipmaps = nr_levels;
         texInfo.usage = slrd::TEXTURE_USAGE_SAMPLED | slrd::TEXTURE_USAGE_TRANSFER_DST | slrd::TEXTURE_USAGE_TRANSFER_SRC;
-        texInfo.format = slrd::FORMAT_RGBA8_UNORM;
+        texInfo.format = slrd::FORMAT_RGBA8_SRGB;
         texInfo.tiling = slrd::TEXTURE_TILING_OPTIMAL;
 
         slrd::Ref<slrd::ITexture> texture = m_device->createTexture (texInfo);
