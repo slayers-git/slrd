@@ -106,16 +106,30 @@ namespace slrd {
         m_device->vkdeallocate (VK_OBJECT_TYPE_IMAGE, 0);
     }
 
-    static constexpr VkImageViewType getVkImageViewType (TextureType tt) {
-        switch (tt) {
-            case TEXTURE_TYPE_1D: return VK_IMAGE_VIEW_TYPE_1D;
-            case TEXTURE_TYPE_2D: return VK_IMAGE_VIEW_TYPE_2D;
-            case TEXTURE_TYPE_3D: return VK_IMAGE_VIEW_TYPE_3D;
-            case TEXTURE_TYPE_CUBE_MAP: return VK_IMAGE_VIEW_TYPE_CUBE;
+    static constexpr VkImageViewType getVkImageViewType (TextureType tt, uint32_t layers = 1) {
+        SLRD_ASSERT(layers >= 1);
+
+        if (layers == 1) {
+            switch (tt) {
+                case TEXTURE_TYPE_1D: return VK_IMAGE_VIEW_TYPE_1D;
+                case TEXTURE_TYPE_2D: return VK_IMAGE_VIEW_TYPE_2D;
+                case TEXTURE_TYPE_3D: return VK_IMAGE_VIEW_TYPE_3D;
+                case TEXTURE_TYPE_CUBE_MAP: return VK_IMAGE_VIEW_TYPE_CUBE;
+            }
+        } else {
+            switch (tt) {
+                case TEXTURE_TYPE_1D: return VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+                case TEXTURE_TYPE_2D: return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+                case TEXTURE_TYPE_CUBE_MAP: return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+                case TEXTURE_TYPE_3D:
+                    SLRD_DEBUG_CRIT(
+                        "Only array layer count of 1 is allowed for TEXTURE_TYPE_3D ITextureViews.");
+            }
         }
 
         SLRD_DEBUG_CRIT ("getVkImageViewType: invalid type");
     }
+
     int VKTexture::getDimensions (uint32_t& w, uint32_t& h, uint32_t& depth) {
         w = m_width;
         h = m_height;
@@ -149,7 +163,8 @@ namespace slrd {
 
         VkImageView imageView;
 
-        VkImageViewType vkviewType = getVkImageViewType (texture->m_type);
+        VkImageViewType vkviewType = getVkImageViewType (texture->m_type,
+                viewData.arrayLayers);
 
         VkImageViewCreateInfo ivInfo {};
         ivInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
