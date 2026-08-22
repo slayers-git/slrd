@@ -282,7 +282,7 @@ namespace slrd {
                 (vkcap.maxImageCount && vkcap.maxImageCount < MAX_SWAPCHAIN_IMAGES) ?
                     vkcap.maxImageCount : MAX_SWAPCHAIN_IMAGES);
 
-        auto surfaceFormat = caps->selectBestFormatAvailable ();
+        auto surfaceFormat = caps->selectBestFormatAvailable (info.colorMode == SWAPCHAIN_COLOR_MODE_SRGB);
         auto presentMode = caps->selectBestModeAvailable (info.requireVSync);
 
         m_presentMode = presentMode;

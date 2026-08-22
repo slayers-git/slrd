@@ -34,7 +34,7 @@ namespace slrd {
             /* It's more likely for the platform to support VSync than it is
              * for it to not support it. */
             VkPresentModeKHR selectBestModeAvailable (bool demandVSync = true) const;
-            VkSurfaceFormatKHR selectBestFormatAvailable () const;
+            VkSurfaceFormatKHR selectBestFormatAvailable (bool srgb) const;
         };
 
         ~VKSurface ();

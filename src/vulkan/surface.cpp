@@ -99,18 +99,34 @@ namespace slrd {
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
-    VkSurfaceFormatKHR VKSurface::SurfaceCapabilities::selectBestFormatAvailable () const {
-        static const VkFormat best_formats[] = {
+    VkSurfaceFormatKHR VKSurface::SurfaceCapabilities::selectBestFormatAvailable (bool srgb) const {
+        static const VkFormat best_srgb[] = {
             VK_FORMAT_B8G8R8A8_SRGB,
             VK_FORMAT_R8G8B8A8_SRGB
         };
+
+        static const VkFormat best_unorm[] = {
+            VK_FORMAT_B8G8R8A8_UNORM,
+            VK_FORMAT_R8G8B8A8_UNORM,
+        };
+
+        VkFormat best_formats[4];
+        if (srgb) {
+            auto it = std::copy(best_srgb,
+                    best_srgb + std::size(best_srgb), best_formats);
+            std::copy(best_unorm, best_unorm + std::size(best_unorm), it);
+        } else {
+            auto it = std::copy(best_unorm,
+                    best_unorm + std::size(best_unorm), best_formats);
+            std::copy(best_srgb, best_srgb + std::size(best_srgb), it);
+        }
 
         if (formats.size() && formats[0].format == VK_FORMAT_UNDEFINED) {
             return { best_formats[0], formats[0].colorSpace };
         }
 
-        for (const auto& format : formats) {
-            for (auto best_format : best_formats) {
+        for (auto best_format : best_formats) {
+            for (const auto& format : formats) {
                 if (format.format == best_format &&
                         format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                     return format;
