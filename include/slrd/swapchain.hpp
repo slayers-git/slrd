@@ -9,6 +9,11 @@
 #include <memory>
 
 namespace slrd {
+    enum SwapchainColorMode {
+        SWAPCHAIN_COLOR_MODE_UNORM,
+        SWAPCHAIN_COLOR_MODE_SRGB
+    };
+
     struct SwapchainInfo {
         uint32_t requestedImages = 2;
         ISurface *surface;
@@ -17,6 +22,8 @@ namespace slrd {
 
         uint32_t width{};
         uint32_t height{};
+
+        SwapchainColorMode colorMode = SWAPCHAIN_COLOR_MODE_SRGB;
 
         /* Debug name of the resource */
         std::string_view name = "";
