@@ -100,9 +100,14 @@ namespace slrd {
             return m_swapchain;
         }
 
+        /**
+         * @note Only call after createFramebufferIfNeeded() */
         [[nodiscard]] uint32_t getWidth () const {
             return m_width;
         }
+
+        /**
+         * @note Only call after createFramebufferIfNeeded() */
         [[nodiscard]] uint32_t getHeight () const {
             return m_height;
         }

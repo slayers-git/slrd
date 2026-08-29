@@ -205,19 +205,20 @@ namespace slrd {
             height = texture->getHeight ();
         }
 
-        m_width = width;
-        m_height = height;
-
         return 0;
     }
 
     VkFramebuffer VKRenderPass::createFramebuffer () {
+        SLRD_ASSERT(!m_textureViews.empty());
+        SLRD_ASSERT(m_textureViews[0]);
+
         VkFramebuffer vkframebuffer;
         VkFramebufferCreateInfo fbInfo {};
         fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fbInfo.width = m_width;
-        fbInfo.height = m_height;
         fbInfo.renderPass = m_renderpass;
+
+        uint32_t width  = m_textureViews[0]->getTexture()->getWidth();
+        uint32_t height = m_textureViews[0]->getTexture()->getHeight();
 
         std::vector<VkImageView> vkimageViews (m_textureViews.size ());
         for (uint32_t i = 0; i < m_textureViews.size (); ++i) {
@@ -226,7 +227,20 @@ namespace slrd {
 
             SLRD_ASSERT (m_textureViews[i]->getView ());
             vkimageViews[i] = m_textureViews[i]->getView ();
+
+            auto texture = m_textureViews[i]->getTexture();
+            SLRD_COMPLAIN_RETURN(
+                texture->getWidth() != width || texture->getHeight() != height,
+                VK_NULL_HANDLE,
+                "Creating a framebuffer with a non-uniformly sized attachments");
         }
+
+        m_width  = width;
+        m_height = height;
+
+        fbInfo.width = m_width;
+        fbInfo.height = m_height;
+
         fbInfo.attachmentCount = vkimageViews.size ();
         fbInfo.pAttachments = vkimageViews.data ();
         fbInfo.layers = 1;
@@ -268,9 +282,6 @@ namespace slrd {
 
             m_swapchainConnections.disconnect ();
             connectToSwapchain ();
-
-            m_width =  texture->getWidth ();
-            m_height = texture->getHeight ();
 
             m_requiresFBRecreation = true;
         }
