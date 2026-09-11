@@ -47,6 +47,8 @@ namespace slrd {
         public SimpleRefCounted<IDevice>,
         public VKNamedResource<VKDevice> {
     private:
+        static constexpr uint32_t INITIAL_SETS_PER_POOL = 16;
+
         VkDevice m_device;
         /* A reference, not created, therefore doesn't need to be deallocated */
         VkPhysicalDevice m_physicalDevice;
