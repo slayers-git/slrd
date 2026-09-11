@@ -9,6 +9,10 @@
 namespace slrd {
     void PoolKey::rehash() noexcept {
         XXH64_state_t *state = XXH64_createState();
+
+        SLRD_DEBUG_CRIT_IF(!state, "Failed to create XXH64_state");
+        XXH64_reset(state, 0);
+
         XXH64_update(state, m_array.data(),
                 m_array.size() * sizeof(m_array[0]));
 
@@ -76,7 +80,7 @@ namespace slrd {
         };
 
         if (!vkset) {
-            uint32_t pool_idx = createPool(m_setsPerPool);
+            pool_idx = createPool(m_setsPerPool);
             if (pool_idx == UINT32_MAX) {
                 return std::make_tuple(VK_NULL_HANDLE, UINT32_MAX);
             }
