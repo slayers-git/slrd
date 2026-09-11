@@ -29,6 +29,7 @@ namespace slrd {
             POOL_STATE_READY,
             POOL_STATE_FULL
         };
+
         struct PoolInfo {
             VkDescriptorPool pool = VK_NULL_HANDLE;
             PoolState state = POOL_STATE_UNALLOCATED;
@@ -41,6 +42,8 @@ namespace slrd {
 
         /* The pools managed by this manager */
         std::vector<PoolInfo> m_pools;
+        /* The pools available for allocation */
+        std::vector<uint32_t> m_readyPools;
 
         /* The amount of completely free pools */
         uint32_t m_freePoolsAmount;
@@ -50,6 +53,9 @@ namespace slrd {
 
         /* Delete the pool by this id */
         void deletePool (uint32_t poolIdx);
+
+        VkDescriptorSet allocateInPool(uint32_t poolIdx,
+                VkDescriptorSetLayout layout);
 
     public:
         /* The maximum amount of free pools allowed before they are freed */

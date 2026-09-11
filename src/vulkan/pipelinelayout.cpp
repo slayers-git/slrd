@@ -24,7 +24,7 @@ namespace slrd {
 
             for (uint32_t j = 0; j < sets[i].bindings.size (); ++j) {
                 poolKey.m_array[sets[i].bindings[j].descriptorType] += 
-                    sets[i].bindings[j].descriptorCount * 16;
+                    sets[i].bindings[j].descriptorCount;
             }
 
             VkDescriptorSetLayoutCreateInfo dscInfo {};
