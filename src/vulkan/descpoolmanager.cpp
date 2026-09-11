@@ -64,8 +64,8 @@ namespace slrd {
     }
 
     std::tuple<VkDescriptorSet, uint32_t> DescriptorPoolManager::allocateSet (VkDescriptorSetLayout layout) {
-        VkDescriptorSet vkset;
-        uint32_t pool_idx;
+        VkDescriptorSet vkset = VK_NULL_HANDLE;
+        uint32_t pool_idx = UINT32_MAX;
 
         auto it = m_readyPools.begin();
         while (it != m_readyPools.end()) {
@@ -155,20 +155,21 @@ namespace slrd {
         }
         m_pools[pool].state = POOL_STATE_READY;
 
+        vkFreeDescriptorSets (m_device, m_pools[pool].pool, 1, &set);
+
         if (m_pools[pool].allocations == 0) {
             m_freePoolsAmount++;
             if (m_freePoolsAmount > MAX_FREE_POOLS) {
                 clearUnusedPools ();
             }
         }
-
-        vkFreeDescriptorSets (m_device, m_pools[pool].pool, 1, &set);
     }
 
     void DescriptorPoolManager::clearUnusedPools () {
         for (uint32_t i = 0; i < m_pools.size (); ++i) {
             if (m_pools[i].state != POOL_STATE_UNALLOCATED && !m_pools[i].allocations) {
                 deletePool (i);
+                m_freePoolsAmount--;
             }
         }
     }
