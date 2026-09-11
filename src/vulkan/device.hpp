@@ -62,10 +62,10 @@ namespace slrd {
         VkPipelineStageFlags m_pipelineShaderStages;
 
         /* FIXME: Add memory management for this */
-        std::map<PoolKey, std::unique_ptr<DescriptorPoolManager>> m_descriptorManagers;
+        std::unordered_map<PoolKey, std::unique_ptr<DescriptorPoolManager>> m_descriptorManagers;
 
         /* Set layouts */
-        std::map<PoolKey, VkDescriptorSetLayout> m_setLayouts;
+        std::unordered_map<PoolKey, VkDescriptorSetLayout> m_setLayouts;
 
         std::unique_ptr<PipelineManager> m_pipelineManager;
 

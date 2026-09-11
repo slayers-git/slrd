@@ -4,7 +4,20 @@
 #include "debug.hpp"
 #include "vulkan/error.hpp"
 
+#include <xxhash.h>
+
 namespace slrd {
+    void PoolKey::rehash() noexcept {
+        XXH64_state_t *state = XXH64_createState();
+        XXH64_update(state, m_array.data(),
+                m_array.size() * sizeof(m_array[0]));
+
+        m_hash = XXH64_digest(state);
+        XXH64_freeState(state);
+    }
+
+
+
     int DescriptorPoolManager::init (VkDevice device, const PoolKey& key, uint32_t initial_sets) {
         m_key = key;
         m_device = device;
@@ -79,12 +92,12 @@ namespace slrd {
 
     uint32_t DescriptorPoolManager::createPool (uint32_t setsPerPool) {
         std::vector<VkDescriptorPoolSize> poolSizes;
-        poolSizes.reserve (m_key.m_array.size ());
-        for (uint32_t i = 0; i < m_key.m_array.size (); ++i) {
-            if (m_key.m_array[i] > 0) {
+        poolSizes.reserve (m_key.MAX_DESCRIPTOR_SIZES);
+        for (uint32_t i = 0; i < m_key.MAX_DESCRIPTOR_SIZES; ++i) {
+            if (m_key[i] > 0) {
                 VkDescriptorPoolSize ps;
                 ps.type = VkDescriptorType (i);
-                ps.descriptorCount = m_key.m_array[i] * setsPerPool;
+                ps.descriptorCount = m_key[i] * setsPerPool;
 
                 poolSizes.push_back (ps);
             }
