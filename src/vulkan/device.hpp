@@ -47,6 +47,8 @@ namespace slrd {
         public SimpleRefCounted<IDevice>,
         public VKNamedResource<VKDevice> {
     private:
+        static constexpr uint32_t INITIAL_SETS_PER_POOL = 16;
+
         VkDevice m_device;
         /* A reference, not created, therefore doesn't need to be deallocated */
         VkPhysicalDevice m_physicalDevice;
@@ -60,10 +62,10 @@ namespace slrd {
         VkPipelineStageFlags m_pipelineShaderStages;
 
         /* FIXME: Add memory management for this */
-        std::map<PoolKey, std::unique_ptr<DescriptorPoolManager>> m_descriptorManagers;
+        std::unordered_map<PoolKey, std::unique_ptr<DescriptorPoolManager>> m_descriptorManagers;
 
         /* Set layouts */
-        std::map<PoolKey, VkDescriptorSetLayout> m_setLayouts;
+        std::unordered_map<PoolKey, VkDescriptorSetLayout> m_setLayouts;
 
         std::unique_ptr<PipelineManager> m_pipelineManager;
 

@@ -3,21 +3,45 @@
 #ifndef __VULKAN_DESCPOOLMANAGER_HPP__
 #define __VULKAN_DESCPOOLMANAGER_HPP__
 
+#include <span>
 #include <vector>
 #include <vulkan/vulkan.h>
 #include <array>
 
 namespace slrd {
-    /* This is the key that identifies a pool */
+    /* The key that identifies a pool */
     struct PoolKey {
-        std::array<size_t, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT + 1> m_array;
+    public:
+        static constexpr uint32_t MAX_DESCRIPTOR_SIZES =
+            VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT + 1;
+    private:
+        std::array<size_t, MAX_DESCRIPTOR_SIZES> m_array;
+        uint64_t m_hash = 0;
 
-        PoolKey () {
-            m_array.fill (0);
+        void rehash() noexcept;
+
+    public:
+        PoolKey() {
+            m_array.fill(0);
+            rehash();
         };
 
-        bool operator< (const PoolKey& other) const {
-            return m_array < other.m_array;
+        PoolKey(const std::span<const size_t, MAX_DESCRIPTOR_SIZES> values) {
+            std::copy(values.begin(), values.end(), m_array.begin());
+            rehash();
+        }
+
+        bool operator==(const PoolKey& other) const noexcept {
+            return m_array == other.m_array;
+        }
+        
+        size_t operator[](size_t id) const noexcept {
+            return m_array[id];
+        }
+
+        [[nodiscard]]
+        size_t getHash() const noexcept {
+            return m_hash;
         }
     };
 
@@ -29,6 +53,7 @@ namespace slrd {
             POOL_STATE_READY,
             POOL_STATE_FULL
         };
+
         struct PoolInfo {
             VkDescriptorPool pool = VK_NULL_HANDLE;
             PoolState state = POOL_STATE_UNALLOCATED;
@@ -41,6 +66,8 @@ namespace slrd {
 
         /* The pools managed by this manager */
         std::vector<PoolInfo> m_pools;
+        /* The pools available for allocation */
+        std::vector<uint32_t> m_readyPools;
 
         /* The amount of completely free pools */
         uint32_t m_freePoolsAmount;
@@ -50,6 +77,9 @@ namespace slrd {
 
         /* Delete the pool by this id */
         void deletePool (uint32_t poolIdx);
+
+        VkDescriptorSet allocateInPool(uint32_t poolIdx,
+                VkDescriptorSetLayout layout);
 
     public:
         /* The maximum amount of free pools allowed before they are freed */
@@ -82,6 +112,13 @@ namespace slrd {
         /* Clear all pools */
         void clear ();
     };
+};
+
+template<>
+struct std::hash<slrd::PoolKey> {
+    size_t operator()(const slrd::PoolKey& key) const noexcept {
+        return key.getHash();
+    }
 };
 
 #endif /* #define __VULKAN_DESCPOOLMANAGER_HPP__ */

@@ -77,7 +77,7 @@ namespace slrd {
         }
 
         auto manager = std::make_unique<DescriptorPoolManager> ();
-        if (manager->init (m_device, key, 1024)) {
+        if (manager->init (m_device, key, INITIAL_SETS_PER_POOL)) {
             return nullptr;
         }
 

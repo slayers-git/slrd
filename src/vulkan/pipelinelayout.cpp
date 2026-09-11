@@ -14,7 +14,7 @@ namespace slrd {
      * layouts using the same shaders. */
     std::vector<VkDescriptorSetLayout> VKPipelineLayout::getVkSetLayouts (
             std::span<const DescriptorSet> sets) {
-        PoolKey poolKey {};
+        std::array<size_t, PoolKey::MAX_DESCRIPTOR_SIZES> sizes{};
 
         std::vector<VkDescriptorSetLayout> layouts;
         for (uint32_t i = 0; i < sets.size (); ++i) {
@@ -23,8 +23,8 @@ namespace slrd {
                     "Shader has a set number higher than {}", MAX_SETS);
 
             for (uint32_t j = 0; j < sets[i].bindings.size (); ++j) {
-                poolKey.m_array[sets[i].bindings[j].descriptorType] += 
-                    sets[i].bindings[j].descriptorCount * 16;
+                sizes[sets[i].bindings[j].descriptorType] += 
+                    sets[i].bindings[j].descriptorCount;
             }
 
             VkDescriptorSetLayoutCreateInfo dscInfo {};
@@ -43,7 +43,7 @@ namespace slrd {
             m_setLayouts[sets[i].set] = layout;
         }
 
-        m_key = poolKey;
+        m_key = PoolKey(sizes);
 
         return layouts;
 
