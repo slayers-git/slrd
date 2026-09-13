@@ -50,8 +50,13 @@ namespace slrd {
         cpInfo.stage = stages[0];
         cpInfo.layout = iShader->getOrCreatePipelineLayout ()->getLayout ();
 
+        VkPipelineCache cache = VK_NULL_HANDLE;
+        if (device->getPipelineCache()) {
+            cache = device->getPipelineCache()->handle();
+        }
+
         VK_WRAP_RETURN_RESULT_LOGERROR (
-                vkCreateComputePipelines (device->getVkDevice (), VK_NULL_HANDLE, 1,
+                vkCreateComputePipelines (device->getVkDevice (), cache, 1,
                     &cpInfo, nullptr, &vkpipeline),
                 "Failed to create VkPipeline (compute)"
                 );
