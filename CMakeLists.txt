@@ -54,6 +54,7 @@ set (VULKAN_SRC
          src/vulkan/uniformset.cpp
          src/vulkan/descpoolmanager.cpp
          src/vulkan/pipelinemanager.cpp
+         src/vulkan/pipelinecache.cpp
          src/vulkan/resourceprofiler.cpp)
 
 if (SLRD_VULKAN_ENABLED)

@@ -125,14 +125,14 @@ namespace slrd {
     };
 
     struct VertexBindingDescription {
-        uint32_t binding;
+        uint32_t binding = 0;
         uint32_t stride;
         VertexInputRate inputRate = VERTEX_INPUT_RATE_VERTEX;
     };
 
     struct VertexAttributeDescription {
         uint32_t location;
-        uint32_t binding;
+        uint32_t binding = 0;
         uint32_t offset;
 
         Format format;
@@ -215,7 +215,7 @@ namespace slrd {
 	};
 
     struct ComputePipelineInfo {
-        IShader *shader;
+        IShader *shader = nullptr;
 
         /* Debug name of the resource */
         std::string_view name = "";

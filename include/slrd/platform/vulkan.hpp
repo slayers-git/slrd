@@ -57,6 +57,8 @@ namespace slrd {
 
         VkSwapchainKHR getSwapchain (ISwapchain *swapchain);
 
+        VkPipelineCache getPipelineCache (IDevice *device);
+
         /**
          * Class that exposes Vulkan resource usage */
         class VKResourceProfiler {
@@ -71,6 +73,7 @@ namespace slrd {
         private:
             void allocate (VkObjectType type, VkDeviceSize size) noexcept;
             void deallocate (VkObjectType type, VkDeviceSize size) noexcept;
+            void deallocateSet (VkObjectType type, uint32_t count) noexcept;
 
             std::mutex m_mtx;
 

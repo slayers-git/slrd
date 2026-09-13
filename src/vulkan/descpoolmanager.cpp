@@ -2,6 +2,7 @@
 
 #include "descpoolmanager.hpp"
 #include "debug.hpp"
+#include "vulkan/device.hpp"
 #include "vulkan/error.hpp"
 
 #include <xxhash.h>
@@ -22,7 +23,7 @@ namespace slrd {
 
 
 
-    int DescriptorPoolManager::init (VkDevice device, const PoolKey& key, uint32_t initial_sets) {
+    int DescriptorPoolManager::init (VKDevice *device, const PoolKey& key, uint32_t initial_sets) {
         m_key = key;
         m_device = device;
         m_setsPerPool = initial_sets;
@@ -54,11 +55,12 @@ namespace slrd {
         set_info.descriptorSetCount = 1;
         set_info.descriptorPool = pool;
 
-        auto res = vkAllocateDescriptorSets(m_device, &set_info, &vkset);
+        auto res = vkAllocateDescriptorSets(m_device->getVkDevice(), &set_info, &vkset);
         if (res == VK_ERROR_OUT_OF_POOL_MEMORY || res == VK_ERROR_FRAGMENTED_POOL) {
             return VK_NULL_HANDLE;
         }
 
+        m_device->vkallocate(VK_OBJECT_TYPE_DESCRIPTOR_SET, 0);
         m_pools[poolIdx].allocations++;
         return vkset;
     }
@@ -115,8 +117,11 @@ namespace slrd {
         pInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
         VkDescriptorPool vkpool;
-        VK_WRAP_RETURN (vkCreateDescriptorPool (m_device, &pInfo, nullptr, &vkpool),
+        VK_WRAP_RETURN (vkCreateDescriptorPool (
+                    m_device->getVkDevice(), &pInfo, nullptr, &vkpool),
                 UINT32_MAX);
+
+        m_device->vkallocate(VK_OBJECT_TYPE_DESCRIPTOR_POOL, 0);
 
         for (uint32_t i = 0; i < m_pools.size (); ++i) {
             if (m_pools[i].state == POOL_STATE_UNALLOCATED) {
@@ -134,8 +139,18 @@ namespace slrd {
 
     void DescriptorPoolManager::deletePool (uint32_t poolIdx) {
         SLRD_ASSERT (poolIdx < m_pools.size ());
-        if (m_pools[poolIdx].pool)
-            vkDestroyDescriptorPool (m_device, m_pools[poolIdx].pool, nullptr);
+        if (m_pools[poolIdx].pool) {
+            vkDestroyDescriptorPool (m_device->getVkDevice(), m_pools[poolIdx].pool, nullptr);
+            /* May lead to errors if the sets that belong to this pool aren't released 
+             * before this function call, which should be impossible anyway.
+             *
+             * This call should theoretically be completely useless, as the number of
+             * allocations by this point should always be 0, provided a normal
+             * working state */
+            m_device->vkdeallocateSet(VK_OBJECT_TYPE_DESCRIPTOR_POOL,
+                    m_pools[poolIdx].allocations);
+        }
+
         m_pools[poolIdx] = { VK_NULL_HANDLE, POOL_STATE_UNALLOCATED, 0 };
         m_readyPools.erase(std::find(m_readyPools.begin(),
                     m_readyPools.end(), poolIdx));
@@ -155,7 +170,8 @@ namespace slrd {
         }
         m_pools[pool].state = POOL_STATE_READY;
 
-        vkFreeDescriptorSets (m_device, m_pools[pool].pool, 1, &set);
+        vkFreeDescriptorSets(m_device->getVkDevice(), m_pools[pool].pool, 1, &set);
+        m_device->vkdeallocate(VK_OBJECT_TYPE_DESCRIPTOR_SET, 0);
 
         if (m_pools[pool].allocations == 0) {
             m_freePoolsAmount++;
@@ -178,7 +194,7 @@ namespace slrd {
     void DescriptorPoolManager::reset () {
         for (uint32_t pool_idx = 0; pool_idx < m_pools.size(); ++pool_idx) {
             auto& pool = m_pools[pool_idx];
-            vkResetDescriptorPool (m_device, pool.pool, 0);
+            vkResetDescriptorPool (m_device->getVkDevice(), pool.pool, 0);
 
             pool.allocations = 0;
             if (pool.state == POOL_STATE_FULL)

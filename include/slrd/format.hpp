@@ -193,12 +193,12 @@ namespace slrd {
 
     template<typename T>
     struct Rect2D {
-        T x, y, w, h;
+        T x{}, y{}, w{}, h{};
     };
 
     template<typename T>
     struct Rect3D {
-        T x, y, z, w, h, d;
+        T x{}, y{}, z{}, w{}, h{}, d{};
     };
 
     template<typename T>

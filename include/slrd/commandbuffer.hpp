@@ -41,7 +41,7 @@ namespace slrd {
 
     struct BufferTextureRegion {
         /* The mip and layer of the texture to which the copy is due */
-        TextureViewInfo textureViewInfo;
+        TextureViewInfo textureViewInfo{};
 
         uint32_t rows   = 0;
         uint32_t height = 0;
@@ -49,7 +49,7 @@ namespace slrd {
         DeviceSize offset = 0;
 
         /* The portion of the texture where to copy */
-        Rect3D<uint32_t> rect;
+        Rect3D<uint32_t> rect{};
     };
 
     struct BufferTextureCopyInfo {
@@ -67,7 +67,7 @@ namespace slrd {
 
         DeviceSize srcOffset = 0;
         DeviceSize dstOffset = 0;
-        DeviceSize size;
+        DeviceSize size = 0;
     };
 
     struct TextureBarrierInfo {
@@ -105,11 +105,13 @@ namespace slrd {
 
         std::span<const TextureBlitRegion> regions;
         
-        Filter filter;
+        Filter filter = FILTER_LINEAR;
     };
 
     struct DispatchInfo {
-        uint32_t x, y, z;
+        uint32_t x = 0;
+        uint32_t y = 0;
+        uint32_t z = 0;
     };
 
     struct RenderPassColorClearValue {

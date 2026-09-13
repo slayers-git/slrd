@@ -19,11 +19,19 @@ namespace slrd {
         DEVICE_DEBUG_FLAG_API_RESOURCE_PROFILER = 2,
     };
 
+    enum DeviceFlag {
+        DEVICE_FLAG_NONE,
+        DEVICE_FLAG_PIPELINE_CACHE = 1,
+    };
+
     struct DeviceConfig {
         std::span<const char *> deviceExtensions;
 
         bool debug = false;
         uint32_t debugFlags = DEVICE_DEBUG_FLAG_NONE;
+        uint32_t flags = DEVICE_FLAG_NONE;
+
+        std::string_view pipelineCacheFilePath = "pipeline_cache.bin";
 
         DeviceConfig () = default;
     };

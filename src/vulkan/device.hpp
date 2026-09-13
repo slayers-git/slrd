@@ -12,6 +12,7 @@
 #include <vk_mem_alloc.h>
 #include "descpoolmanager.hpp"
 #include "pipelinemanager.hpp"
+#include "pipelinecache.hpp"
 
 #include <slrd/config.hpp>
 
@@ -68,6 +69,9 @@ namespace slrd {
         std::unordered_map<PoolKey, VkDescriptorSetLayout> m_setLayouts;
 
         std::unique_ptr<PipelineManager> m_pipelineManager;
+        std::unique_ptr<VKPipelineCache> m_pipelineCache;
+
+        std::string m_pipelineCacheFilePath;
 
 #ifdef SLRD_RESOURCE_PROFILER
         std::unique_ptr<ResourceProfiler> m_profiler;
@@ -114,6 +118,10 @@ namespace slrd {
             return m_vma;
         }
 
+        [[nodiscard]] auto getPipelineCache() const {
+            return m_pipelineCache.get();
+        }
+
         /**
          * Tell the device that an allocation happened */
         void allocate (ObjectType type, DeviceSize size) noexcept;
@@ -128,6 +136,10 @@ namespace slrd {
         /**
          * Tell the device that a Vulkan object was deallocated/destroyed */
         void vkdeallocate (VkObjectType type, VkDeviceSize size) noexcept;
+
+        /**
+         * Tell the device that a set of Vulkan objects was deallocated */
+        void vkdeallocateSet (VkObjectType type, uint32_t count) noexcept;
 
         const VKResourceProfiler *getVkResourceProfiler () const noexcept;
 
