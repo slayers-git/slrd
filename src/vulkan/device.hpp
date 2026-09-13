@@ -129,6 +129,10 @@ namespace slrd {
          * Tell the device that a Vulkan object was deallocated/destroyed */
         void vkdeallocate (VkObjectType type, VkDeviceSize size) noexcept;
 
+        /**
+         * Tell the device that a set of Vulkan objects was deallocated */
+        void vkdeallocateSet (VkObjectType type, uint32_t count) noexcept;
+
         const VKResourceProfiler *getVkResourceProfiler () const noexcept;
 
         DescriptorPoolManager *allocateOrGetDescriptorManager (PoolKey key);

@@ -45,6 +45,8 @@ namespace slrd {
         }
     };
 
+    class VKDevice;
+
     /* This class manages pools, so that the allocations can happen all the time */
     class DescriptorPoolManager {
     private:
@@ -62,7 +64,7 @@ namespace slrd {
 
         /* The key to the pool */
         PoolKey m_key;
-        VkDevice m_device = VK_NULL_HANDLE;
+        VKDevice *m_device = nullptr;
 
         /* The pools managed by this manager */
         std::vector<PoolInfo> m_pools;
@@ -90,7 +92,7 @@ namespace slrd {
 
         /* Initialize the pool manager with an initial pool allocated
          * it will have exactly N initial sets available. */
-        int init (VkDevice device, const PoolKey& key, uint32_t initial_sets);
+        int init (VKDevice *device, const PoolKey& key, uint32_t initial_sets);
 
         /* Get a pool for allocations */
         uint32_t getPoolID ();

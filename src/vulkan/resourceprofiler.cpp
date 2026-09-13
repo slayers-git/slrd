@@ -35,4 +35,15 @@ namespace slrd::platform::vulkan {
         res.memoryUsed -= size;
         res.allocatedObjects--;
     }
+
+    void VKResourceProfiler::deallocateSet (VkObjectType type, uint32_t count) noexcept {
+        SLRD_ASSERT (type < MAX_RESOURCE_TYPES);
+
+        std::lock_guard lock(m_mtx);
+
+        auto& res = m_resources[type];
+        SLRD_ASSERT (res.allocatedObjects >= count);
+
+        res.allocatedObjects -= count;
+    }
 };

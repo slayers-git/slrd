@@ -77,7 +77,7 @@ namespace slrd {
         }
 
         auto manager = std::make_unique<DescriptorPoolManager> ();
-        if (manager->init (m_device, key, INITIAL_SETS_PER_POOL)) {
+        if (manager->init (this, key, INITIAL_SETS_PER_POOL)) {
             return nullptr;
         }
 
@@ -320,6 +320,13 @@ namespace slrd {
 #ifdef SLRD_RESOURCE_PROFILER
         if (m_vkprofiler)
             m_vkprofiler->deallocate (type, size);
+#endif
+    }
+
+    void VKDevice::vkdeallocateSet (VkObjectType type, uint32_t count) noexcept {
+#ifdef SLRD_RESOURCE_PROFILER
+        if (m_vkprofiler)
+            m_vkprofiler->deallocateSet(type, count);
 #endif
     }
 
