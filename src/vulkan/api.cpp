@@ -238,6 +238,13 @@ namespace slrd::platform::vulkan {
         return vkswapchain->getSwapchain ();
     }
 
+    VkPipelineCache getPipelineCache (IDevice *device) {
+        auto vkdevice = static_cast<VKDevice *>(device);
+        auto cache = vkdevice->getPipelineCache();
+
+        return cache ? cache->handle() : VK_NULL_HANDLE;
+    }
+
     const VKResourceProfiler *getVulkanResourceProfiler (IDevice *device) {
         SLRD_ASSERT (device != nullptr);
 

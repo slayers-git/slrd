@@ -57,6 +57,8 @@ namespace slrd {
 
         VkSwapchainKHR getSwapchain (ISwapchain *swapchain);
 
+        VkPipelineCache getPipelineCache (IDevice *device);
+
         /**
          * Class that exposes Vulkan resource usage */
         class VKResourceProfiler {
