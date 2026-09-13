@@ -14,7 +14,7 @@ namespace slrd {
 
     struct SubmitInfo {
         /* Fence to singal when the execution is complete. */
-        IFence *fence;
+        IFence *fence = nullptr;
         /* Which command buffers need to be executed */
         std::span<ICommandBuffer *> commandBuffers;
     };
