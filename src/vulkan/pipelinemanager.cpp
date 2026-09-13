@@ -207,8 +207,13 @@ namespace slrd {
         plInfo.pViewportState = &vpInfo;
         plInfo.pInputAssemblyState = &state.iaInfo;
 
+        VkPipelineCache cache = VK_NULL_HANDLE;
+        if (m_device->getPipelineCache()) {
+            cache = m_device->getPipelineCache()->handle();
+        }
+
         VK_WRAP_RETURN_LOGERROR (
-                vkCreateGraphicsPipelines (m_device->getVkDevice (), VK_NULL_HANDLE, 1, &plInfo, nullptr, &vkpipeline),
+                vkCreateGraphicsPipelines (m_device->getVkDevice (), cache, 1, &plInfo, nullptr, &vkpipeline),
                 VK_NULL_HANDLE,
                 "Failed to create VkPipeline"
                 );

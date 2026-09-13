@@ -12,6 +12,7 @@
 #include <vk_mem_alloc.h>
 #include "descpoolmanager.hpp"
 #include "pipelinemanager.hpp"
+#include "pipelinecache.hpp"
 
 #include <slrd/config.hpp>
 
@@ -68,6 +69,9 @@ namespace slrd {
         std::unordered_map<PoolKey, VkDescriptorSetLayout> m_setLayouts;
 
         std::unique_ptr<PipelineManager> m_pipelineManager;
+        std::unique_ptr<VKPipelineCache> m_pipelineCache;
+
+        std::string m_pipelineCacheFilePath;
 
 #ifdef SLRD_RESOURCE_PROFILER
         std::unique_ptr<ResourceProfiler> m_profiler;
@@ -112,6 +116,10 @@ namespace slrd {
 
         [[nodiscard]] auto getVkAllocator () const {
             return m_vma;
+        }
+
+        [[nodiscard]] auto getPipelineCache() const {
+            return m_pipelineCache.get();
         }
 
         /**

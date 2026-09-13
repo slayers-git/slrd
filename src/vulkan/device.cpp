@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 
+#include "debug.hpp"
 #include "swapchain.hpp"
 #include "error.hpp"
 #include "vulkan/buffer.hpp"
@@ -17,6 +18,7 @@
 #include "vulkan/shader.hpp"
 #include "vulkan/texture.hpp"
 #include "vulkan/sampler.hpp"
+#include "vulkan/pipelinecache.hpp"
 #include "device.hpp"
 
 #if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED
@@ -233,8 +235,6 @@ namespace slrd {
         }
 #endif
 
-        m_pipelineManager = std::make_unique<PipelineManager> (this);
-
 #ifdef SLRD_RESOURCE_PROFILER
         if (getAPIConfig ()->debugFlags & API_DEBUG_RESOURCE_PROFILER) {
             if (config.debug && config.debugFlags & DEVICE_DEBUG_FLAG_RESOURCE_PROFILER)
@@ -245,6 +245,18 @@ namespace slrd {
         }
 #endif
 
+        if (config.flags & DEVICE_FLAG_PIPELINE_CACHE) {
+            SLRD_DEBUG_CRIT_IF(config.pipelineCacheFilePath.empty(),
+                    "Pipeline cache file path is empty");
+
+            m_pipelineCache = std::make_unique<VKPipelineCache>();
+            if (m_pipelineCache->init(this, config.pipelineCacheFilePath))
+                return -1;
+
+            m_pipelineCacheFilePath = config.pipelineCacheFilePath;
+        }
+
+        m_pipelineManager = std::make_unique<PipelineManager> (this);
         return 0;
     }
 
@@ -340,6 +352,10 @@ namespace slrd {
 
     VKDevice::~VKDevice () {
         waitIdle ();
+
+        if (m_pipelineCache)
+            m_pipelineCache->saveToDisk(m_pipelineCacheFilePath);
+        m_pipelineCache = nullptr;
 
         m_pipelineManager = nullptr;
         clearDescriptorManagers ();
