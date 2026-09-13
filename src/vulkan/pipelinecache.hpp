@@ -1,3 +1,5 @@
+/* SPDX-License-Identifer: LGPL-3.0-or-later */
+
 #ifndef __SLRD_VULKAN_PIPELINECACHE_HPP__
 #define __SLRD_VULKAN_PIPELINECACHE_HPP__
 

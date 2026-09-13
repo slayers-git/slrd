@@ -1,3 +1,5 @@
+/* SPDX-License-Identifer: LGPL-3.0-or-later */
+
 #include "pipelinecache.hpp"
 
 #include "debug.hpp"
