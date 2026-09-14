@@ -27,7 +27,7 @@ namespace slrd {
         vkGetPhysicalDeviceProperties(device->getPhysicalDevice(), &props);
 
         if (!data.empty() && isValid(data, props)) {
-            validated = data;
+            validated = data.subspan(sizeof(VKPipelineCacheHeader));
         }
 
         VkPipelineCache cache;
@@ -40,6 +40,15 @@ namespace slrd {
         VK_WRAP_RETURN_RESULT_LOGERROR(
             vkCreatePipelineCache(device->getVkDevice(), &info, nullptr, &cache),
             "Failed to create a VkPipelineCache");
+
+        size_t actual_size = 0;
+        VkResult result = vkGetPipelineCacheData(
+                device->getVkDevice(), cache, &actual_size, nullptr);
+        /* Can reloading introduce size variance? */
+        SLRD_COMPLAIN_IF(
+                result != VK_SUCCESS ||
+                (!validated.empty() && actual_size != validated.size()),
+                "Initial pipeline cache data may not have been used.");
 
         device->vkallocate(VK_OBJECT_TYPE_PIPELINE_CACHE, 0);
 
