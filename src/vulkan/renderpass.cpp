@@ -12,17 +12,23 @@
 
 namespace slrd {
     int VKRenderPass::init (VKDevice *device, const RenderPassInfo& info) {
-        SLRD_ASSERT (device != nullptr);
+        SLRD_ASSERT(device != nullptr);
+        SLRD_ASSERT(info.colorAttachments.size() <= MAX_COLOR_ATTACHMENTS);
+        SLRD_DEBUG_CRIT_IF(info.stencilAttachment.has_value(),
+                "Separate depth and stencil attachments are not supported");
+
+        /* TODO: Add physical device limits checks */
 
         VkRenderPass renderpass;
 
-        const auto attachmentCount = info.colorAttachments.size () + 
-            info.depthAttachment.has_value () + info.stencilAttachment.has_value ();
+        const auto attachmentCount =
+            info.colorAttachments.size () + 
+            info.depthAttachment.has_value ();
 
         /* Attachments */
-        std::vector<VkAttachmentDescription> attachments (attachmentCount);
+        std::array<VkAttachmentDescription, MAX_ATTACHMENTS> attachments;
         /* Color references */
-        std::vector<VkAttachmentReference> cref (info.colorAttachments.size ());
+        std::array<VkAttachmentReference, MAX_COLOR_ATTACHMENTS> cref;
 
         /* Depth reference */
         VkAttachmentReference sdref {};
@@ -76,6 +82,8 @@ namespace slrd {
             auto& curAttachment = attachments[i];
             
             if (curInfoColor.presentable) {
+                /* TODO: Support multiple swapchain image attachments */
+                SLRD_ASSERT(m_swapchainImageIndex == UINT32_MAX);
                 m_swapchainImageIndex = i;
             }
 
@@ -86,11 +94,11 @@ namespace slrd {
             cref[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             cref[i].attachment = i;
         }
-        m_colorAttachments = info.colorAttachments.size ();
+        m_colorAttachmentCount = info.colorAttachments.size ();
 
         VkSubpassDescription subpass {};
         subpass.pColorAttachments = cref.data ();
-        subpass.colorAttachmentCount = cref.size ();
+        subpass.colorAttachmentCount = m_colorAttachmentCount;
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
         VkAttachmentDescription ddesc {};
@@ -103,18 +111,12 @@ namespace slrd {
             sdref.attachment = i;
 
             m_depthIndex = i;
+            if (slrd::hasStencil(info.depthAttachment->format))
+                m_stencilIndex = i;
+
             attachments[i++] = ddesc;
             subpass.pDepthStencilAttachment = &sdref;
         }
-
-        /* FIXME: IMPLIED FOR NOW */
-        /*VkAttachmentDescription sdesc;*/
-        /*if (info.stencilAttachment.has_value ()) {*/
-        /*    const auto& stencil = info.stencilAttachment.value ();*/
-        /*    if (!convAttachment (stencil, sdesc))*/
-        /*        return -1;*/
-        /*}*/
-        /**/
 
         uint32_t subpassDependencyCount = 0;
         std::array<VkSubpassDependency, 2> subpassDependencies;
@@ -141,14 +143,12 @@ namespace slrd {
             subpassDependencies[subpassDependencyCount++] = dep;
         }
 
-        /* TODO: Stencil + depth */
-
         VkRenderPassCreateInfo rpInfo {};
         rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         rpInfo.pSubpasses = &subpass;
         rpInfo.subpassCount = 1;
         rpInfo.pAttachments = attachments.data ();
-        rpInfo.attachmentCount = attachments.size ();
+        rpInfo.attachmentCount = attachmentCount;
         rpInfo.dependencyCount = subpassDependencyCount;
         rpInfo.pDependencies = subpassDependencies.data ();
 
@@ -165,8 +165,8 @@ namespace slrd {
         if (!info.name.empty ())
             setResourceName (info.name, VK_OBJECT_TYPE_RENDER_PASS, m_renderpass);
 
-        m_textureViews.resize (attachments.size ());
         m_requiresFBRecreation = true;
+        m_attachmentCount = attachmentCount;
 
         device->allocate (OBJECT_TYPE_RENDER_PASS, 0);
         device->vkallocate (VK_OBJECT_TYPE_RENDER_PASS, 0);
@@ -175,7 +175,7 @@ namespace slrd {
     }
     
     int VKRenderPass::setTextureViews (std::span<ITextureView *> textureViews) {
-        SLRD_ASSERT (textureViews.size () == m_colorAttachments);
+        SLRD_ASSERT (textureViews.size () == m_colorAttachmentCount);
         SLRD_ASSERT (m_renderpass != nullptr);
 
         uint32_t width  = 0;
@@ -209,7 +209,7 @@ namespace slrd {
     }
 
     VkFramebuffer VKRenderPass::createFramebuffer () {
-        SLRD_ASSERT(!m_textureViews.empty());
+        SLRD_ASSERT(m_attachmentCount >= 1);
         SLRD_ASSERT(m_textureViews[0]);
 
         VkFramebuffer vkframebuffer;
@@ -220,8 +220,8 @@ namespace slrd {
         uint32_t width  = m_textureViews[0]->getTexture()->getWidth();
         uint32_t height = m_textureViews[0]->getTexture()->getHeight();
 
-        std::vector<VkImageView> vkimageViews (m_textureViews.size ());
-        for (uint32_t i = 0; i < m_textureViews.size (); ++i) {
+        std::vector<VkImageView> vkimageViews (m_attachmentCount);
+        for (uint32_t i = 0; i < m_attachmentCount; ++i) {
             SLRD_COMPLAIN_RETURN (!m_textureViews[i], VK_NULL_HANDLE,
                     "Creating a framebuffer from an incomplete set of textures");
 
@@ -265,7 +265,8 @@ namespace slrd {
     }
 
     int VKRenderPass::setTextureView (uint32_t index, ITextureView *textureView) {
-        SLRD_ASSERT (index < m_textureViews.size ());
+        /* Don't allow setting depth textures through this method */
+        SLRD_ASSERT (index < m_colorAttachmentCount);
 
         auto *vkView = static_cast<VKTextureView *>(textureView);
         SLRD_ASSERT (vkView->getTexture () &&

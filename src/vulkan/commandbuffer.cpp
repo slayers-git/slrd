@@ -206,7 +206,7 @@ namespace slrd {
         VkRenderPass vkrenderPass = iRenderPass->getRenderPass ();
 
         SLRD_DEBUG_CRIT_IF (
-                info.colorClearValues.size () != iRenderPass->getColorAttachments (),
+                info.colorClearValues.size () != iRenderPass->getColorAttachmentCount (),
                 "The number of clear values in the renderpass is not equal to " \
                 "the number of color attachments provided");
 
@@ -231,22 +231,19 @@ namespace slrd {
         bool depthOrStencil = iRenderPass->hasDepth () ||
             iRenderPass->hasStencil ();
 
-        /* TODO: Perhaps not the most efficient way, but C++ doesn't support VLAs and
-         * I ain't making a whole inplace_vector class. */
-        std::vector<VkClearValue> clearValues (info.colorClearValues.size () + 
-                depthOrStencil);
+        std::array<VkClearValue, VKRenderPass::MAX_ATTACHMENTS> clearValues;
         for (uint32_t i = 0; i < info.colorClearValues.size (); ++i) {
-            /* Also not the best way, but ehhh. */
             std::memcpy (&clearValues[i].color, &info.colorClearValues[i],
                     sizeof (clearValues[i].color));
         }
+
         if (depthOrStencil) {
-            auto& dps = clearValues.back ();
+            auto& dps = clearValues[info.colorClearValues.size()];
             dps.depthStencil.depth = info.depthStencilClearValue.depth;
             dps.depthStencil.stencil = info.depthStencilClearValue.stencil;
         }
 
-        begInfo.clearValueCount = clearValues.size ();
+        begInfo.clearValueCount = info.colorClearValues.size() + depthOrStencil;
         begInfo.pClearValues = clearValues.data ();
 
         m_renderpass = iRenderPass;

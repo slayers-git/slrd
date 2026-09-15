@@ -39,6 +39,14 @@ namespace slrd {
     class VKRenderPass :
         public VKDeviceObject<IRenderPass>,
         public VKNamedResource<VKRenderPass> {
+    public:
+        /* Absolute maximum for color attachments. Some hardware may lower the
+         * boundary to 4, but for static asserts and array sizes we set it at 8 */
+        static constexpr uint32_t MAX_COLOR_ATTACHMENTS = 8;
+        /* The absolute maximum number of attachments on a single renderpass.
+         * MAX_COLOR_ATTACHMENT + a single depth+stencil attachment */
+        static constexpr uint32_t MAX_ATTACHMENTS = MAX_COLOR_ATTACHMENTS + 1;
+
     private:
         VkRenderPass m_renderpass = VK_NULL_HANDLE;
 
@@ -62,7 +70,8 @@ namespace slrd {
         uint32_t m_depthIndex = UINT32_MAX;
         uint32_t m_stencilIndex = UINT32_MAX;
 
-        uint32_t m_colorAttachments = 0;
+        uint32_t m_colorAttachmentCount = 0;
+        uint32_t m_attachmentCount = 0;
 
         /* If the framebuffer/framebuffers with cache have to be recreated for this
          * renderpass */
@@ -71,7 +80,7 @@ namespace slrd {
          * presentable attachment has changed */
         mutable bool m_requiresFBForView = true;
 
-        std::vector<const VKTextureView *> m_textureViews;
+        std::array<const VKTextureView *, MAX_ATTACHMENTS> m_textureViews;
 
         /* Current framebuffer */
         VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
@@ -112,8 +121,8 @@ namespace slrd {
             return m_height;
         }
 
-        [[nodiscard]] const auto& getColorAttachments () const {
-            return m_colorAttachments;
+        [[nodiscard]] const auto& getColorAttachmentCount () const {
+            return m_colorAttachmentCount;
         }
 
         [[nodiscard]] VkFramebuffer getCurrentFramebuffer () const {
