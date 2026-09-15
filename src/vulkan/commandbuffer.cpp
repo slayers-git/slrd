@@ -413,9 +413,9 @@ namespace slrd {
     void VKCommandBuffer::bindSets (std::span<IUniformSet *> uniformSets,
             uint32_t firstSet) {
         SLRD_ASSERT (m_pipeline != nullptr);
+        SLRD_ASSERT (uniformSets.size() <= VKPipelineLayout::MAX_SETS);
 
-        /* FIXME: Bake this on the UniformSet's side */
-        std::vector<VkDescriptorSet> sets (uniformSets.size ());
+        std::array<VkDescriptorSet, VKPipelineLayout::MAX_SETS> sets;
         for (uint32_t i = 0; i < uniformSets.size (); ++i) {
             auto *uniformSet = static_cast<VKUniformSet *> (uniformSets[i]);
             sets[i] = uniformSet->getDescriptorSet ();
