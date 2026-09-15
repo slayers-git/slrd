@@ -61,13 +61,13 @@ namespace slrd {
         m_allocation = allocation;
         setParentDevice (device);
         m_valid = true;
+        m_size = allocationInfo.size;
 
         if (!info.name.empty ())
             setResourceName (info.name, VK_OBJECT_TYPE_IMAGE, m_image);
 
-        // FIXME: The actual size is not calculated and set
-        device->allocate (OBJECT_TYPE_TEXTURE, 0);
-        device->vkallocate (VK_OBJECT_TYPE_IMAGE, 0);
+        device->allocate (OBJECT_TYPE_TEXTURE, m_size);
+        device->vkallocate (VK_OBJECT_TYPE_IMAGE, m_size);
 
         return 0;
     }
@@ -88,9 +88,12 @@ namespace slrd {
         m_swapchain = swapchain;
         m_valid = true;
 
-        // FIXME: The actual size is not calculated and set
-        device->allocate (OBJECT_TYPE_TEXTURE, 0);
-        device->vkallocate (VK_OBJECT_TYPE_IMAGE, 0);
+        // Can't actually get an accurate number on the size for these
+        // especially if the existing image is a part of a swapchain
+        m_size  = 0;
+
+        device->allocate (OBJECT_TYPE_TEXTURE, m_size);
+        device->vkallocate (VK_OBJECT_TYPE_IMAGE, m_size);
         
         return 0;
     }
@@ -101,9 +104,8 @@ namespace slrd {
             vmaDestroyImage (m_device->getVkAllocator (), m_image, m_allocation);
         }
 
-        // FIXME: The actual size is not calculated and set
-        m_device->deallocate (OBJECT_TYPE_TEXTURE, 0);
-        m_device->vkdeallocate (VK_OBJECT_TYPE_IMAGE, 0);
+        m_device->deallocate (OBJECT_TYPE_TEXTURE, m_size);
+        m_device->vkdeallocate (VK_OBJECT_TYPE_IMAGE, m_size);
     }
 
     static constexpr VkImageViewType getVkImageViewType (TextureType tt, uint32_t layers = 1) {
