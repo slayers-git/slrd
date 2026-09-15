@@ -97,6 +97,9 @@ namespace slrd {
         uint32_t m_depth;
         VkFormat m_format;
 
+        /* Used for profiling data */
+        VkDeviceSize m_size{};
+
         TextureType m_type;
 
         bool m_valid;
