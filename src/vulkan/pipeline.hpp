@@ -222,31 +222,6 @@ namespace slrd {
             const ComputePipelineInfo& info) {
         return makeResource<VKPipeline> (device, info);
     }
-
-    inline constexpr VkCompareOp getVkCompareOp (CompareOperator compare) {
-#define __COMPARE_CASE(__Op) \
-        case COMPARE_OPERATOR_ ## __Op: op = VK_COMPARE_OP_ ## __Op; break;
-
-        VkCompareOp op = VK_COMPARE_OP_LESS;
-
-        switch (compare) {
-            __COMPARE_CASE (NEVER);
-            __COMPARE_CASE (LESS);
-            __COMPARE_CASE (EQUAL);
-            __COMPARE_CASE (LESS_OR_EQUAL);
-            __COMPARE_CASE (GREATER);
-            __COMPARE_CASE (NOT_EQUAL);
-            __COMPARE_CASE (GREATER_OR_EQUAL);
-            __COMPARE_CASE (ALWAYS);
-
-            default:
-                SLRD_DEBUG_CRIT ("getVkBlendFactor: invalid enum");
-                break;
-        }
-
-#undef __COMPARE_CASE
-        return op;
-    }
 };
 
 #endif /* #define __SLRD_VULKAN_PIPELINE_HPP__ */

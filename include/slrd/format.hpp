@@ -176,6 +176,17 @@ namespace slrd {
         MIPMAP_MODE_MAX_ENUM,
     };
 
+    enum CompareOperator {
+        COMPARE_OPERATOR_NEVER,
+        COMPARE_OPERATOR_LESS,
+        COMPARE_OPERATOR_EQUAL,
+        COMPARE_OPERATOR_LESS_OR_EQUAL,
+        COMPARE_OPERATOR_GREATER,
+        COMPARE_OPERATOR_NOT_EQUAL,
+        COMPARE_OPERATOR_GREATER_OR_EQUAL,
+        COMPARE_OPERATOR_ALWAYS,
+    };
+
     enum TextureLayout {
         /* Derive the best layout automatically */
         TEXTURE_LAYOUT_AUTO = 0,

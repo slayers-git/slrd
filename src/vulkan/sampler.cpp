@@ -5,6 +5,8 @@
 #include "device.hpp"
 #include "error.hpp"
 
+#include "format.hpp"
+
 namespace slrd {
     int VKSampler::init (VKDevice *device,
             const SamplerInfo& info) {
@@ -20,12 +22,14 @@ namespace slrd {
         smpInfo.magFilter = getVkFilter (info.magFilter);
         smpInfo.minFilter = getVkFilter (info.minFilter);
         smpInfo.mipmapMode = getVkSamplerMipmapMode (info.mipmapMode);
-        smpInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK; 
+        smpInfo.borderColor = getVkBorderColor (info.borderColor); 
         smpInfo.addressModeU = getVkSamplerAddressMode (info.addressModeU); 
         smpInfo.addressModeV = getVkSamplerAddressMode (info.addressModeV); 
         smpInfo.addressModeW = getVkSamplerAddressMode (info.addressModeW); 
         smpInfo.anisotropyEnable = info.anisotropy;
         smpInfo.maxAnisotropy    = info.anisotropyMax;
+        smpInfo.compareEnable    = info.compareEnabled;
+        smpInfo.compareOp        = getVkCompareOp (info.compareOperator);
         
         VK_WRAP_RETURN (vkCreateSampler (device->getVkDevice (), &smpInfo, nullptr, &vksampler), -1);
 
