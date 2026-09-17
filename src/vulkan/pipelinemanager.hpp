@@ -92,6 +92,7 @@ namespace slrd {
         std::mutex m_pipelineMtx;
         std::mutex m_pipelineLayoutMtx;
 
+        /* FIXME: The pipelines remain allocated FOREVER. */
         std::unordered_map<PipelineStateHash, VkPipeline>
             m_stateRpToPipeline;
 

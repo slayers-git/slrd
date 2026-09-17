@@ -10,6 +10,8 @@
 #include "error.hpp"
 #include "debug.hpp"
 
+#include <xxhash.h>
+
 namespace slrd {
     int VKRenderPass::init (VKDevice *device, const RenderPassInfo& info) {
         SLRD_ASSERT(device != nullptr);
@@ -76,6 +78,23 @@ namespace slrd {
             return true;
         };
 
+        /* The hash should be the same for the COMPATIBLE renderpasses */
+        RenderPassHash hash = 0;
+        XXH64_state_t *xxh_state = XXH64_createState();
+        SLRD_DEBUG_CRIT_IF(!xxh_state, "VKRenderPass::init: Failed to create XXH64_state_t");
+        (void)XXH64_reset(xxh_state, 0); // Can't return anything but OK
+
+        const auto hash_attachment = [xxh_state](const RenderPassAttachment& attachment) {
+            uint32_t hashed_attachment[2] = {
+                attachment.format,
+                attachment.msaa
+            };
+
+            SLRD_DEBUG_CRIT_IF(
+                XXH64_update(xxh_state, &hashed_attachment, sizeof(hashed_attachment)),
+                "VKRenderPass::init: Failed to hash IRenderPass");
+        };
+
         unsigned i;
         for (i = 0; i < info.colorAttachments.size (); ++i) {
             const auto& curInfoColor = info.colorAttachments[i];
@@ -88,12 +107,16 @@ namespace slrd {
             }
 
             if (!convAttachment (curInfoColor, curAttachment, false)) {
+                XXH64_freeState(xxh_state);
                 return -1;
             }
+
+            hash_attachment(curInfoColor);
 
             cref[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             cref[i].attachment = i;
         }
+
         m_colorAttachmentCount = info.colorAttachments.size ();
 
         VkSubpassDescription subpass {};
@@ -104,8 +127,13 @@ namespace slrd {
         VkAttachmentDescription ddesc {};
         if (info.depthAttachment.has_value ()) {
             const auto& depth = info.depthAttachment.value ();
-            if (!convAttachment (depth, ddesc, true))
+
+            if (!convAttachment (depth, ddesc, true)) {
+                XXH64_freeState(xxh_state);
                 return -1;
+            }
+
+            hash_attachment(*info.depthAttachment);
 
             sdref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             sdref.attachment = i;
@@ -117,6 +145,9 @@ namespace slrd {
             attachments[i++] = ddesc;
             subpass.pDepthStencilAttachment = &sdref;
         }
+
+        hash = XXH64_digest(xxh_state);
+        XXH64_freeState(xxh_state);
 
         uint32_t subpassDependencyCount = 0;
         std::array<VkSubpassDependency, 2> subpassDependencies;
@@ -156,8 +187,7 @@ namespace slrd {
                 vkCreateRenderPass (device->getVkDevice (), &rpInfo, nullptr, &renderpass),
                 "Failed to create renderpass");
 
-        /* TODO: FIXME calculate the hash based on the rules of RP compatibility */
-        m_hash = reinterpret_cast<RenderPassHash> (m_renderpass);
+        m_hash = hash;
 
         setParentDevice (device);
         m_renderpass = renderpass;
