@@ -113,7 +113,7 @@ namespace slrd {
         void blitTexture(const TextureBlitInfo& info) final override;
 
         void dispatch (const DispatchInfo&) final override;
-
+        void dispatchIndirect (slrd::IBuffer *buffer, DeviceSize offset) final override;
 
 
         VkCommandBuffer handle () const {

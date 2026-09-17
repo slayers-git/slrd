@@ -189,6 +189,7 @@ namespace slrd {
         virtual void blitTexture(const TextureBlitInfo& info) = 0;
 
         virtual void dispatch (const DispatchInfo&) = 0;
+        virtual void dispatchIndirect (slrd::IBuffer *buffer, DeviceSize offset) = 0;
     };
 };
 

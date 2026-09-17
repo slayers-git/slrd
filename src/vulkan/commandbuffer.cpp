@@ -552,4 +552,11 @@ namespace slrd {
         SLRD_ASSERT (m_buffer != VK_NULL_HANDLE);
         vkCmdDispatch (m_buffer, info.x, info.y, info.z);
     }
+
+    void VKCommandBuffer::dispatchIndirect (slrd::IBuffer *buffer, DeviceSize offset) {
+        SLRD_ASSERT(m_pipeline);
+        auto ibuffer = static_cast<VKBuffer *>(buffer);
+
+        vkCmdDispatchIndirect(m_buffer, ibuffer->handle(), offset);
+    }
 };
