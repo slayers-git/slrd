@@ -175,6 +175,11 @@ namespace slrd {
                 uint32_t firstIndex = 0, uint32_t vertexOffset = 0,
                 uint32_t firstInstance = 0) = 0;
 
+        virtual void drawIndirect(slrd::IBuffer *buffer, DeviceSize offset,
+                uint32_t drawCount, uint32_t stride) = 0;
+        virtual void drawIndexedIndirect(slrd::IBuffer *buffer, DeviceSize offset,
+                uint32_t drawCount, uint32_t stride) = 0;
+
         virtual void copyBufferToImage (const BufferTextureCopyInfo& info) = 0;
         virtual void copyBuffer (const BufferCopyInfo& info) = 0;
 

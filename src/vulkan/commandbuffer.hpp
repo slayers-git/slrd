@@ -99,6 +99,11 @@ namespace slrd {
                 uint32_t firstIndex = 0, uint32_t vertexOffset = 0,
                 uint32_t firstInstance = 0) final override;
 
+        void drawIndirect(slrd::IBuffer *buffer, DeviceSize offset,
+                uint32_t drawCount, uint32_t stride) final override;
+        void drawIndexedIndirect(slrd::IBuffer *buffer, DeviceSize offset,
+                uint32_t drawCount, uint32_t stride) final override;
+
         void copyBufferToImage (const BufferTextureCopyInfo& info) final override;
         void copyBuffer (const BufferCopyInfo& info) final;
 
