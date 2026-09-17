@@ -16,6 +16,17 @@ namespace slrd {
         SAMPLER_ADDRESS_MODE_MAX_ENUM
     };
 
+    enum SamplerBorderColor {
+        SAMPLER_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK = 0,
+        SAMPLER_BORDER_COLOR_INT_TRANSPARENT_BLACK = 1,
+        SAMPLER_BORDER_COLOR_FLOAT_OPAQUE_BLACK = 2,
+        SAMPLER_BORDER_COLOR_INT_OPAQUE_BLACK = 3,
+        SAMPLER_BORDER_COLOR_FLOAT_OPAQUE_WHITE = 4,
+        SAMPLER_BORDER_COLOR_INT_OPAQUE_WHITE = 5,
+
+        SAMPLER_BORDER_COLOR_MAX_ENUM
+    };
+
     struct SamplerInfo {
         Filter magFilter = FILTER_LINEAR;
         Filter minFilter = FILTER_LINEAR;
@@ -31,6 +42,11 @@ namespace slrd {
         float mipLodBias = 0.f;
         float minLod = 0.f;
         float maxLod = 1.f;
+
+        SamplerBorderColor borderColor = SAMPLER_BORDER_COLOR_INT_OPAQUE_BLACK;
+
+        bool compareEnabled = false;
+        CompareOperator compareOperator = COMPARE_OPERATOR_NEVER;
 
         /* Debug name of the resource */
         std::string_view name = "";

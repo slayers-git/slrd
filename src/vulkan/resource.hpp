@@ -57,12 +57,15 @@ namespace slrd {
         template<typename T>
         bool setResourceName (std::string_view name, VkObjectType type, T handle) noexcept {
 #if defined (SLRD_REQUIRE_DEBUG_NAMES)
+            m_name = name;
+
+            if (!getAPIConfig()->debug)
+                return false;
+
             SLRD_COMPLAIN_RETURN (
                     !(getAPIConfig ()->debugFlags & API_DEBUG_FLAG_NAMES),
                     false,
                     "setResourceName() is used, but API_DEBUG_FLAG_NAMES is not set");
-
-            m_name = name;
 
             auto device = self ()->getDevice ();
             auto vkdevice = device->getVkDevice ();

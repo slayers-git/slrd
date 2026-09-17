@@ -28,6 +28,11 @@ namespace slrd {
         return static_cast<VkSamplerAddressMode> (mode);
     }
 
+    constexpr VkBorderColor getVkBorderColor (SamplerBorderColor color) {
+        SLRD_ASSERT (color < SAMPLER_BORDER_COLOR_MAX_ENUM);
+        return static_cast<VkBorderColor> (color);
+    }
+
     SLRD_RESOURCE_DEFINE_TYPE (VKSampler, VK_OBJECT_TYPE_SAMPLER);
     class VKSampler :
         public VKDeviceObject<ISampler>,

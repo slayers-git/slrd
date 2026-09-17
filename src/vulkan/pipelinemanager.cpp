@@ -225,21 +225,28 @@ namespace slrd {
                 VKRenderPass *rp) {
         SLRD_ASSERT (rp != nullptr);
 
-        std::lock_guard lock (m_pipelineMtx);
-
         PipelineStateHash combined[2] = {
             state.hash,
             rp->getHash ()
         };
-
         auto hash = XXH64 (combined, sizeof (combined), 0);
 
-        if (auto it = m_stateRpToPipeline.find (hash);
-                it != m_stateRpToPipeline.end ()) {
-            return it->second;
-        } else {
-            return m_stateRpToPipeline.emplace (hash, createPipelineForRenderPass (state, rp)).first->second;
+        {
+            std::lock_guard lock (m_pipelineMtx);
+            if (auto it = m_stateRpToPipeline.find (hash);
+                    it != m_stateRpToPipeline.end ()) {
+                return it->second;
+            }
         }
+
+        VkPipeline pipeline = createPipelineForRenderPass (state, rp);
+
+        std::lock_guard lock(m_pipelineMtx);
+        auto[it, inserted] = m_stateRpToPipeline.try_emplace(hash, pipeline);
+        if (!inserted)
+            vkDestroyPipeline(m_device->getVkDevice(), pipeline, nullptr);
+
+        return it->second;
     }
 
     void PipelineManager::addPipelineLayoutInfo (const PipelineLayoutInfo& info) {
@@ -247,65 +254,56 @@ namespace slrd {
 
         if (auto it = m_hashToPipelineLayoutInfo.find (info.hash);
                 it != m_hashToPipelineLayoutInfo.end ()) {
-            it->second.second++;
+            it->second.counter++;
             return;
         }
 
-        m_hashToPipelineLayoutInfo.emplace (info.hash, std::make_pair (info, 1));
+        m_hashToPipelineLayoutInfo.emplace(
+                info.hash,
+                PipelineLayoutInfoRef{ info, 1 });
+    }
+
+    VKPipelineLayout *PipelineManager::getOrGrabPipelineLayout(
+            PipelineLayoutInfoHash hash, bool bump) {
+        std::lock_guard lock (m_pipelineLayoutMtx);
+
+        SLRD_ASSERT(m_hashToPipelineLayoutInfo.contains(hash));
+        PipelineLayoutInfoRef& ref = m_hashToPipelineLayoutInfo.at (hash);
+
+        if (auto it = m_hashToPipelineLayout.find (hash);
+                it != m_hashToPipelineLayout.end ()) {
+            if (bump)
+                ++ref.counter;
+
+            return it->second.get ();
+        }
+
+        auto layout = std::make_unique<VKPipelineLayout> ();
+        if (layout->init (m_device, ref.info) != 0) {
+            return nullptr;
+        }
+
+        auto[it, inserted] = m_hashToPipelineLayout.emplace(ref.info.hash, std::move(layout));
+        if (bump)
+            ++ref.counter;
+
+        return it->second.get();
     }
 
     VKPipelineLayout *PipelineManager::grabOrCreatePipelineLayout (PipelineLayoutInfoHash hash) {
-        std::lock_guard lock (m_pipelineLayoutMtx);
-
-        SLRD_ASSERT (m_hashToPipelineLayoutInfo.contains (hash));
-
-        auto&[info, counter] = m_hashToPipelineLayoutInfo.at (hash);
-        if (auto it = m_hashToPipelineLayout.find (hash);
-                it != m_hashToPipelineLayout.end ()) {
-            ++counter;
-            return it->second.get ();
-        }
-
-
-        auto layout = std::make_unique<VKPipelineLayout> ();
-        if (layout->init (m_device, info) != 0) {
-            return nullptr;
-        }
-
-        ++counter;
-        m_hashToPipelineLayout.emplace (info.hash, std::move (layout));
-        return m_hashToPipelineLayout[hash].get ();
+        return getOrGrabPipelineLayout(hash, true);
     }
 
-    /* Get the pipeline layout */
     VKPipelineLayout *PipelineManager::getOrCreatePipelineLayout (PipelineLayoutInfoHash hash) {
-        std::lock_guard lock (m_pipelineLayoutMtx);
-
-        SLRD_ASSERT (m_hashToPipelineLayoutInfo.contains (hash));
-
-        auto info = m_hashToPipelineLayoutInfo.at (hash).first;
-        if (auto it = m_hashToPipelineLayout.find (hash);
-                it != m_hashToPipelineLayout.end ()) {
-            return it->second.get ();
-        }
-
-
-        auto layout = std::make_unique<VKPipelineLayout> ();
-        if (layout->init (m_device, info) != 0) {
-            return nullptr;
-        }
-
-        m_hashToPipelineLayout.emplace (info.hash, std::move (layout));
-        return m_hashToPipelineLayout[hash].get ();
+        return getOrGrabPipelineLayout(hash, false);
     }
 
     void PipelineManager::releasePipelineLayout (PipelineLayoutInfoHash hash) {
         std::lock_guard lock (m_pipelineLayoutMtx);
-
         SLRD_ASSERT (m_hashToPipelineLayoutInfo.contains (hash));
 
-        auto count = --m_hashToPipelineLayoutInfo[hash].second;
-        if (!count) {
+        auto& counter = m_hashToPipelineLayoutInfo[hash].counter;
+        if (counter-- == 1) {
             m_hashToPipelineLayoutInfo.erase (hash);
             m_hashToPipelineLayout.erase (hash);
         }

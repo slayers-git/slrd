@@ -334,6 +334,23 @@ namespace slrd {
                 firstIndex, vertexOffset, firstInstance);
     }
 
+    void VKCommandBuffer::drawIndirect(slrd::IBuffer *buffer, DeviceSize offset,
+            uint32_t drawCount, uint32_t stride) {
+        SLRD_ASSERT(m_pipeline && buffer != nullptr);
+        auto ibuffer = static_cast<VKBuffer *>(buffer);
+
+        vkCmdDrawIndirect(m_buffer, ibuffer->handle(), offset, drawCount, stride);
+    }
+
+    void VKCommandBuffer::drawIndexedIndirect(slrd::IBuffer *buffer, DeviceSize offset,
+            uint32_t drawCount, uint32_t stride) {
+        SLRD_ASSERT(m_pipeline && buffer != nullptr);
+        auto ibuffer = static_cast<VKBuffer *>(buffer);
+
+        vkCmdDrawIndexedIndirect(m_buffer, ibuffer->handle(), offset, drawCount, stride);
+    }
+
+
     /* According to Vulkan's documentation, an image to which the copy is done should have
      * a format that has a VK_FORMAT_FEATURE_TRANSFER_DST_BIT feature set.
      *
@@ -534,5 +551,12 @@ namespace slrd {
     void VKCommandBuffer::dispatch (const DispatchInfo& info) {
         SLRD_ASSERT (m_buffer != VK_NULL_HANDLE);
         vkCmdDispatch (m_buffer, info.x, info.y, info.z);
+    }
+
+    void VKCommandBuffer::dispatchIndirect (slrd::IBuffer *buffer, DeviceSize offset) {
+        SLRD_ASSERT(m_pipeline);
+        auto ibuffer = static_cast<VKBuffer *>(buffer);
+
+        vkCmdDispatchIndirect(m_buffer, ibuffer->handle(), offset);
     }
 };

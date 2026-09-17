@@ -88,15 +88,22 @@ namespace slrd {
     private:
         VKDevice *m_device;
 
+        /* TODO: rwlock */
         std::mutex m_pipelineMtx;
         std::mutex m_pipelineLayoutMtx;
 
+        /* FIXME: The pipelines remain allocated FOREVER. */
         std::unordered_map<PipelineStateHash, VkPipeline>
             m_stateRpToPipeline;
 
-        /* Stores the PipelineLayout itself along with the reference counting */
+        struct PipelineLayoutInfoRef {
+            PipelineLayoutInfo info;
+            uint32_t counter = 1;
+        };
+
         std::unordered_map<PipelineLayoutInfoHash,
-            std::pair<PipelineLayoutInfo, std::atomic<uint32_t>>> m_hashToPipelineLayoutInfo;
+            PipelineLayoutInfoRef> m_hashToPipelineLayoutInfo;
+
         std::unordered_map<PipelineLayoutInfoHash,
             std::unique_ptr<VKPipelineLayout>> m_hashToPipelineLayout;
 
@@ -104,6 +111,8 @@ namespace slrd {
 
         VkPipeline createPipelineForRenderPass (const VKPipelineState& state,
                 VKRenderPass *rp);
+
+        VKPipelineLayout *getOrGrabPipelineLayout(PipelineLayoutInfoHash, bool bump);
 
     public:
         PipelineManager (VKDevice *device);
