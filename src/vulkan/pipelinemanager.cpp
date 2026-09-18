@@ -81,13 +81,18 @@ namespace slrd {
         {
             const auto& rasterConfig = info.rasterizerConfig;
 
-            /* TODO: Finish making this */
             rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
             rasterInfo.cullMode = slrd::getVkCullMode (rasterConfig.cullMode);
             rasterInfo.frontFace = slrd::getVkFrontFace (rasterConfig.windingOrder);
             rasterInfo.lineWidth = 1.0f;
             rasterInfo.polygonMode = slrd::getVkPolygonMode (rasterConfig.polygonMode);
-            rasterInfo.depthClampEnable = rasterConfig.depthClampEnable;
+            rasterInfo.depthClampEnable = rasterConfig.depthClampEnabled;
+            rasterInfo.rasterizerDiscardEnable = rasterConfig.rasterizerDiscardEnabled;
+
+            rasterInfo.depthBiasEnable = rasterConfig.depthBiasEnabled;
+            rasterInfo.depthBiasSlopeFactor = rasterConfig.depthBiasSlopeFactor;
+            rasterInfo.depthBiasConstantFactor = rasterConfig.depthBiasConstantFactor;
+            rasterInfo.depthBiasClamp = rasterConfig.depthBiasClamp;
         }
 
         /* iaInfo */

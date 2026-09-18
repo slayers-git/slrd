@@ -158,21 +158,18 @@ namespace slrd {
         Scissor  scissor;
 
 		struct RasterizerConfig {
-			bool depthClampEnable = false;
-			bool rasterizerDiscardEnable = false;
+			bool depthClampEnabled = false;
+			bool rasterizerDiscardEnabled = false;
 
 			PolygonMode polygonMode = POLYGON_MODE_FILL;
 			CullMode cullMode = CULL_MODE_BACK;
 
 			WindingOrder windingOrder = WINDING_ORDER_COUNTERCLOCKWISE;
 
-			struct DepthBias {
-				float clamp = 0;
-                float constantFactor = 0;
-                float slopeFactor = 0;
-
-				bool enable = false;
-			} depthBias;
+            bool depthBiasEnabled = false;
+            float depthBiasConstantFactor = 0;
+            float depthBiasClamp = 0;
+            float depthBiasSlopeFactor = 0;
 		} rasterizerConfig;
 
 		struct MultisampleConfig {
