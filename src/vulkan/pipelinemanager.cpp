@@ -110,24 +110,94 @@ namespace slrd {
         SLRD_DEBUG_CRIT_IF (XXH64_reset (state, 0),
                 "Failed to create a state for the hashing function");
 
-        XXH64_update (state, &msInfo, sizeof (msInfo));
-        XXH64_update (state, &dpsInfo, sizeof (dpsInfo));
-        XXH64_update (state, &blendInfo, sizeof (blendInfo));
-        XXH64_update (state, &rasterInfo, sizeof (rasterInfo));
-        XXH64_update (state, &iaInfo, sizeof (iaInfo));
+        XXH64_update (state, &msInfo.flags, sizeof (msInfo.flags));
+        XXH64_update (state, &msInfo.rasterizationSamples,
+                sizeof (msInfo.rasterizationSamples));
+        XXH64_update (state, &msInfo.sampleShadingEnable,
+                sizeof (msInfo.sampleShadingEnable));
+        XXH64_update (state, &msInfo.minSampleShading,
+                sizeof (msInfo.minSampleShading));
+        /* FIXME: Sample mask */
+        XXH64_update (state, &msInfo.alphaToCoverageEnable,
+                sizeof (msInfo.alphaToCoverageEnable));
+        XXH64_update (state, &msInfo.alphaToOneEnable,
+                sizeof (msInfo.alphaToOneEnable));
 
+        XXH64_update (state, &dpsInfo.flags, sizeof (dpsInfo.flags));
+        XXH64_update (state, &dpsInfo.depthTestEnable,
+                sizeof (dpsInfo.depthTestEnable));
+        XXH64_update (state, &dpsInfo.depthWriteEnable,
+                sizeof (dpsInfo.depthWriteEnable));
+        XXH64_update (state, &dpsInfo.depthCompareOp,
+                sizeof (dpsInfo.depthCompareOp));
+        XXH64_update (state, &dpsInfo.depthBoundsTestEnable,
+                sizeof (dpsInfo.depthBoundsTestEnable));
+        XXH64_update (state, &dpsInfo.stencilTestEnable,
+                sizeof (dpsInfo.stencilTestEnable));
+        XXH64_update (state, &dpsInfo.front, sizeof (dpsInfo.front));
+        XXH64_update (state, &dpsInfo.back, sizeof (dpsInfo.back));
+        XXH64_update (state, &dpsInfo.minDepthBounds,
+                sizeof (dpsInfo.minDepthBounds));
+        XXH64_update (state, &dpsInfo.maxDepthBounds,
+                sizeof (dpsInfo.maxDepthBounds));
+
+        XXH64_update (state, &blendInfo.flags, sizeof (blendInfo.flags));
+        XXH64_update (state, &blendInfo.logicOpEnable,
+                sizeof (blendInfo.logicOpEnable));
+        XXH64_update (state, &blendInfo.logicOp,
+                sizeof (blendInfo.logicOp));
+        XXH64_update (state, &blendInfo.attachmentCount,
+                sizeof (blendInfo.attachmentCount));
+        /* Attachments are hashed separately */
+        XXH64_update (state, blendInfo.blendConstants,
+                sizeof (blendInfo.blendConstants));
+
+
+        XXH64_update (state, &rasterInfo.flags, sizeof (rasterInfo.flags));
+        XXH64_update (state, &rasterInfo.depthClampEnable,
+                sizeof (rasterInfo.depthClampEnable));
+        XXH64_update (state, &rasterInfo.rasterizerDiscardEnable,
+                sizeof (rasterInfo.rasterizerDiscardEnable));
+        XXH64_update (state, &rasterInfo.polygonMode,
+                sizeof (rasterInfo.polygonMode));
+        XXH64_update (state, &rasterInfo.cullMode,
+                sizeof (rasterInfo.cullMode));
+        XXH64_update (state, &rasterInfo.frontFace,
+                sizeof (rasterInfo.frontFace));
+        XXH64_update (state, &rasterInfo.depthBiasEnable,
+                sizeof (rasterInfo.depthBiasEnable));
+        XXH64_update (state, &rasterInfo.depthBiasConstantFactor,
+                sizeof (rasterInfo.depthBiasConstantFactor));
+        XXH64_update (state, &rasterInfo.depthBiasClamp,
+                sizeof (rasterInfo.depthBiasClamp));
+        XXH64_update (state, &rasterInfo.depthBiasSlopeFactor,
+                sizeof (rasterInfo.depthBiasSlopeFactor));
+        XXH64_update (state, &rasterInfo.lineWidth,
+                sizeof (rasterInfo.lineWidth));
+
+        XXH64_update (state, &iaInfo.flags, sizeof (iaInfo.flags));
+        XXH64_update (state, &iaInfo.topology,
+                sizeof (iaInfo.topology));
+        XXH64_update (state, &iaInfo.primitiveRestartEnable,
+                sizeof (iaInfo.primitiveRestartEnable));
+
+        /* Vertex input */
         XXH64_update (state, bindings.data (),
                 bindings.size () * sizeof (decltype (bindings)::value_type));
         XXH64_update (state, attributes.data (),
                 attributes.size () * sizeof (decltype (attributes)::value_type));
+
+        /* Blend attachments */
         XXH64_update (state, blendAttachments.data (),
                 blendAttachments.size () *
                 sizeof (decltype (blendAttachments)::value_type));
 
+        /* FIXME: This is only shader stage code. If specialization constants
+         * make their way into the library this alone will not do.
+         * Specialization constant hash will have to be added. */
         auto *vkshader = getShader ();
-        /* FIXME */
-        XXH64_update (state, vkshader->getStages ().data (), vkshader->getStages ().size () *
-                sizeof (VkPipelineShaderStageCreateInfo));
+        ShaderHash stage_hash = vkshader->getStageHash();
+        XXH64_update(state, &stage_hash, sizeof(stage_hash));
 
         hash = XXH64_digest (state);
         XXH64_freeState (state);

@@ -3,6 +3,7 @@
 #include "shader.hpp"
 #include "vulkan/error.hpp"
 #include <map>
+#include <array>
 
 #include "device.hpp"
 #include "vulkan/pipelinelayout.hpp"
@@ -349,6 +350,17 @@ namespace slrd {
         setParentDevice (device);
 
         WRAP_COND_RETURN (reflectShader (config.bytecodes) != VK_SUCCESS, -1);
+        
+        static constexpr auto stage_order = std::to_array({
+            STAGE_VERTEX,
+            STAGE_FRAGMENT,
+            STAGE_GEOMETRY,
+            STAGE_TESSELLATION_CONTROL,
+            STAGE_TESSELLATION_EVALUATION,
+            STAGE_COMPUTE
+        });
+
+        std::vector<ShaderHash> stage_hashes(config.bytecodes.size());
 
         std::vector<VkPipelineShaderStageCreateInfo> stages (config.bytecodes.size ());
         for (uint32_t i = 0; i < stages.size (); ++i) {
@@ -356,11 +368,36 @@ namespace slrd {
                     (uint32_t *)config.bytecodes[i].data (),
                     config.bytecodes[i].size (), &stages[i]);
 
+            auto hash = XXH64(config.bytecodes[i].data(), config.bytecodes[i].size(), 0);
+            stage_hashes[i] = hash;
+
             WRAP_COND_RETURN (result != VK_SUCCESS, -1);
             device->vkallocate (VK_OBJECT_TYPE_SHADER_MODULE, 0);
         }
 
+        ShaderHash hash = 0;
+        XXH64_state_t *state = XXH64_createState();
+        SLRD_DEBUG_CRIT_IF(!state,
+                "VKShader::init: Failed to create hash state");
+        /* Can't error out */
+        (void)XXH64_reset(state, 0);
+
+        for (auto stage : stage_order) {
+            for (uint32_t i = 0; i < stages.size(); ++i) {
+                StageFlags current_stage = getSLRDStageFlags(stages[i].stage);
+                if (current_stage != stage)
+                    continue;
+
+                XXH64_update(state, &stage, sizeof(stage));
+                XXH64_update(state, &stage_hashes[i], sizeof(stage_hashes[i]));
+                break;
+            }
+        }
+
         m_stages = stages;
+
+        m_stageHash = XXH64_digest(state);
+        XXH64_freeState(state);
 
         device->allocate (OBJECT_TYPE_SHADER, 0);
         return 0;

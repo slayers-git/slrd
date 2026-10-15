@@ -19,6 +19,8 @@ namespace slrd {
     class VKDevice;
     class VKPipelineLayout;
 
+    using ShaderHash = uint64_t;
+
     SLRD_RESOURCE_DEFINE_TYPE (VKShader, VK_OBJECT_TYPE_SHADER_MODULE);
     class VKShader :
             public VKDeviceObject<IShader>,
@@ -39,6 +41,12 @@ namespace slrd {
         VkResult reflectShader (std::span<const ShaderBytecode> bytecode);
 
         PipelineLayoutInfoHash m_layoutHash {};
+
+        /* The combined hash of codes from all provided stages
+         *
+         * Each stage is hashed as a tuple (StageFlags stage, uint64_t stage_hash)
+         * in defined order */
+        ShaderHash m_stageHash{};
 
         /* stages used in this shader (in order of appearance) */
         std::vector<VkShaderStageFlagBits> m_stageFlags;
@@ -66,6 +74,10 @@ namespace slrd {
         Ref<IUniformSet> allocateUniformSet (uint32_t set) final override;
 
         const ShaderReflection& getShaderReflection () const final override;
+
+        ShaderHash getStageHash() const {
+            return m_stageHash;
+        }
     };
 
     inline VKShader *createVKShader (VKDevice *device, const ShaderInfo& info) {
