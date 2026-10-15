@@ -5,7 +5,10 @@
 #include "debug.hpp"
 #include "device.hpp"
 #include "vulkan/error.hpp"
+#include <filesystem>
 #include <vulkan/vulkan.h>
+
+#include "helper/atomicfile.hpp"
 
 #include <fstream>
 #include <vulkan/vulkan_core.h>
@@ -109,11 +112,6 @@ namespace slrd {
                 -1,
                 "VKPipelineCache::saveToDisk: Failed to get cache data");
 
-        std::ofstream fs(path.data(), std::ios::binary);
-        SLRD_COMPLAIN_RETURN(!fs.is_open(),
-                -1,
-                "VKPipelineCache::saveToDisk: Failed to open file");
-        
         VkPhysicalDeviceProperties props;
         vkGetPhysicalDeviceProperties(m_device->getPhysicalDevice(), &props);
 
@@ -125,10 +123,12 @@ namespace slrd {
         header.driverVersion = props.driverVersion;
         memcpy(header.pipelineCacheUUID, props.pipelineCacheUUID, 16);
 
-        fs.write(reinterpret_cast<char *>(&header), sizeof(header));
-        fs.write(reinterpret_cast<char *>(data.data()), data.size());
+        auto result = atomicWriteToFile(path, [&header, &data](auto& fs) { 
+            fs.write(reinterpret_cast<const char *>(&header), sizeof(header));
+            fs.write(reinterpret_cast<const char *>(data.data()), data.size());
+        });
 
-        SLRD_COMPLAIN_RETURN(!fs.good(),
+        SLRD_COMPLAIN_RETURN(!result,
                 -1,
                 "VKPipelineCache::saveToDisk: Failed to write to file");
 

@@ -459,6 +459,7 @@ struct App {
             devconf.debug = true;
             devconf.debugFlags = slrd::DEVICE_DEBUG_FLAG_RESOURCE_PROFILER |
                 slrd::DEVICE_DEBUG_FLAG_API_RESOURCE_PROFILER;
+            devconf.flags = slrd::DEVICE_FLAG_PIPELINE_CACHE;
             m_device = slrd::createDevice (devconf);
             if (!m_device) {
                 std::cerr << slrd::getErrorString ();
