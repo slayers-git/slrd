@@ -181,7 +181,7 @@ namespace slrd {
 
         VkSwapchainCreateInfoKHR scInfo {};
         scInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        scInfo.surface = m_surface->getSurface ();
+        scInfo.surface = m_surface->handle();
         scInfo.minImageCount = m_imageCount;
         scInfo.imageFormat = m_format;
         scInfo.imageColorSpace = m_colorSpace;

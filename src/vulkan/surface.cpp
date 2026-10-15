@@ -37,24 +37,32 @@ namespace slrd {
 
         uint32_t count;
         {
-            vkGetPhysicalDeviceSurfaceFormatsKHR (physicalDevice, m_surface, &count,
-                    nullptr);
+            result = vkGetPhysicalDeviceSurfaceFormatsKHR (physicalDevice, m_surface, 
+                    &count, nullptr);
+            if (result != VK_SUCCESS)
+                return result;
 
             if (count) {
                 info.formats.resize (count);
-                vkGetPhysicalDeviceSurfaceFormatsKHR (physicalDevice, m_surface, &count,
-                        info.formats.data ());
+                result = vkGetPhysicalDeviceSurfaceFormatsKHR (physicalDevice, m_surface, 
+                        &count, info.formats.data ());
+                if (result != VK_SUCCESS)
+                    return result;
             }
         }
 
         {
-            vkGetPhysicalDeviceSurfacePresentModesKHR (physicalDevice, m_surface, &count,
-                    nullptr);
+            result = vkGetPhysicalDeviceSurfacePresentModesKHR (physicalDevice, m_surface,
+                    &count, nullptr);
+            if (result != VK_SUCCESS)
+                return result;
 
             if (count) {
                 info.presentModes.resize (count);
-                vkGetPhysicalDeviceSurfacePresentModesKHR (physicalDevice, m_surface, &count,
-                        info.presentModes.data ());
+                result = vkGetPhysicalDeviceSurfacePresentModesKHR (physicalDevice, m_surface,
+                        &count, info.presentModes.data ());
+                if (result != VK_SUCCESS)
+                    return result;
             }
         }
 

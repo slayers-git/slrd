@@ -19,8 +19,7 @@ namespace slrd {
         public SimpleRefCounted<ISurface>,
         public VKResource<VKSurface> {
     private:
-        VkSurfaceKHR m_surface;    
-        VkSurfaceFormatKHR m_format;
+        VkSurfaceKHR m_surface = VK_NULL_HANDLE;    
 
     public:
         struct SurfaceCapabilities {
@@ -39,12 +38,8 @@ namespace slrd {
 
         ~VKSurface ();
 
-        [[nodiscard]] VkSurfaceKHR getSurface () const {
+        [[nodiscard]] VkSurfaceKHR handle() const {
             return m_surface;
-        }
-
-        [[nodiscard]] VkSurfaceFormatKHR getSurfaceFormat () const {
-            return m_format;
         }
 
         int init (const SurfaceInfo& info);
