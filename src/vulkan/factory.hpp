@@ -12,7 +12,13 @@ namespace slrd {
         T *x = new T;
         auto res = x->init (std::forward<Args>(args)...);
 
-        return !res ? x : nullptr;
+        /* If the object wasn't created successfully, decrement the refcnt */
+        if (res) {
+            x->release();
+            return nullptr;
+        }
+
+        return x;
     }
 };
 
