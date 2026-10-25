@@ -99,13 +99,24 @@ namespace slrd {
     }
 
     VKTexture::~VKTexture () {
+        if (!m_image)
+            return;
+
+        /* Actually destroy the object first by using vmaDestroyImage() and
+         * only then call device->*deallocate() */
+        VkImage image = m_image;
+
         /* If the image is managed by this class, destroy it */
-        if (m_image && m_allocation) {
+        if (m_allocation)
             vmaDestroyImage (m_device->getVkAllocator (), m_image, m_allocation);
+
+        /* Should this even be here given that the memory is managed externally
+         * anyway? */
+        if (image != VK_NULL_HANDLE) {
+            m_device->deallocate (OBJECT_TYPE_TEXTURE, m_size);
+            m_device->vkdeallocate (VK_OBJECT_TYPE_IMAGE, m_size);
         }
 
-        m_device->deallocate (OBJECT_TYPE_TEXTURE, m_size);
-        m_device->vkdeallocate (VK_OBJECT_TYPE_IMAGE, m_size);
     }
 
     static constexpr VkImageViewType getVkImageViewType (TextureType tt, uint32_t layers = 1) {

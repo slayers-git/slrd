@@ -16,7 +16,7 @@ namespace slrd {
 
     class VKAPI : public VulkanData {
     public:
-        VKAPI () = default;
+        VKAPI () : VulkanData() { }
 
         int init (const APIConfig&);
         ~VKAPI ();

@@ -19,13 +19,12 @@ namespace slrd {
             public VKDeviceObject<IUniformSet>,
             public VKResource<VKUniformSet> {
     private:
-        VkDevice m_device = VK_NULL_HANDLE;
         VkDescriptorSet m_set = nullptr;
 
         /* Manager, from which this set is allocated */
-        DescriptorPoolManager *m_manager;
+        DescriptorPoolManager *m_manager = nullptr;
         /* idx into the pool from which this has been allocated */
-        uint32_t m_pool;
+        uint32_t m_pool = UINT32_MAX;
 
     public:
         [[nodiscard]] auto& getDevice () const {

@@ -53,7 +53,15 @@ namespace slrd {
         /* Is the render semaphore used? */
         bool m_waitForRender = false;
 
-        VkSwapchainKHR m_swapchain;
+        VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
+        /* Since m_swapchain can be set to nullptr, while still remaining a
+         * valid object - for instance during resize() - a flag is needed so
+         * that the destructor knows what exactly happened - a failed resize(),
+         * or a failed init().
+         *
+         * In the first case we still have to call VKDevice::deallocate(). */
+        bool m_initialized = false;
+
         /* For managing semaphores */
         std::deque<FrameData> m_frameHistory;
         FrameData *m_currentFrame;

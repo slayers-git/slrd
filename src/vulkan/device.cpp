@@ -215,6 +215,8 @@ namespace slrd {
         result = vmaCreateAllocator (&vmaInfo, &m_vma);
         RETURN_LOG_ERROR_IF (result != VK_SUCCESS, -1, "Failed to create VmaAllocator");
 
+        /* FIXME: Why is it on the device if it doesn't do anything with the
+         * device??? */
 #if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED
         if (config.debug && (getAPIConfig ()->debugFlags & API_DEBUG_FLAG_LAYERS)) {
             VkDebugUtilsMessengerCreateInfoEXT debugInfo {};
@@ -351,6 +353,10 @@ namespace slrd {
     }
 
     VKDevice::~VKDevice () {
+        /* If the device was never properly created, we don't do anything */
+        if (!m_device)
+            return;
+
         waitIdle ();
 
         if (m_pipelineCache)
@@ -360,7 +366,9 @@ namespace slrd {
         m_pipelineManager = nullptr;
         clearDescriptorManagers ();
 
-        vmaDestroyAllocator (m_vma);
+        if (m_vma)
+            vmaDestroyAllocator (m_vma);
+
         vkDestroyDevice (m_device, nullptr);
 
 #if SLRD_VULKAN_DEBUG_MESSENGER_ENABLED

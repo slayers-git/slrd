@@ -80,21 +80,19 @@ namespace slrd {
             }
         }
 
-        vkUpdateDescriptorSets (m_device, writes.size (), writes.data (), 0, nullptr);
-
+        vkUpdateDescriptorSets (m_device->getVkDevice(), writes.size (), writes.data (), 0, nullptr);
         return 0;
     }
 
     int VKUniformSet::init (VKPipelineLayout *pipelineLayout, uint32_t set) {
         SLRD_ASSERT (pipelineLayout && pipelineLayout->getDevice ());
 
-        m_device = pipelineLayout->getDevice ()->getVkDevice ();
+        VKDevice *device = pipelineLayout->getDevice ();
+        setParentDevice(device);
 
         auto descPool = pipelineLayout->getDevice ()->
             allocateOrGetDescriptorManager (pipelineLayout->getPoolKey ());
-        if (!descPool) {
-            return -1;
-        }
+        SLRD_COMPLAIN_RETURN(!descPool, -1, "Failed to create VKUniformSet!");
 
         m_manager = descPool;
 
@@ -103,13 +101,15 @@ namespace slrd {
         SLRD_COMPLAIN_IF(!m_set, "Failed to create VKUniformSet!");
 
         if (m_set)
-            pipelineLayout->getDevice ()->allocate (OBJECT_TYPE_UNIFORM_SET, 0);
+            m_device->allocate (OBJECT_TYPE_UNIFORM_SET, 0);
 
         return !m_set;
     }
 
     VKUniformSet::~VKUniformSet () {
-        /* Perhaps there should be some better logics here, but erhhhh */
-        m_manager->freeSet (m_pool, m_set);
+        if (m_set != VK_NULL_HANDLE) {
+            m_manager->freeSet (m_pool, m_set);
+            m_device->deallocate (OBJECT_TYPE_UNIFORM_SET, 0);
+        }
     }
 };

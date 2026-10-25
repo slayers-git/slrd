@@ -269,11 +269,10 @@ namespace slrd {
         VKSurface *surface = static_cast<VKSurface *> (info.surface);
 
         auto caps = surface->queryCapabilities (device);
-        if (!caps) {
-            slrd::debug::info ("[VKSwapchain] Failed to query capabilities: {}",
-                    string_VkResult (caps.error ()));
-            return -1;
-        }
+        SLRD_COMPLAIN_RETURN(!caps,
+                -1,
+                "[VKSwapchain] Failed to query capabilities: {}",
+                string_VkResult (caps.error ()));
 
         const auto& vkcap = caps->capabilities;
 
@@ -294,10 +293,12 @@ namespace slrd {
         setParentDevice (device);
         m_surface = Ref<VKSurface>::share (surface);
         m_swapchain = create (VK_NULL_HANDLE, info.width, info.height);
+        if (!m_swapchain)
+            return -1;
 
         device->allocate (OBJECT_TYPE_SWAPCHAIN, 0);
-
-        return !m_swapchain;
+        m_initialized = true;
+        return 0;
     }
 
     SwapchainResult VKSwapchain::present (const PresentInfo& info) {
@@ -391,6 +392,8 @@ namespace slrd {
 
     VKSwapchain::~VKSwapchain () {
         free ();
-        m_device->deallocate (OBJECT_TYPE_SWAPCHAIN, 0);
+
+        if (m_initialized)
+            m_device->deallocate (OBJECT_TYPE_SWAPCHAIN, 0);
     }
 };

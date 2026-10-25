@@ -50,15 +50,15 @@ namespace slrd {
     private:
         static constexpr uint32_t INITIAL_SETS_PER_POOL = 16;
 
-        VkDevice m_device;
+        VkDevice m_device = VK_NULL_HANDLE;
         /* A reference, not created, therefore doesn't need to be deallocated */
-        VkPhysicalDevice m_physicalDevice;
+        VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 
-        VkQueue m_graphicsQueue;
-        VkQueue m_presentQueue;
-        VmaAllocator m_vma;
+        VkQueue m_graphicsQueue = VK_NULL_HANDLE;
+        VkQueue m_presentQueue  = VK_NULL_HANDLE;
+        VmaAllocator m_vma = VK_NULL_HANDLE;
 
-        QueueIndices m_indices;
+        QueueIndices m_indices{};
 
         VkPipelineStageFlags m_pipelineShaderStages;
 

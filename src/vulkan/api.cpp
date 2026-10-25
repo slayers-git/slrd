@@ -60,7 +60,7 @@ namespace slrd {
         if (slrd::getCurrentAPI () != API_VULKAN)
             return;
 
-        vkapi = 0;
+        vkapi = nullptr;
     }
 
     int VKAPI::init (const APIConfig& config) {
